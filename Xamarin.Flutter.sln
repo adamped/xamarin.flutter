@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2036
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dart2CSharpTranspiler", "Dart2CSharpTranspiler\Dart2CSharpTranspiler.csproj", "{DF9E7018-6549-4273-93F9-B81A00977CF3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlutterSDK", "FlutterSDK\FlutterSDK.csproj", "{0781218D-0BCF-4528-AA32-A1937572E43B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{0D75E496-44EB-4553-B1D1-D16F2F2301ED}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		LICENSE = LICENSE
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DF9E7018-6549-4273-93F9-B81A00977CF3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DF9E7018-6549-4273-93F9-B81A00977CF3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF9E7018-6549-4273-93F9-B81A00977CF3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DF9E7018-6549-4273-93F9-B81A00977CF3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0781218D-0BCF-4528-AA32-A1937572E43B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0781218D-0BCF-4528-AA32-A1937572E43B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0781218D-0BCF-4528-AA32-A1937572E43B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0781218D-0BCF-4528-AA32-A1937572E43B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FC817DF6-985F-441B-A47E-2539BCDEB3C1}
+	EndGlobalSection
+EndGlobal
