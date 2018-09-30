@@ -132,6 +132,10 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Flutter.Sample.App\Flutter.Sample.App.csproj">
+      <Project>{e0fb1bf8-e32c-4a8a-9ae6-e501cc68f279}</Project>
+      <Name>Flutter.Sample.App</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Flutter.Shell.UWP\Flutter.Shell.UWP.csproj">
       <Project>{a5bf7067-2a28-4002-aeb4-1965d0dedc14}</Project>
       <Name>Flutter.Shell.UWP</Name>

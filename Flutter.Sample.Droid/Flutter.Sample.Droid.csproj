@@ -95,6 +95,10 @@
     <PackageReference Include="Xamarin.Android.Support.Design" Version="27.0.2.1" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Flutter.Sample.App\Flutter.Sample.App.csproj">
+      <Project>{e0fb1bf8-e32c-4a8a-9ae6-e501cc68f279}</Project>
+      <Name>Flutter.Sample.App</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Flutter.Shell.Droid\Flutter.Shell.Droid.csproj">
       <Project>{c9e1caa4-53f3-4032-92a0-81f5322d446b}</Project>
       <Name>Flutter.Shell.Droid</Name>
