@@ -38,7 +38,7 @@ namespace Dart2CSharpTranspiler
             Console.WriteLine($"Classes: {dartFiles.Sum(x => x.Classes.Count).ToString("N0")}");
             Console.WriteLine($"Class Sections: {dartFiles.Sum(x => x.Classes.Select(y => y.Sections.Count).Sum()).ToString("N0")}");
 
-            Console.ReadLine();
+            //Console.ReadLine();
         }
 
         private static Dictionary<string, DartClass> ClassList { get; set; }
