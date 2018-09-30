@@ -1,14 +1,16 @@
 # Flutter for Xamarin
 
-Note: This project has no affiliation with Microsoft, Google or the Xamarin or Flutter teams.
+*This project has no affiliation with Microsoft, Google or the Xamarin or Flutter teams.*
 
-This project is designed to make the Flutter SDK available on the .NET Framework, initially with the supported platforms of:
+The project is designed to make the Flutter SDK available on the .NET Framework, initially with the supported platforms of:
 
 1) Xamarin.Android
 2) Xamarin.iOS
 3) UWP
 
 The is no reason this couldn't also expand to any place where [SkiaSharp](https://github.com/mono/SkiaSharp) is supported.
+
+This project is never expected to be commercially viable, unless it is picked up or supported by a larger company. As it currently stands, this is just a fun side project, done by a bunch of developers in their spare time. We offer no support for solutions ever built with this framework, or any guarantee on completion.
 
 # Overview
 
