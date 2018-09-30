@@ -1,8 +1,6 @@
-﻿using Microsoft.CodeAnalysis.CSharp;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
-using Microsoft.CodeAnalysis;
-using System;
-using System.Globalization;
 
 namespace Transpiler
 {
@@ -18,7 +16,6 @@ namespace Transpiler
             foreach (var @class in dart.Classes)
             {
                 var classDeclaration = SyntaxFactory.ClassDeclaration(@class.Name);
-
                 classDeclaration = classDeclaration.AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword));
 
                 // Add class to namespace
