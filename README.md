@@ -36,6 +36,22 @@ We welcome any help. We have a Slack Channel in [XamarinChat](https://xamarincha
 
 Also look at the Projects board to see what is available. The tasks will be managed through there. If you think you can do anything on there, comment on it, and I will assign it to you.
 
+Please note our [Code of Conduct](CODE_OF_CONDUCT.md)
+
+## Skills needed
+
+1) Experience in C# is essential.
+
+2) Experience in Dart is an advantage in dealing with the Transpiler
+
+3) Experience in Skia/SkiaSharp is an advantage in dealing with the Flutter Bindings
+
+4) Experience in Xamarin.Android, Xamarin.iOS and/or UWP is beneficial for working with the Shell
+
+You can be on a Mac or Windows. This is a Visual Studio 2017 solution file and projects. Having at least the Xamarin components of Visual Studio is required when dealing with the Shell.
+
+Only C#/.NET are used in this project. Though we do parse Dart files. No C++ or other language skills needed.
+
 ## How to contribute
 
 1) Create a fork of this project. Then clone your fork locally.
