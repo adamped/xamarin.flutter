@@ -3,17 +3,18 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28010.2036
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dart2CSharpTranspiler", "Dart2CSharpTranspiler\Dart2CSharpTranspiler.csproj", "{DF9E7018-6549-4273-93F9-B81A00977CF3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dart2CSharpTranspiler", "Dart2CSharpTranspiler\Dart2CSharpTranspiler.csproj", "{DF9E7018-6549-4273-93F9-B81A00977CF3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlutterSDK", "FlutterSDK\FlutterSDK.csproj", "{0781218D-0BCF-4528-AA32-A1937572E43B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlutterSDK", "FlutterSDK\FlutterSDK.csproj", "{0781218D-0BCF-4528-AA32-A1937572E43B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{0D75E496-44EB-4553-B1D1-D16F2F2301ED}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
 		LICENSE = LICENSE
+		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlutterBinding", "FlutterBinding\FlutterBinding.csproj", "{C9313643-3357-4872-9B00-03E2C79AD297}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlutterBinding", "FlutterBinding\FlutterBinding.csproj", "{C9313643-3357-4872-9B00-03E2C79AD297}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shell", "Shell", "{AEF05715-89B3-4BDE-96B4-A8C502ADD1E5}"
 EndProject
