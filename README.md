@@ -59,7 +59,8 @@ Over time, your fork will become out of date with the main repository. If you do
 
 You should have something similar to 
 
-   ```origin  https://github.com/YOUR_USERNAME/YOUR_FORK.git (fetch)   
+   ```
+   origin  https://github.com/YOUR_USERNAME/YOUR_FORK.git (fetch)   
    origin  https://github.com/YOUR_USERNAME/YOUR_FORK.git (push)
    ```
 
@@ -95,11 +96,11 @@ You should have something similar to
 
 10) Rebase your branch
 
-   `git rebase master/<branch name>`
+    `git rebase master/<branch name>`
 
 11) Force push your new rebased branch to your fork
 
-   `git push origin <branch name> --force`
+    `git push origin <branch name> --force`
 
 ### Help its all a mess
 
