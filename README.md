@@ -8,13 +8,15 @@ The project is designed to make the Flutter SDK available on the .NET Framework,
 2) Xamarin.iOS
 3) UWP
 
-The is no reason this couldn't also expand to any place where [SkiaSharp](https://github.com/mono/SkiaSharp) is supported.
+There is no reason this couldn't also expand to any place where [SkiaSharp](https://github.com/mono/SkiaSharp) is supported.
 
-This project is never expected to be commercially viable, unless it is picked up or supported by a larger company. As it currently stands, this is just a fun side project, done by a bunch of developers in their spare time. We offer no support for solutions ever built with this framework, or any guarantee on completion.
+This project is never expected to be commercially viable, unless it is picked up or supported by a larger company. As it currently stands, this is just a fun side project, done by a bunch of developers in their spare time. We offer no support for solutions ever built with this framework, or any guarantee of completion.
 
 # Overview
 
 To make this work, numerous components need to come together.
+
+![alt text](https://github.com/adamped/xamarin.flutter/blob/master/XamarinFlutterProject.png?raw=true "Overview of project")
 
 ## Transpiler
 
@@ -130,10 +132,10 @@ You should have something similar to
 
     `git push origin <branch name> --force`
 
-### Help its all a mess
+### Help! It's all a mess
 
 If things have gone wrong and you have already had an existing branch PR'd and merged (PLEASE NOTE YOU NEED IT MERGED INTO THIS REPOSITORY). 
-Then you can just delete your fork, and create a new one. Sometimes its an easier approach if things are a mess and you don't have work that needs to be saved. All your PR'd and merged contributions will still be existing and credited to you. You do not lose any contributions or credit for them, by deleting your fork. But they must be merged here first.
+Then you can just delete your fork, and create a new one. Sometimes it's an easier approach if things are a mess and you don't have work that needs to be saved. All your PR'd and merged contributions will still be existing and credited to you. You do not lose any contributions or credit for them, by deleting your fork. But they must be merged here first.
 
 # License
 
