@@ -48,7 +48,7 @@ Please note our [Code of Conduct](CODE_OF_CONDUCT.md)
 
 1) Experience in C# is essential.
 
-2) Experience in Dart is an advantage in dealing with the Transpiler
+2) Experience in Dart and/or Rosyln is an advantage in dealing with the Transpiler
 
 3) Experience in Skia/SkiaSharp is an advantage in dealing with the Flutter Bindings
 
