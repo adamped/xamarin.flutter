@@ -1,3 +1,7 @@
+# Flutter for Xamarin
+
+Note: This project has no affiliation with Microsoft, Google or the Xamarin or Flutter teams.
+
 This project is designed to make the Flutter SDK available on the .NET Framework, initially with the supported platforms of:
 
 1) Xamarin.Android
