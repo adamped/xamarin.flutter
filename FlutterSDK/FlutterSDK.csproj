@@ -8,4 +8,8 @@
     <Folder Include="src\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\FlutterBinding\FlutterBinding.csproj" />
+  </ItemGroup>
+
 </Project>
