@@ -122,3 +122,7 @@ You should have something similar to
 
 If things have gone wrong and you have already had an existing branch PR'd and merged (PLEASE NOTE YOU NEED IT MERGED INTO THIS REPOSITORY). 
 Then you can just delete your fork, and create a new one. Sometimes its an easier approach if things are a mess and you don't have work that needs to be saved. All your PR'd and merged contributions will still be existing and credited to you. You do not lose any contributions or credit for them, by deleting your fork. But they must be merged here first.
+
+# License
+
+All code here is licensed under the [MIT license](LICENSE)
