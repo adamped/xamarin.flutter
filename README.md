@@ -57,8 +57,8 @@ Over time, your fork will become out of date with the main repository. If you do
    `git remote -v`
 
 You should have something similar to 
-   ```origin  https://github.com/YOUR_USERNAME/YOUR_FORK.git (fetch)
-      origin  https://github.com/YOUR_USERNAME/YOUR_FORK.git (push)```
+   `origin  https://github.com/YOUR_USERNAME/YOUR_FORK.git (fetch)`
+   `origin  https://github.com/YOUR_USERNAME/YOUR_FORK.git (push)`
 
 3) Add upstream by typing this command:
    `git remote add upstream https://github.com/adamped/xamarin.flutter.git`
