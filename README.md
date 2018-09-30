@@ -54,39 +54,50 @@ Over time, your fork will become out of date with the main repository. If you do
 
 ### Only do these once
 2) Make sure you haven't already added an upstream by typing 
+
    `git remote -v`
 
 You should have something similar to 
-   `origin  https://github.com/YOUR_USERNAME/YOUR_FORK.git (fetch)`
-   `origin  https://github.com/YOUR_USERNAME/YOUR_FORK.git (push)`
+
+   `origin  https://github.com/YOUR_USERNAME/YOUR_FORK.git (fetch)
+   origin  https://github.com/YOUR_USERNAME/YOUR_FORK.git (push)`
 
 3) Add upstream by typing this command:
+
    `git remote add upstream https://github.com/adamped/xamarin.flutter.git`
 
 ### Do these every rebase
 4) Ensure the master branch is checked out. 
+
    `git checkout master`
 
 5) Reset the master branch. This is just to confirm nothing is lurking there.
+
    `git reset --hard HEAD`
 
 6) Fetch the latest upstream
+
    `git fetch upstream`
 
 7) Rebase upstream on to master
+
    `git rebase upstream/master`
 
 8) Force push your new rebased master to your fork
+
    `git push origin master --force`
 
 ### If you need to rebase a branch as well (complete the above steps, then do these as well)
 9) Checkout your branch (do not include the angle brackets with your branch name < > )
+
    `git checkout <branch name>`
 
 10) Rebase your branch
+
    `git rebase master/<branch name>`
 
 11) Force push your new rebased branch to your fork
+
    `git push origin <branch name> --force`
 
 ### Help its all a mess
