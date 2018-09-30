@@ -38,9 +38,15 @@ The Shell, is where the Skia Canvas is initialized and platform level events are
 
 # Contributing
 
-We welcome any help. We have a Slack Channel in [XamarinChat](https://xamarinchat.herokuapp.com/). Its private, so tweet me [@adpedley](https://twitter.com/adpedley) if you want to be added.
+We welcome any help. 
 
-Also look at the Projects board to see what is available. The tasks will be managed through there. If you think you can do anything on there, comment on it, and I will assign it to you.
+1) We have a Slack Channel in [XamarinChat](https://xamarinchat.herokuapp.com/). Its private, so tweet me [@adpedley](https://twitter.com/adpedley) if you want to be added. Let me know your username.
+
+2) Decide which area you want to start work in. (Transpiler, Bindings, Platform Shell)
+
+3) Look at the Projects Board and/or Issues list. Pick any issue and ask for it to be assigned to you, by commenting on it.
+
+If you don't know where to start, comment in the Slack channel what area you might like to work on, and we can recommend some.
 
 Please note our [Code of Conduct](CODE_OF_CONDUCT.md)
 
