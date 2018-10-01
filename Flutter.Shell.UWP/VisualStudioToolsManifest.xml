@@ -1,0 +1,7 @@
+﻿<FileList>
+  <File Reference="Flutter.Shell.UWP.dll">
+    <ToolboxItems VSCategory="Flutter Shell Tookit" BlendCategory="Flutter Shell Toolkit">
+      <Item Type="Flutter.Shell.UWP" />
+    </ToolboxItems>
+  </File>
+</FileList>
