@@ -6,6 +6,26 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Dart\AbstractSyntaxTree.cs" />
+    <Compile Remove="Dart\AnalysisTarget.cs" />
+    <Compile Remove="Dart\DartLibrary.cs" />
+    <Compile Remove="Dart\DeclaredVariables.cs" />
+    <Compile Remove="Dart\Element.cs" />
+    <Compile Remove="Dart\Engine.cs" />
+    <Compile Remove="Dart\Interner.cs" />
+    <Compile Remove="Dart\LineInfo.cs" />
+    <Compile Remove="Dart\ResolverScope.cs" />
+    <Compile Remove="Dart\Source.cs" />
+    <Compile Remove="Dart\StringUtilities.cs" />
+    <Compile Remove="Dart\SyntaticEntity.cs" />
+    <Compile Remove="Dart\TimestampedData.cs" />
+    <Compile Remove="Dart\Token.cs" />
+    <Compile Remove="Dart\Type.cs" />
+    <Compile Remove="Dart\Utilities.cs" />
+    <Compile Remove="Dart\Value.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.Compilers" Version="2.9.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="2.9.0" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
