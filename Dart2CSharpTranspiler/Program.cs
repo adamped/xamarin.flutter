@@ -16,25 +16,33 @@ namespace Dart2CSharpTranspiler
         {  
             string source = @"..\..\..\..\flutter\lib\src";
             string destination = @"..\..\..\..\FlutterSDK\src";
+            string modelStorage = @"..\..\..\..\model.json";
 
-            // Abstract Syntax Trees loaded from pre-generated JSON via the DartAnalyzer
-            Dictionary<string, CompilationUnit> ast = new Dictionary<string, CompilationUnit>();
+            DartModel model = null;
 
-            var model = JsonConvert.DeserializeObject<CompilationUnit>(File.ReadAllText(@"C:\Users\Adam\source\repos\xamarin.flutter\flutter\lib\src\animation\animation.ast.json"));
+            if (File.Exists(modelStorage))
+                model = JsonConvert.DeserializeObject<DartModel>(File.ReadAllText(modelStorage));
 
+            if (model == null)
+            {               
+                model = BuildDartModel(source);
+
+                File.WriteAllText(modelStorage, JsonConvert.SerializeObject(model));
+            }
+
+            PostProcessDart(model);
+
+            CreateCSharpFiles(model, destination);
+
+            List<DartFile> dartFiles = model.SelectMany(x => x.Value).ToList();
+
+            Console.WriteLine($"Files: {dartFiles.Count.ToString("N0")}");
+            Console.WriteLine($"File Sections: {dartFiles.Sum(x => x.Sections.Count).ToString("N0")}");
+            Console.WriteLine($"File Imports: {dartFiles.Sum(x => x.Imports.Count).ToString("N0")}");
+            Console.WriteLine($"Classes: {dartFiles.Sum(x => x.Classes.Count).ToString("N0")}");
+            Console.WriteLine($"Class Sections: {dartFiles.Sum(x => x.Classes.Select(y => y.Sections.Count).Sum()).ToString("N0")}");
 
             Console.ReadLine();
-            //CreateCSharpFiles(model, destination);
-
-            //List<DartFile> dartFiles = model.SelectMany(x => x.Value).ToList();
-
-            //Console.WriteLine($"Files: {dartFiles.Count.ToString("N0")}");
-            //Console.WriteLine($"File Sections: {dartFiles.Sum(x => x.Sections.Count).ToString("N0")}");
-            //Console.WriteLine($"File Imports: {dartFiles.Sum(x => x.Imports.Count).ToString("N0")}");
-            //Console.WriteLine($"Classes: {dartFiles.Sum(x => x.Classes.Count).ToString("N0")}");
-            //Console.WriteLine($"Class Sections: {dartFiles.Sum(x => x.Classes.Select(y => y.Sections.Count).Sum()).ToString("N0")}");
-
-            //Console.ReadLine();
         }
 
         private static Dictionary<string, DartClass> ClassList { get; set; }
@@ -54,34 +62,35 @@ namespace Dart2CSharpTranspiler
             return baseClass;
         }
 
-        //private static DartModel BuildDartModel(string source)
-        //{
-        //    var model = new DartModel();
+        private static DartModel BuildDartModel(string source)
+        {
+            var model = new DartModel();
 
-        //    foreach (var sourceDirectory in Directory.GetDirectories(source))
-        //    {
-        //        var folder = sourceDirectory.Replace(source, "").TrimStart('\\');
+            foreach (var sourceDirectory in Directory.GetDirectories(source))
+            {
+                var folder = sourceDirectory.Replace(source, "").TrimStart('\\');
 
-        //        foreach (var sourceFilePath in Directory.GetFiles(sourceDirectory))
-        //        {
-        //            // Create Model from Dart File
-        //            var sourceFileName = sourceFilePath.Replace(sourceDirectory, "").TrimStart('\\');
-        //            var dart = File.ReadAllText(sourceFilePath);
-        //            var file = DartClassReader.Construct(sourceFileName, folder, dart);
+                foreach (var sourceFilePath in Directory.GetFiles(sourceDirectory).Where(x=>x.EndsWith(".json")))
+                {
+                    // Create Model from Dart File
+                    var sourceFileName = sourceFilePath.Replace(sourceDirectory, "").TrimStart('\\');
+                    var astJson = JsonConvert.DeserializeObject<CompilationUnit>(File.ReadAllText(sourceFilePath));
 
-        //            if (model.ContainsKey(folder))
-        //                model[folder].Add(file);
-        //            else
-        //            {
-        //                var list = new List<DartFile>();
-        //                model.Add(folder, list);
-        //                list.Add(file);
-        //            }
-        //        }
-        //    }
+                    var file = Process.CreateFile(sourceFileName, folder, astJson);
 
-        //    return model;
-        //}
+                    if (model.ContainsKey(folder))
+                        model[folder].Add(file);
+                    else
+                    {
+                        var list = new List<DartFile>();
+                        model.Add(folder, list);
+                        list.Add(file);
+                    }
+                }
+            }
+
+            return model;
+        }
 
         private static void CreateCSharpFiles(DartModel model, string destination)
         {
@@ -123,28 +132,28 @@ namespace Dart2CSharpTranspiler
 
         private static void PostProcessDart(DartModel model)
         {
-            ClassList = new Dictionary<string, DartClass>();
+            //ClassList = new Dictionary<string, DartClass>();
 
-            foreach ((string folder, IList<DartFile> file) in model)
-                foreach (var @class in file.SelectMany(x => x.Classes))
-                {
-                    var name = @class.RawName;
-                    if (name.Contains("<"))
-                        name = name.Substring(0, name.IndexOf("<")) + "<>";
+            //foreach ((string folder, IList<DartFile> file) in model)
+            //    foreach (var @class in file.SelectMany(x => x.Classes))
+            //    {
+            //        var name = @class.RawName;
+            //        if (name.Contains("<"))
+            //            name = name.Substring(0, name.IndexOf("<")) + "<>";
 
-                    ClassList.Add($"{folder}.{name.Replace("<T>", "<>")}", @class);
-                }
+            //        ClassList.Add($"{folder}.{name.Replace("<T>", "<>")}", @class);
+            //    }
 
-            InheritanceCalculation(ClassList);
+            //InheritanceCalculation(ClassList);
 
-            PropertyCombination(ClassList);
+            //PropertyCombination(ClassList);
 
-            foreach (var file in model.Values.SelectMany(x => x))
-            {
-                foreach (var item in file.Sections.Where(x => x.Type == SectionType.Enum))
-                    if (!CSharpWriter.Enums.Contains(item.Name))
-                        CSharpWriter.Enums.Add(item.Name);
-            }
+            //foreach (var file in model.Values.SelectMany(x => x))
+            //{
+            //    foreach (var item in file.Sections.Where(x => x.Type == SectionType.Enum))
+            //        if (!CSharpWriter.Enums.Contains(item.Name))
+            //            CSharpWriter.Enums.Add(item.Name);
+            //}
         }
 
         private static void PropertyCombination(Dictionary<string, DartClass> classList)

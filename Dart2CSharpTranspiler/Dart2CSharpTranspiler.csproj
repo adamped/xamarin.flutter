@@ -6,7 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Dart\AbstractSyntaxTree.cs" />
     <Compile Remove="Dart\AnalysisTarget.cs" />
     <Compile Remove="Dart\DartLibrary.cs" />
     <Compile Remove="Dart\DeclaredVariables.cs" />
