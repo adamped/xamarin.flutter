@@ -90,6 +90,7 @@ bool _isPrimitive(value) {
 String serializeModel(value) {
   var serialized = serializeObject(value);
   //logger.info('Serialization result: $serialized');
+  objects = [];
   return json.encode(serialized);
 }
 
