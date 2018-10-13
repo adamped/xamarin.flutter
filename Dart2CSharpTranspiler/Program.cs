@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Dart2CSharpTranspiler.Writer;
+using Microsoft.CodeAnalysis;
 using Transpiler;
 
 namespace Dart2CSharpTranspiler
@@ -10,7 +12,7 @@ namespace Dart2CSharpTranspiler
     class Program
     {
         static void Main(string[] args)
-        {
+        {  
             string source = @"..\..\..\..\flutter\lib\src";
             string destination = @"..\..\..\..\FlutterSDK\src";
             string modelStorage = @"..\..\..\..\model.json";
@@ -89,9 +91,16 @@ namespace Dart2CSharpTranspiler
 
         private static void CreateCSharpFiles(DartModel model, string destination)
         {
+            if (Directory.Exists(destination))
+            {
+                Directory.Delete(destination, true);
+            }
+
+            var writer = new CSharpWriter(model, "FlutterSDK");
+
             foreach (var folder in model)
             {
-                var destinationFolder = Path.Combine(destination, folder.Key);
+                var destinationFolder = Path.Combine(destination, NormalizationHelper.CamelCase(folder.Key));
 
                 // Check Folder
                 if (!Directory.Exists(destinationFolder))
@@ -99,9 +108,13 @@ namespace Dart2CSharpTranspiler
 
                 foreach (var file in folder.Value)
                 {
+                    
                     // Create CSharp File
-                    var csharpFile = CSharpWriter.CreateFile(file, model);
-                    var destinationFileName = $"{file.Name.Substring(0, file.Name.IndexOf("."))}.cs";
+                    var namespaceDeclaration = writer.GenerateFileSyntaxTree(file);
+                    var code = namespaceDeclaration
+                        .NormalizeWhitespace()
+                        .ToFullString();
+                    var destinationFileName = $"{NormalizationHelper.NormalizeTypeName(file.Name)}.cs";
 
                     var destinationPath = Path.Combine(destinationFolder, destinationFileName);
 
@@ -109,7 +122,7 @@ namespace Dart2CSharpTranspiler
                     if (!File.Exists(destinationFileName))
                         File.Create(destinationPath).Close();
 
-                    File.WriteAllText(destinationPath, csharpFile);
+                    File.WriteAllText(destinationPath, code);
                 }
             }
         }
