@@ -1,12 +1,11 @@
 ﻿using Dart2CSharpTranspiler.Dart;
+using Dart2CSharpTranspiler.Writer;
+using Microsoft.CodeAnalysis;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Dart2CSharpTranspiler.Writer;
-using Microsoft.CodeAnalysis;
-using Transpiler;
 
 namespace Dart2CSharpTranspiler
 {
