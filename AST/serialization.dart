@@ -71,8 +71,6 @@ bool _isPrimitive(value) {
 /// Serializes any arbitrary Dart datum to JSON. Supports schema validation.
 String serializeModel(value) {
   var serialized = serializeObject(value);
-  // Reset list now that object is done
-  objects = [];
   return json.encode(serialized);
 }
 
@@ -95,17 +93,8 @@ serializeObject(value, {bool primitiveOnly = false}) {
   }
 }
 
-List<Object> objects = [];
-
 serializeNonPrimitiveObject(value) {
-  if (objects.contains(value))
-    return serializeObject(
-        serialize(value, serializeObject, primitiveOnly: true),
-        primitiveOnly: true);
-  else {
-    objects.add(value);
-    return serializeObject(serialize(value, serializeObject));
-  }
+  return serializeObject(serialize(value, serializeObject));
 }
 
 /// Recursively transforms a Map and its children into JSON-serializable data.

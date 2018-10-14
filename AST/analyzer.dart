@@ -14,12 +14,10 @@ main() async {
       // 2) AST and Encode each file and place out corresponding .ast.json
       var src = await new File(item.path).readAsString();
       print(item.path);
-
       var ast = parseCompilationUnit(src, parseFunctionBodies: true);
-      print("Parsed");
+
       var simplified = new SimpleCompilationUnit()
-        ..beginToken = simplify(ast.beginToken);
-      print("Simplified");
+        ..beginToken = simplify(ast.beginToken, ast.beginToken, initial: true);
 
       // 3) Serialize and output AST to same directory
       String serialized = god.serializeModel(simplified);
@@ -30,19 +28,30 @@ main() async {
       var newFileName = filePath + '\\' + fileName + '.ast.json';
       if (File(newFileName).existsSync()) File(newFileName).deleteSync();
       await new File(newFileName).writeAsString(serialized);
-      print("Serialized");
     }
   }
 }
 
-SimpleToken simplify(Token token) {
+int count = 0;
+
+SimpleToken simplify(Token startToken, Token token, {bool initial = false}) {
   var newToken = new SimpleToken()
-  ..lexeme = token.lexeme
-  ..type = createSimpleType(token.type)
-  ..isKeyword = token.isKeyword;
+    ..lexeme = token.lexeme
+    ..type = createSimpleType(token.type)
+    ..isKeyword = token.isKeyword;
 
-  if (!token.isEof) newToken.next = simplify(token.next);
+  // Tmp hack - if recursion goes for too long on big files it just throws a stack overflow exception
+  if (count > 6000) {
+    count = 0;
+    newToken.hasFailed = true;
+    return newToken;
+  }
 
+  count = count + 1;
+  if (token.next != null && !token.isEof && (startToken != token || initial))
+    newToken.next = simplify(startToken, token.next);
+
+  count = 0;
   return newToken;
 }
 
@@ -57,6 +66,7 @@ class SimpleToken {
   SimpleToken next;
   bool isKeyword;
   String lexeme;
+  bool hasFailed;
 }
 
 class SimpleTokenType {
@@ -76,13 +86,10 @@ Future<List<FileSystemEntity>> dirContents(Directory directory) async {
 
   var exists = await directory.exists();
   if (exists) {
-    print("exits");
-
     var stream = directory
         .list(recursive: true, followLinks: false)
         .listen((FileSystemEntity entity) {
       files.add(entity);
-      print(entity.path);
     });
 
     stream.onDone(() => completer.complete(files));

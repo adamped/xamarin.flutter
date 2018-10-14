@@ -36,7 +36,7 @@ namespace Dart2CSharpTranspiler.Dart
                     }
                 }
 
-                // Currently building
+                // Currently building import
                 if (import != null)
                 {                   
                     if (IsType(token.type, TokenType.STRING, TokenType.IDENTIFIER))
@@ -79,6 +79,8 @@ namespace Dart2CSharpTranspiler.Dart
 
         }
 
+
+
         static bool IsKeyword(SimpleTokenType type, Keyword keyword)
         => type.name == keyword.name;
 
@@ -90,7 +92,8 @@ namespace Dart2CSharpTranspiler.Dart
 
             return false;
         }
-        public static string CleanEnclosingString(this string value)
+
+        static string CleanEnclosingString(this string value)
             => value.TrimStart('\'').TrimEnd('\'');
 
     }
