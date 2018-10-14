@@ -3,133 +3,35 @@
 namespace Dart2CSharpTranspiler.Dart
 {
 
-    public class Type
+    public class SimpleToken
     {
-        public int kind { get; set; }
-        public bool isModifier { get; set; }
-        public bool isOperator { get; set; }
-        public bool isTopLevelKeyword { get; set; }
-        public bool isUserDefinableOperator { get; set; }
-        public string lexeme { get; set; }
-        public string name { get; set; }
-        public int precedence { get; set; }
-        public string stringValue { get; set; }
-        public bool isAdditiveOperator { get; set; }
-        public bool isAssignmentOperator { get; set; }
-        public bool isAssociativeOperator { get; set; }
-        public bool isBuiltIn { get; set; }
-        public bool isEqualityOperator { get; set; }
-        public bool isIncrementOperator { get; set; }
-        public bool isKeyword { get; set; }
-        public bool isPseudo { get; set; }
-        public bool isMultiplicativeOperator { get; set; }
-        public bool isRelationalOperator { get; set; }
-        public bool isShiftOperator { get; set; }
-        public bool isUnaryPostfixOperator { get; set; }
-        public bool isUnaryPrefixOperator { get; set; }
-        public bool isSelectorOperator { get; set; }
-        public string value { get; set; }
-        public bool isBuiltInOrPseudo { get; set; }
-        public bool isPseudoKeyword { get; set; }
-        public string syntax { get; set; }
+        public SimpleTokenType type;
+        public SimpleToken next;
+        public bool isKeyword;
+        public string lexeme;
     }
 
-    public class Previous
+    public class SimpleTokenType
     {
-        public Type type { get; set; }
-        public int offset { get; set; }
-        public Previous previous { get; set; }
-        public Next next { get; set; }
-        public int charCount { get; set; }
-        public int charOffset { get; set; }
-        public int charEnd { get; set; }
-        public object beforeSynthetic { get; set; }
-        public int end { get; set; }
-        public object endGroup { get; set; }
-        public bool isEof { get; set; }
-        public bool isIdentifier { get; set; }
-        public bool isKeyword { get; set; }
-        public bool isKeywordOrIdentifier { get; set; }
-        public bool isModifier { get; set; }
-        public bool isOperator { get; set; }
-        public bool isSynthetic { get; set; }
-        public bool isTopLevelKeyword { get; set; }
-        public bool isUserDefinableOperator { get; set; }
-        public object keyword { get; set; }
-        public int kind { get; set; }
-        public int length { get; set; }
-        public string lexeme { get; set; }
-        public object precedingComments { get; set; }
-        public string stringValue { get; set; }
-    }
-    
-    public class PrecedingComments
-    {
-        public Type type { get; set; }
-        public int offset { get; set; }
-        public object previous { get; set; }
-        public object next { get; set; }
-        public int charCount { get; set; }
-        public int charOffset { get; set; }
-        public int charEnd { get; set; }
-        public object beforeSynthetic { get; set; }
-        public int end { get; set; }
-        public object endGroup { get; set; }
-        public bool isEof { get; set; }
-        public bool isIdentifier { get; set; }
-        public bool isKeyword { get; set; }
-        public bool isKeywordOrIdentifier { get; set; }
-        public bool isModifier { get; set; }
-        public bool isOperator { get; set; }
-        public bool isSynthetic { get; set; }
-        public bool isTopLevelKeyword { get; set; }
-        public bool isUserDefinableOperator { get; set; }
-        public object keyword { get; set; }
-        public int kind { get; set; }
-        public int length { get; set; }
-        public string lexeme { get; set; }
-        public object precedingComments { get; set; }
-        public object stringValue { get; set; }
-        public string valueOrLazySubstring { get; set; }
-        public string parent { get; set; }
+        public string name;
+        public bool isKeyword;
     }
 
-    public class Next
+    public class SimpleCompilationUnit
     {
-        public Type type { get; set; }
-        public int offset { get; set; }
-        public Previous previous { get; set; }
-        public Next next { get; set; }
-        public int charCount { get; set; }
-        public int charOffset { get; set; }
-        public int charEnd { get; set; }
-        public object beforeSynthetic { get; set; }
-        public int end { get; set; }
-        public object endGroup { get; set; }
-        public bool isEof { get; set; }
-        public bool isIdentifier { get; set; }
-        public bool isKeyword { get; set; }
-        public bool isKeywordOrIdentifier { get; set; }
-        public bool isModifier { get; set; }
-        public bool isOperator { get; set; }
-        public bool isSynthetic { get; set; }
-        public bool isTopLevelKeyword { get; set; }
-        public bool isUserDefinableOperator { get; set; }
-        public object keyword { get; set; }
-        public int kind { get; set; }
-        public int length { get; set; }
-        public string lexeme { get; set; }
-        public object precedingComments { get; set; }
-        public object stringValue { get; set; }
-        public string valueOrLazySubstring { get; set; }
+        public SimpleToken beginToken;
     }
-    
+
+
+
+
+
     public class Token
     {
-        public Type type { get; set; }
+        public TokenType type { get; set; }
         public int offset { get; set; }
-        public Previous previous { get; set; }
-        public Next next { get; set; }
+        public Token previous { get; set; }
+        public Token next { get; set; }
         public int charCount { get; set; }
         public int charOffset { get; set; }
         public int charEnd { get; set; }
@@ -149,7 +51,7 @@ namespace Dart2CSharpTranspiler.Dart
         public int kind { get; set; }
         public int length { get; set; }
         public string lexeme { get; set; }
-        public PrecedingComments precedingComments { get; set; }
+        public Token precedingComments { get; set; }
         public string stringValue { get; set; }
     }
 
@@ -158,8 +60,7 @@ namespace Dart2CSharpTranspiler.Dart
         public List<int> lineStarts { get; set; }
         public int lineCount { get; set; }
     }
-
-
+    
     public class BestType
     {
         public string name { get; set; }
@@ -325,8 +226,7 @@ namespace Dart2CSharpTranspiler.Dart
         public int ordinal { get; set; }
         public bool isOptional { get; set; }
     }
-
-
+    
     public class ImplementsClause
     {
         public int end { get; set; }
@@ -349,18 +249,18 @@ namespace Dart2CSharpTranspiler.Dart
         public int length { get; set; }
         public int offset { get; set; }
         public object parent { get; set; }
-        public string root { get; set; }
+        public object root { get; set; }
         public Token beginToken { get; set; }
         public Token endToken { get; set; }
         public object declaredElement { get; set; }
         public LineInfo lineInfo { get; set; }
         //public LocalDeclarations localDeclarations { get; set; }
         public List<object> childEntities { get; set; }
-        public List<string> declarations { get; set; }
-        public List<string> directives { get; set; }
+        public List<object> declarations { get; set; }
+        public List<object> directives { get; set; }
         public object element { get; set; }
         public object scriptTag { get; set; }
-        public List<string> sortedDirectivesAndDeclarations { get; set; }
+        public List<object> sortedDirectivesAndDeclarations { get; set; }
     }
 
 }

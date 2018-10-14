@@ -2,5 +2,3 @@ name: analyzer_export
 
 dependencies:
   analyzer: ^0.33.0
-  json_god: ^2.0.0-beta
-  logging: ^0.11.3+2

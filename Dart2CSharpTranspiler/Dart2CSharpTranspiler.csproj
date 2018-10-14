@@ -18,7 +18,6 @@
     <Compile Remove="Dart\StringUtilities.cs" />
     <Compile Remove="Dart\SyntaticEntity.cs" />
     <Compile Remove="Dart\TimestampedData.cs" />
-    <Compile Remove="Dart\Token.cs" />
     <Compile Remove="Dart\Type.cs" />
     <Compile Remove="Dart\Utilities.cs" />
     <Compile Remove="Dart\Value.cs" />

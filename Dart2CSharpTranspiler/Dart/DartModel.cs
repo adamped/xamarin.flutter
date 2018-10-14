@@ -29,13 +29,12 @@ namespace Dart2CSharpTranspiler.Dart
 	}
 
 	public class DartImport
-	{
-		public string Alias { get; set; }
+	{		
 		public ImportType Type { get; set; }
 		public string Name { get; set; }
-		public string Raw { get; set; }
-		public string Complete { get; set; }
-		public IList<string> ScopedVariables { get; set; } = new List<string>();
+        public string Raw { get; set; }
+        public bool HasScoped { get; set; }
+        public IList<string> ScopedVariables { get; set; } = new List<string>();
 	}
 
 	public class Property

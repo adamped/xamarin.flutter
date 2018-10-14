@@ -19,15 +19,15 @@ namespace Dart2CSharpTranspiler
 
             DartModel model = null;
 
-            if (File.Exists(modelStorage))
-                model = JsonConvert.DeserializeObject<DartModel>(File.ReadAllText(modelStorage));
+            //if (File.Exists(modelStorage))
+            //    model = JsonConvert.DeserializeObject<DartModel>(File.ReadAllText(modelStorage));
 
-            if (model == null)
-            {               
+            //if (model == null)
+            //{               
                 model = BuildDartModel(source);
 
-                File.WriteAllText(modelStorage, JsonConvert.SerializeObject(model));
-            }
+            //    File.WriteAllText(modelStorage, JsonConvert.SerializeObject(model));
+            //}
 
             PostProcessDart(model);
 
@@ -73,7 +73,7 @@ namespace Dart2CSharpTranspiler
                 {
                     // Create Model from Dart File
                     var sourceFileName = sourceFilePath.Replace(sourceDirectory, "").TrimStart('\\');
-                    var astJson = JsonConvert.DeserializeObject<CompilationUnit>(File.ReadAllText(sourceFilePath));
+                    var astJson = JsonConvert.DeserializeObject<SimpleCompilationUnit>(File.ReadAllText(sourceFilePath));
 
                     var file = Process.CreateFile(sourceFileName, folder, astJson);
 
