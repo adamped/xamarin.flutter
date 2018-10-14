@@ -1,58 +1,113 @@
 import 'package:analyzer/analyzer.dart';
 import 'package:analyzer/dart/ast/token.dart';
+import 'package:analyzer/file_system/physical_file_system.dart';
 import 'dart:io';
 import 'serialization.dart' as god;
 import 'dart:async';
 
+import 'dart:io';
+
+import 'package:analyzer/dart/ast/ast.dart';
+import 'package:analyzer/dart/ast/visitor.dart';
+import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/file_system/physical_file_system.dart';
+import 'package:analyzer/src/context/builder.dart';
+import 'package:analyzer/src/dart/sdk/sdk.dart';
+import 'package:analyzer/src/file_system/file_system.dart';
+import 'package:analyzer/src/generated/engine.dart';
+import 'package:analyzer/src/generated/sdk.dart' show DartSdk;
+import 'package:analyzer/src/generated/source.dart';
+import 'package:analyzer/src/generated/source_io.dart';
+import 'package:analyzer/src/source/package_map_resolver.dart';
+import 'package:analyzer/src/source/source_resource.dart';
+
 main() async {
   // 1) Get all directories and all files
-  var contents = await dirContents(Directory('..\\flutter\\lib\\src'));
+  var directoryPath = Directory('..\\flutter\\lib\\src').absolute.path;
+  directoryPath = directoryPath.replaceAll('\\AST\\..', '');
 
-  for (var item in contents) {
-    FileSystemEntityType type = await FileSystemEntity.type(item.path);
-    if (type == FileSystemEntityType.file && item.path.endsWith('dart')) {
-      // 2) AST and Encode each file and place out corresponding .ast.json
-      var src = await new File(item.path).readAsString();
-      print(item.path);
-      var ast = parseCompilationUnit(src, parseFunctionBodies: true);
+  var contents = await dirContents(Directory(directoryPath));
 
-      var simplified = new SimpleCompilationUnit()
-        ..beginToken = simplify(ast.beginToken, ast.beginToken, initial: true);
+  PhysicalResourceProvider resourceProvider = PhysicalResourceProvider.INSTANCE;
+  DartSdk sdk = new FolderBasedDartSdk(
+      resourceProvider, resourceProvider.getFolder('D:\\Dart\\dart-sdk'));
 
-      // 3) Serialize and output AST to same directory
-      String serialized = god.serializeModel(simplified);
+  var resolvers = [
+    new DartUriResolver(sdk),
+    new ResourceUriResolver(resourceProvider)
+  ];
 
-      var fileName = item.path.substring(item.path.lastIndexOf('\\') + 1);
-      fileName = fileName.substring(0, fileName.lastIndexOf('.'));
-      var filePath = item.path.substring(0, item.path.lastIndexOf('\\'));
-      var newFileName = filePath + '\\' + fileName + '.ast.json';
-      if (File(newFileName).existsSync()) File(newFileName).deleteSync();
-      await new File(newFileName).writeAsString(serialized);
-    }
-  }
+  AnalysisContext context = AnalysisEngine.instance.createAnalysisContext()
+    ..sourceFactory = new SourceFactory(resolvers);
+
+  // for (var item in contents) {
+  // FileSystemEntityType type = await FileSystemEntity.type(item.path);
+  // if (type == FileSystemEntityType.file && item.path.endsWith('dart')) {
+  Source source = new FileSource(resourceProvider.getFile(
+      'C:\\Users\\Adam\\source\\repos\\xamarin.flutter\\flutter\\lib\\src\\animation\\animation.dart'));
+  ChangeSet changeSet = new ChangeSet()..addedSource(source);
+  context.applyChanges(changeSet);
+  LibraryElement libElement = context.computeLibraryElement(source);
+  CompilationUnit resolvedUnit =
+      context.resolveCompilationUnit(source, libElement);
+
+  // 2) AST and Encode each file and place out corresponding .ast.json
+  // print(item.path);
+  // var ast = parseDartFile(item.path, parseFunctionBodies: true);
+
+  var test = resolvedUnit.declaredElement;
+
+  // var simplified = new SimpleCompilationUnit()
+  //   ..beginToken = simplify(ast.beginToken);
+
+  // // 3) Serialize and output AST to same directory
+   String serialized = god.serializeModel(test);
+
+  // var fileName = item.path.substring(item.path.lastIndexOf('\\') + 1);
+  // fileName = fileName.substring(0, fileName.lastIndexOf('.'));
+  // var filePath = item.path.substring(0, item.path.lastIndexOf('\\'));
+  // var newFileName = filePath + '\\' + fileName + '.ast.json';
+  // if (File(newFileName).existsSync()) File(newFileName).deleteSync();
+  // new File(newFileName).writeAsStringSync(serialized);
+  // }
+  //}
 }
 
 int count = 0;
 
-SimpleToken simplify(Token startToken, Token token, {bool initial = false}) {
-  var newToken = new SimpleToken()
-    ..lexeme = token.lexeme
-    ..type = createSimpleType(token.type)
-    ..isKeyword = token.isKeyword;
+List<SimpleToken> simplify(Token token, {bool initial = false}) {
+  var currentToken = token;
+  var list = new List<SimpleToken>();
 
-  // Tmp hack - if recursion goes for too long on big files it just throws a stack overflow exception
-  if (count > 6000) {
-    count = 0;
-    newToken.hasFailed = true;
-    return newToken;
+  while (currentToken != null) {
+    var newToken = new SimpleToken()
+      ..lexeme = currentToken.lexeme
+      ..type = createSimpleType(currentToken.type)
+      ..isKeyword = currentToken.isKeyword;
+
+    // Tmp hack - if recursion goes for too long on big files it just throws a stack overflow exception
+    if (count > 6000) {
+      count = 0;
+      newToken.hasFailed = true;
+      list.add(newToken);
+      currentToken = null; // end
+    } else
+      newToken.hasFailed = false;
+
+    count = count + 1;
+
+    list.add(newToken);
+
+    if (currentToken != null &&
+        currentToken.next != null &&
+        !currentToken.isEof)
+      currentToken = currentToken.next;
+    else
+      currentToken = null;
   }
 
-  count = count + 1;
-  if (token.next != null && !token.isEof && (startToken != token || initial))
-    newToken.next = simplify(startToken, token.next);
-
   count = 0;
-  return newToken;
+  return list;
 }
 
 SimpleTokenType createSimpleType(TokenType type) {
@@ -63,7 +118,6 @@ SimpleTokenType createSimpleType(TokenType type) {
 
 class SimpleToken {
   SimpleTokenType type;
-  SimpleToken next;
   bool isKeyword;
   String lexeme;
   bool hasFailed;
@@ -75,7 +129,7 @@ class SimpleTokenType {
 }
 
 class SimpleCompilationUnit {
-  SimpleToken beginToken;
+  List<SimpleToken> beginToken;
 }
 
 Future<List<FileSystemEntity>> dirContents(Directory directory) async {

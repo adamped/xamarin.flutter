@@ -6,7 +6,6 @@ namespace Dart2CSharpTranspiler.Dart
     public class SimpleToken
     {
         public SimpleTokenType type;
-        public SimpleToken next;
         public bool isKeyword;
         public string lexeme;
         public bool hasFailed; // This is a temporary hack. If you get here it means the Dart AST generation failed.
@@ -20,12 +19,8 @@ namespace Dart2CSharpTranspiler.Dart
 
     public class SimpleCompilationUnit
     {
-        public SimpleToken beginToken;
+        public IEnumerable<SimpleToken> beginToken;
     }
-
-
-
-
 
     public class Token
     {

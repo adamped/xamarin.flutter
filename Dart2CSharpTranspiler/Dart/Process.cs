@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using System.Collections.Generic;
 
 namespace Dart2CSharpTranspiler.Dart
 {
@@ -16,63 +18,90 @@ namespace Dart2CSharpTranspiler.Dart
                 Imports = new List<DartImport>(),
                 Sections = new List<Section>()
             };
-
-            SimpleToken token = ast.beginToken;
-
+                       
             DartImport import = null;
+            DartClass @class = null;
 
             var raw = "";
 
-            while (token != null)
+            IList<SimpleToken> _previousTokens = new List<SimpleToken>();
+
+            foreach (var token in ast.beginToken)
             {
                 raw += $"{token.lexeme} ";
-                if (token.type.isKeyword)
+                if (token.type.isKeyword && import == null && @class == null)
                 {
                     if (IsKeyword(token.type, Keyword.IMPORT))
                     {
                         import = new DartImport();
-                        MoveNext();
-                        continue;
                     }
-                }
-
-                // Currently building import
-                if (import != null)
-                {                   
-                    if (IsType(token.type, TokenType.STRING, TokenType.IDENTIFIER))
+                    else if (IsKeyword(token.type, Keyword.CLASS))
                     {
-                        if (import.HasScoped)
+                        @class = new DartClass();
+
+                        if (_previousTokens.Count > 0)
                         {
-                            import.ScopedVariables.Add(token.lexeme.CleanEnclosingString());
+                            foreach (var t in _previousTokens)
+                                if (IsKeyword(token.type, Keyword.ABSTRACT))
+                                    @class.IsAbstract = true;
                         }
-                        else
+
+                        _previousTokens.Clear();
+
+                    }
+                    else
+                        _previousTokens.Add(token); // If we don't know what to do with them yet, just add them.
+
+
+                }
+                else
+                {
+                    // Currently building import
+                    if (import != null)
+                    {
+                        if (IsType(token.type, TokenType.STRING, TokenType.IDENTIFIER))
                         {
-                            import.Name = token.lexeme.CleanEnclosingString();
-                            if (import.Name.StartsWith("package"))
-                                import.Type = ImportType.Package;
-                            else if (import.Name.StartsWith("dart"))
-                                import.Type = ImportType.Dart;
+                            if (import.HasScoped)
+                            {
+                                import.ScopedVariables.Add(token.lexeme.CleanEnclosingString());
+                            }
                             else
-                                import.Type = ImportType.File;
+                            {
+                                import.Name = token.lexeme.CleanEnclosingString();
+                                if (import.Name.StartsWith("package"))
+                                    import.Type = ImportType.Package;
+                                else if (import.Name.StartsWith("dart"))
+                                    import.Type = ImportType.Dart;
+                                else
+                                    import.Type = ImportType.File;
+                            }
+                        }
+                        else if (token.type.name == Keyword.SHOW.name)
+                        {
+                            import.HasScoped = true;
+                        }
+                        else if (token.type.name == TokenType.SEMICOLON.name)
+                        {
+                            import.Raw = raw;
+                            raw = string.Empty;
+                            file.Imports.Add(import);
+                            import = null;
                         }
                     }
-                    else if (token.type.name == Keyword.SHOW.name)
+
+                    // Currently building class
+                    if (@class != null)
                     {
-                        import.HasScoped = true;
-                    }
-                    else if (token.type.name == TokenType.SEMICOLON.name)
-                    {
-                        import.Raw = raw;
-                        raw = string.Empty;
-                        file.Imports.Add(import);
-                        import = null;
+                        if (IsType(token.type, TokenType.STRING, TokenType.IDENTIFIER))
+                        {
+                            @class.Name = token.lexeme;
+                        }
+                        else if (IsType(token.type, TokenType.LT))
+                        {
+
+                        }
                     }
                 }
-
-                MoveNext();
-
-                void MoveNext() => token = token.next;
-
             }
 
             return file;
