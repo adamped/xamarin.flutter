@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Dart2CSharpTranspiler.Dart
 {
-    public class DartModel : Dictionary<string, IList<DartFile>> { }
+   
 
     [Flags]
 	public enum VisibilityType

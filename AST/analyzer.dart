@@ -1,25 +1,19 @@
 import 'package:analyzer/analyzer.dart';
-import 'package:analyzer/dart/ast/token.dart';
+import 'package:analyzer/dart/element/type.dart';
 import 'package:analyzer/file_system/physical_file_system.dart';
 import 'dart:io';
-import 'serialization.dart' as god;
+import 'serialization.dart' as serialize;
 import 'dart:async';
-
-import 'dart:io';
-
 import 'package:analyzer/dart/ast/ast.dart';
-import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/dart/element/element.dart';
-import 'package:analyzer/file_system/physical_file_system.dart';
-import 'package:analyzer/src/context/builder.dart';
 import 'package:analyzer/src/dart/sdk/sdk.dart';
 import 'package:analyzer/src/file_system/file_system.dart';
 import 'package:analyzer/src/generated/engine.dart';
 import 'package:analyzer/src/generated/sdk.dart' show DartSdk;
 import 'package:analyzer/src/generated/source.dart';
 import 'package:analyzer/src/generated/source_io.dart';
-import 'package:analyzer/src/source/package_map_resolver.dart';
 import 'package:analyzer/src/source/source_resource.dart';
+import 'model.dart';
 
 main() async {
   // 1) Get all directories and all files
@@ -40,96 +34,125 @@ main() async {
   AnalysisContext context = AnalysisEngine.instance.createAnalysisContext()
     ..sourceFactory = new SourceFactory(resolvers);
 
-  // for (var item in contents) {
-  // FileSystemEntityType type = await FileSystemEntity.type(item.path);
-  // if (type == FileSystemEntityType.file && item.path.endsWith('dart')) {
-  Source source = new FileSource(resourceProvider.getFile(
-      'C:\\Users\\Adam\\source\\repos\\xamarin.flutter\\flutter\\lib\\src\\animation\\animation.dart'));
-  ChangeSet changeSet = new ChangeSet()..addedSource(source);
-  context.applyChanges(changeSet);
-  LibraryElement libElement = context.computeLibraryElement(source);
-  CompilationUnit resolvedUnit =
-      context.resolveCompilationUnit(source, libElement);
+  for (var item in contents) {
+    FileSystemEntityType type = await FileSystemEntity.type(item.path);
+    if (type == FileSystemEntityType.file && item.path.endsWith('dart')) {
+      print(item.path);
+      Source source = new FileSource(resourceProvider.getFile(item.path));
+      ChangeSet changeSet = new ChangeSet()..addedSource(source);
+      context.applyChanges(changeSet);
+      LibraryElement libElement = context.computeLibraryElement(source);
+      CompilationUnit resolvedUnit =
+          context.resolveCompilationUnit(source, libElement);
 
-  // 2) AST and Encode each file and place out corresponding .ast.json
-  // print(item.path);
-  // var ast = parseDartFile(item.path, parseFunctionBodies: true);
+      var element = resolvedUnit.declaredElement;
 
-  var test = resolvedUnit.declaredElement;
+      var unit = new ResolvedCompilationUnit()
+        ..enums = convertClassElements(element.enums)
+        ..types = convertClassElements(element.types);
 
-  // var simplified = new SimpleCompilationUnit()
-  //   ..beginToken = simplify(ast.beginToken);
+      convertElement(unit, element);
 
-  // // 3) Serialize and output AST to same directory
-   String serialized = god.serializeModel(test);
+      String serialized = serialize.serializeModel(unit);
 
-  // var fileName = item.path.substring(item.path.lastIndexOf('\\') + 1);
-  // fileName = fileName.substring(0, fileName.lastIndexOf('.'));
-  // var filePath = item.path.substring(0, item.path.lastIndexOf('\\'));
-  // var newFileName = filePath + '\\' + fileName + '.ast.json';
-  // if (File(newFileName).existsSync()) File(newFileName).deleteSync();
-  // new File(newFileName).writeAsStringSync(serialized);
-  // }
-  //}
+      var fileName = item.path.substring(item.path.lastIndexOf('\\') + 1);
+      fileName = fileName.substring(0, fileName.lastIndexOf('.'));
+      var filePath = item.path.substring(0, item.path.lastIndexOf('\\'));
+      var newFileName = filePath + '\\' + fileName + '.sm.json';
+
+      if (File(newFileName).existsSync()) File(newFileName).deleteSync();
+      new File(newFileName).writeAsStringSync(serialized);
+    }
+  }
 }
 
-int count = 0;
+List<ResolvedClassElement> convertClassElements(List<ClassElement> elements) {
+  List<ResolvedClassElement> list = [];
 
-List<SimpleToken> simplify(Token token, {bool initial = false}) {
-  var currentToken = token;
-  var list = new List<SimpleToken>();
+  for (var item in elements) {
+    var resolved = ResolvedClassElement()
+      ..isAbstract = item.isAbstract
+      ..isEnum = item.isEnum
+      ..isMixin = item.isMixin
+      ..isMixinApplication = item.isMixinApplication
+      ..isOrInheritsProxy = item.isOrInheritsProxy
+      ..isProxy = item.isProxy
+      ..isValidMixin = item.isValidMixin
+      ..hasNonFinalField = item.hasNonFinalField
+      ..hasReferenceToSuper = item.hasReferenceToSuper
+      ..hasStaticMember = item.hasStaticMember
+      ..mixins = mixinList(item.mixins)
+      ..methods = methodList(item.methods);
 
-  while (currentToken != null) {
-    var newToken = new SimpleToken()
-      ..lexeme = currentToken.lexeme
-      ..type = createSimpleType(currentToken.type)
-      ..isKeyword = currentToken.isKeyword;
+    convertElement(resolved, item);
 
-    // Tmp hack - if recursion goes for too long on big files it just throws a stack overflow exception
-    if (count > 6000) {
-      count = 0;
-      newToken.hasFailed = true;
-      list.add(newToken);
-      currentToken = null; // end
-    } else
-      newToken.hasFailed = false;
-
-    count = count + 1;
-
-    list.add(newToken);
-
-    if (currentToken != null &&
-        currentToken.next != null &&
-        !currentToken.isEof)
-      currentToken = currentToken.next;
-    else
-      currentToken = null;
+    list.add(resolved);
   }
 
-  count = 0;
   return list;
 }
 
-SimpleTokenType createSimpleType(TokenType type) {
-  return new SimpleTokenType()
-    ..name = type.name
-    ..isKeyword = type.isKeyword;
+List<ResolvedDartType> mixinList(List<InterfaceType> mixins) {
+  List<ResolvedDartType> list = [];
+  for (var item in mixins) {
+    list.add(new ResolvedDartType()..displayName = item.displayName);
+  }
+
+  return list;
 }
 
-class SimpleToken {
-  SimpleTokenType type;
-  bool isKeyword;
-  String lexeme;
-  bool hasFailed;
+List<ResolvedMethodElement> methodList(List<MethodElement> methods) {
+  List<ResolvedMethodElement> list = [];
+  for (var item in methods) {
+    list.add(new ResolvedMethodElement()
+      ..hasImplicitReturnType = item.hasImplicitReturnType
+      ..isAbstract = item.isAbstract
+      ..isAsynchronous = item.isAsynchronous
+      ..isExternal = item.isExternal
+      ..isGenerator = item.isGenerator
+      ..isOperator = item.isOperator
+      ..isStatic = item.isStatic
+      ..isSynchronous = item.isSynchronous
+      ..parameters = parameterList(item.parameters)
+      ..returnType = new ResolvedDartType()
+      ..displayName = item.returnType.displayName
+      ..type = new ResolvedFunctionType()
+      ..displayName = item.type.displayName);
+  }
+
+  return list;
 }
 
-class SimpleTokenType {
-  String name;
-  bool isKeyword;
+List<ResolvedParameterElement> parameterList(
+    List<ParameterElement> parameters) {
+  List<ResolvedParameterElement> list = [];
+  for (var item in parameters) {
+    list.add(new ResolvedParameterElement()..displayName = item.displayName);
+  }
+
+  return list;
 }
 
-class SimpleCompilationUnit {
-  List<SimpleToken> beginToken;
+convertElement(ResolvedElement item, Element element) {
+  item.displayName = element.displayName;
+  item.documentationComment = element.documentationComment;
+  item.hasAlwaysThrows = element.hasAlwaysThrows;
+  item.hasDeprecated = element.hasDeprecated;
+  item.hasFactory = element.hasFactory;
+  item.hasIsTest = element.hasIsTest;
+  item.hasIsTestGroup = element.hasIsTestGroup;
+  item.hasJS = element.hasJS;
+  item.hasOverride = element.hasOverride;
+  item.hasProtected = element.hasProtected;
+  item.hasRequired = element.hasRequired;
+  item.hasSealed = element.hasSealed;
+  item.hasVisibleForTemplate = element.hasVisibleForTemplate;
+  item.hasVisibleForTesting = element.hasVisibleForTesting;
+  item.id = element.id;
+  item.name = element.name;
+  item.isPrivate = element.isPrivate;
+  item.isPublic = element.isPublic;
+  item.isSynthetic = element.isSynthetic;
 }
 
 Future<List<FileSystemEntity>> dirContents(Directory directory) async {
