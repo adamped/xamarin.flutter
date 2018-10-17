@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
-namespace Transpiler
+namespace Dart2CSharpTranspiler.Dart
 {
-    public class DartModel : Dictionary<string, IList<DartFile>> { }
+   
 
     [Flags]
 	public enum VisibilityType
@@ -22,7 +21,7 @@ namespace Transpiler
 		public IList<Section> Sections { get; set; }
 	}
 
-	public enum Type
+	public enum ImportType
 	{
 		Package,
 		Dart,
@@ -30,13 +29,12 @@ namespace Transpiler
 	}
 
 	public class DartImport
-	{
-		public string Alias { get; set; }
-		public Type Type { get; set; }
+	{		
+		public ImportType Type { get; set; }
 		public string Name { get; set; }
-		public string Raw { get; set; }
-		public string Complete { get; set; }
-		public IList<string> ScopedVariables { get; set; } = new List<string>();
+        public string Raw { get; set; }
+        public bool HasScoped { get; set; }
+        public IList<string> ScopedVariables { get; set; } = new List<string>();
 	}
 
 	public class Property
