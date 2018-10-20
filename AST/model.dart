@@ -2,6 +2,7 @@ class ResolvedCompilationUnit extends ResolvedElement {
   List<ResolvedClassElement> enums;
   List<ResolvedClassElement> types;
   List<ResolvedPropertyAccessorElement> accessors;
+  List<ResolvedFunctionElement> functions;
 }
 
 class ResolvedElement {
@@ -28,7 +29,9 @@ class ResolvedElement {
 
 class ResolvedMethodElement extends ResolvedExecutableElement {}
 
-class ResolvedTypeDefiningElement extends ResolvedElement {}
+class ResolvedTypeDefiningElement extends ResolvedElement {
+  ResolvedDartType type;
+}
 
 class ResolvedExecutableElement extends ResolvedFunctionTypeElement {
   bool hasImplicitReturnType;
@@ -62,10 +65,52 @@ class ResolvedClassElement extends ResolvedTypeDefiningElement {
   bool hasNonFinalField;
   bool hasReferenceToSuper;
   bool hasStaticMember;
+
+  List<ResolvedPropertyAccessorElement> accessors;
+  ResolvedInterfaceType supertype;
+  List<ResolvedConstructorElement> constructors;
+  List<ResolvedInterfaceType> allSupertypes;
+  List<ResolvedInterfaceType> superclassConstraints;
+
+  List<ResolvedFieldElement> fields;
+}
+
+class ResolvedFieldElement extends ResolvedPropertyInducingElement {
+  bool isEnumConstant;
+}
+
+class ResolvedPropertyInducingElement extends ResolvedVariableElement {
+  ResolvedPropertyAccessorElement getter;
+  ResolvedPropertyAccessorElement setter;
+}
+
+class ResolvedPropertyAccessorElement extends ResolvedExecutableElement {
+  bool isGetter;
+  bool isSetter;
+}
+
+class ResolvedVariableElement {
+  Object constantValue;
+  bool hasImplicitType;
+  ResolvedFunctionElement initializer;
+  bool isConst;
+  bool isFinal;
+  bool isStatic;
+  ResolvedDartType type;
 }
 
 class ResolvedDartType {
   String displayName;
+
+  bool isBottom;
+  bool isDartAsyncFuture;
+  bool isDartAsyncFutureOr;
+  bool isDartCoreFunction;
+  bool isDartCoreNull;
+  bool isDynamic;
+  bool isObject;
+  bool isUndefined;
+  bool isVoid;
 }
 
 class ResolvedFunctionType extends ResolvedDartType {}
@@ -80,7 +125,37 @@ class ResolvedParameterElement extends ResolvedElement {
   bool isPositional;
 }
 
-class ResolvedPropertyAccessorElement extends ResolvedExecutableElement {
-  bool isGetter;
-  bool isSetter;
+class ResolvedFunctionElement extends ResolvedExecutableElement {
+  bool isEntryPoint;
+}
+
+class ResolvedParamaterizedType extends ResolvedDartType {
+  List<ResolvedDartType> typeArguments;
+  List<ResolvedTypeParameterElement> typeParameters;
+}
+
+class ResolvedTypeParameterElement extends ResolvedTypeDefiningElement {
+  ResolvedDartType bound;
+}
+
+class ResolvedTypeParameterType extends ResolvedDartType {
+  ResolvedDartType type;
+}
+
+class ResolvedConstructorElement extends ResolvedExecutableElement {
+  bool isConst;
+  bool isDefaultConstructor;
+  bool isFactory;
+  bool isStatic;
+}
+
+class ResolvedInterfaceType extends ResolvedParamaterizedType {
+  List<ResolvedPropertyAccessorElement> accessors;
+  List<ResolvedConstructorElement> constructors;
+  //ResolvedClassElement element;
+  List<ResolvedInterfaceType> interfaces;
+  List<ResolvedMethodElement> methods;
+  List<ResolvedInterfaceType> mixins;
+  ResolvedInterfaceType superclass;
+  List<ResolvedInterfaceType> superclassConstraints;
 }
