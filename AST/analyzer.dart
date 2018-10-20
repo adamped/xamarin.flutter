@@ -1,4 +1,5 @@
 import 'package:analyzer/analyzer.dart';
+import 'package:analyzer/dart/ast/token.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:analyzer/file_system/physical_file_system.dart';
 import 'dart:io';
@@ -50,7 +51,8 @@ main() async {
       var unit = new ResolvedCompilationUnit()
         ..enums = convertClassElements(element.enums)
         ..types = convertClassElements(element.types)
-        ..accessors = convertAccessors(element.accessors);
+        ..accessors = convertAccessors(element.accessors)
+        ..functions = convertFunctions(element.functions);
 
       convertElement(unit, element);
 
@@ -67,20 +69,43 @@ main() async {
   }
 }
 
+List<ResolvedFunctionElement> convertFunctions(List<FunctionElement> elements) {
+  List<ResolvedFunctionElement> list = [];
+
+  for (var item in elements) {
+    if (item != null) {
+      var accessor = new ResolvedFunctionElement()
+        ..isEntryPoint = item.isEntryPoint;
+
+      convertExecutableElement(accessor, item);
+
+      list.add(accessor);
+    }
+  }
+
+  return list;
+}
+
 List<ResolvedPropertyAccessorElement> convertAccessors(
     List<PropertyAccessorElement> elements) {
   List<ResolvedPropertyAccessorElement> list = [];
 
   for (var item in elements) {
-    var accessor = new ResolvedPropertyAccessorElement()
-      ..isGetter = item.isGetter
-      ..isSetter = item.isSetter;
-    convertExecutableElement(accessor, item);
-
-    list.add(accessor);
+    if (item != null) list.add(convertAccessor(item));
   }
 
   return list;
+}
+
+ResolvedPropertyAccessorElement convertAccessor(
+    PropertyAccessorElement accessor) {
+  if (accessor == null) return null;
+
+  var item = new ResolvedPropertyAccessorElement()
+    ..isGetter = accessor.isGetter
+    ..isSetter = accessor.isSetter;
+  convertExecutableElement(item, accessor);
+  return item;
 }
 
 List<ResolvedClassElement> convertClassElements(List<ClassElement> elements) {
@@ -98,8 +123,14 @@ List<ResolvedClassElement> convertClassElements(List<ClassElement> elements) {
       ..hasNonFinalField = item.hasNonFinalField
       ..hasReferenceToSuper = item.hasReferenceToSuper
       ..hasStaticMember = item.hasStaticMember
-      ..mixins = mixinList(item.mixins)
-      ..methods = methodList(item.methods);
+      ..supertype = convertInterfaceType(item.supertype)
+      ..mixins = convertInterfaceTypes(item.mixins)
+      ..methods = methodList(item.methods)
+      ..accessors = convertAccessors(item.accessors)
+      ..allSupertypes = convertInterfaceTypes(item.allSupertypes)
+      ..superclassConstraints =
+          convertInterfaceTypes(item.superclassConstraints)
+      ..fields = convertFields(item.fields);
 
     convertElement(resolved, item);
 
@@ -109,10 +140,98 @@ List<ResolvedClassElement> convertClassElements(List<ClassElement> elements) {
   return list;
 }
 
-List<ResolvedDartType> mixinList(List<InterfaceType> mixins) {
-  List<ResolvedDartType> list = [];
-  for (var item in mixins) {
-    list.add(new ResolvedDartType()..displayName = item.displayName);
+List<ResolvedFieldElement> convertFields(List<FieldElement> elements) {
+  List<ResolvedFieldElement> list = [];
+
+  for (var item in elements) {
+    var field = new ResolvedFieldElement()
+      ..isEnumConstant = item.isEnumConstant;
+
+    convertPropertyInducingElement(field, item);
+
+    list.add(field);
+  }
+
+  return list;
+}
+
+ResolvedPropertyInducingElement convertPropertyInducingElement(
+    ResolvedFieldElement item, PropertyInducingElement element) {
+  if (element == null) return null;
+
+  item
+    ..getter = convertAccessor(element.getter)
+    ..setter = convertAccessor(element.setter);
+
+  convertResolvedVariableElement(item, element);
+
+  return item;
+}
+
+ResolvedVariableElement convertResolvedVariableElement(
+    ResolvedPropertyInducingElement item, VariableElement element) {
+  if (element == null) return item;
+  item
+    //..constantValue = element.constantValue
+    ..hasImplicitType = element.hasImplicitType
+    ..isConst = element.isConst
+    ..isFinal = element.isFinal
+    ..isStatic = element.isStatic
+    ..type = convertDartType(new ResolvedDartType(), element.type);
+
+  return item;
+}
+
+ResolvedInterfaceType convertInterfaceType(InterfaceType element) {
+  if (element == null) return null;
+
+  return new ResolvedInterfaceType()
+    ..accessors = convertAccessors(element.accessors)
+    ..constructors = convertConstructors(element.constructors)
+    ..interfaces = convertInterfaceTypes(element.interfaces)
+    ..methods = convertMethodElements(element.methods)
+    ..mixins = convertInterfaceTypes(element.mixins)
+    ..superclassConstraints =
+        convertInterfaceTypes(element.superclassConstraints)
+    ..superclass = convertInterfaceType(element.superclass);
+}
+
+List<ResolvedMethodElement> convertMethodElements(
+    List<MethodElement> elements) {
+  List<ResolvedMethodElement> list = [];
+
+  for (var item in elements) {
+    var method = new ResolvedMethodElement();
+    convertExecutableElement(method, item);
+    list.add(method);
+  }
+
+  return list;
+}
+
+List<ResolvedInterfaceType> convertInterfaceTypes(
+    List<InterfaceType> interfaces) {
+  List<ResolvedInterfaceType> list = [];
+  for (var item in interfaces) {
+    list.add(convertInterfaceType(item));
+  }
+
+  return list;
+}
+
+List<ResolvedConstructorElement> convertConstructors(
+    List<ConstructorElement> constructors) {
+  List<ResolvedConstructorElement> list = [];
+  for (var item in constructors) {
+    var constructor = new ResolvedConstructorElement()
+      ..isConst = item.isConst
+      ..isFactory = item.isFactory
+      ..isDefaultConstructor = item.isDefaultConstructor
+      ..isStatic = item.isStatic;
+
+    convertExecutableElement(constructor, item);
+
+    list.add(constructor);
   }
 
   return list;
@@ -121,7 +240,7 @@ List<ResolvedDartType> mixinList(List<InterfaceType> mixins) {
 List<ResolvedMethodElement> methodList(List<MethodElement> methods) {
   List<ResolvedMethodElement> list = [];
   for (var item in methods) {
-    list.add(new ResolvedMethodElement()
+    var element = new ResolvedMethodElement()
       ..hasImplicitReturnType = item.hasImplicitReturnType
       ..isAbstract = item.isAbstract
       ..isAsynchronous = item.isAsynchronous
@@ -130,14 +249,47 @@ List<ResolvedMethodElement> methodList(List<MethodElement> methods) {
       ..isOperator = item.isOperator
       ..isStatic = item.isStatic
       ..isSynchronous = item.isSynchronous
-      ..parameters = parameterList(item.parameters)
-      ..returnType =
-          (new ResolvedDartType()..displayName = item.returnType.displayName)
-      ..type =
-          (new ResolvedFunctionType()..displayName = item.type.displayName));
+      ..methodDeclaration = getMethodDeclaration(item);
+
+    convertFunctionTypedElement(element, item);
+
+    list.add(element);
   }
 
   return list;
+}
+
+ResolvedMethodDeclaration getMethodDeclaration(MethodElement item) {
+  var method = new ResolvedMethodDeclaration();
+
+  var resolved = item.computeNode();
+
+  method.body = getFunctionBody(resolved);
+
+  return method;
+}
+
+ResolvedFunctionBody getFunctionBody(MethodDeclaration node) {
+  if (node == null) return null;
+
+  var body = new ResolvedFunctionBody();
+
+  body.beginToken = getToken(node.beginToken);
+
+  return body;
+}
+
+ResolvedToken getToken(Token token) {
+  var t = new ResolvedToken()
+    ..kind = token.kind
+    ..lexeme = token.lexeme
+    ..isKeyword = token.isKeyword
+    ..isKeywordOrIdentifier = token.isKeywordOrIdentifier
+    ..isOperator = token.isOperator;
+
+  if (token.next != null && !token.isEof) t.next = getToken(token.next);
+
+  return t;
 }
 
 List<ResolvedParameterElement> parameterList(
@@ -160,6 +312,36 @@ convertExecutableElement(
   item.isOperator = element.isOperator;
   item.isStatic = element.isStatic;
   item.isSynchronous = element.isSynchronous;
+
+  convertFunctionTypedElement(item, element);
+}
+
+convertFunctionTypedElement(
+    ResolvedFunctionTypeElement item, FunctionTypedElement element) {
+  item.parameters = parameterList(element.parameters);
+  item.returnType = convertDartType(new ResolvedDartType(), element.returnType);
+  item.type = convertFunctionType(new ResolvedFunctionType(), element.type);
+}
+
+ResolvedDartType convertDartType(ResolvedDartType item, DartType type) {
+  item.displayName = type.displayName;
+  item.isBottom = type.isBottom;
+  item.isDartAsyncFuture = type.isDartAsyncFuture;
+  item.isDartAsyncFutureOr = type.isDartAsyncFutureOr;
+  item.isDartCoreFunction = type.isDartCoreFunction;
+  item.isDartCoreNull = type.isDartCoreNull;
+  item.isDynamic = type.isDynamic;
+  item.isObject = type.isObject;
+  item.isUndefined = type.isUndefined;
+  item.isVoid = type.isVoid;
+
+  return item;
+}
+
+ResolvedFunctionType convertFunctionType(
+    ResolvedFunctionType item, FunctionType type) {
+  convertDartType(item, type);
+  return item;
 }
 
 convertElement(ResolvedElement item, Element element) {
