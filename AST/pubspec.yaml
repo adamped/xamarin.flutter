@@ -1,0 +1,4 @@
+name: analyzer_export
+
+dependencies:
+  analyzer: ^0.33.0

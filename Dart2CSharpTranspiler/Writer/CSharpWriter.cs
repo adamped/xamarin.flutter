@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
+using Dart2CSharpTranspiler.Dart;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Transpiler;
 
 namespace Dart2CSharpTranspiler.Writer
 {
