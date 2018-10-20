@@ -54,7 +54,7 @@ namespace Dart2CSharpTranspiler
             if (baseClass == null)
             {
                 // Attempt a Generic incase it was an @optionalTypeArgs
-                baseClass = ClassList.Single(x => x.Key.EndsWith($".{name}<>")).Value;
+                baseClass = ClassList.SingleOrDefault(x => x.Key.EndsWith($".{name}<>")).Value;
             }
 
             return baseClass;
@@ -224,6 +224,8 @@ namespace Dart2CSharpTranspiler
                 if (item.Extends != null && !DartFoundationClass(item.Extends.Name))
                 {
                     var baseClass = GetDartClass(item.Extends.Name);
+                    if(baseClass == null)
+                        continue;
 
                     foreach (var method in item.Sections.Where(x => x.Type == SectionType.Method))
                     {

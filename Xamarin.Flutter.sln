@@ -26,6 +26,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flutter.Sample.UWP", "Flutter.Sample.UWP\Flutter.Sample.UWP.csproj", "{F02BD326-5760-4246-9EDC-C41B489E965B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Flutter", "Flutter", "{A3093869-0FE2-4929-8A5C-D384A14F0065}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\Downloads\model.json = ..\..\Downloads\model.json
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flutter.Shell.Droid", "Flutter.Shell.Droid\Flutter.Shell.Droid.csproj", "{C9E1CAA4-53F3-4032-92A0-81F5322D446B}"
 EndProject

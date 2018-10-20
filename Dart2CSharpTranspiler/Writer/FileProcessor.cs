@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -9,21 +10,60 @@ namespace Dart2CSharpTranspiler.Writer
     /// <summary>
     /// Generates the content of a class.
     /// </summary>
-    public static class ClassGenerator
+    public class FileProcessor
     {
-        /// <summary>
-        /// Adds all classes of a <see cref="DartFile"/> to an existing <see cref="NamespaceDeclarationSyntax"/>.
-        /// </summary>
-        public static NamespaceDeclarationSyntax AddClasses(DartFile file, NamespaceDeclarationSyntax namespaceDeclartion, Dictionary<string, string> availableMixins)
+        private readonly DartFile _file;
+        private NamespaceDeclarationSyntax _namespaceDeclartion;
+        private readonly Dictionary<string, string> _availableMixins;
+
+        public FileProcessor(DartFile file, NamespaceDeclarationSyntax namespaceDeclartion, Dictionary<string, string> availableMixins)
         {
-            foreach (var classModel in file.Classes)
+            _file = file;
+            _namespaceDeclartion = namespaceDeclartion;
+            _availableMixins = availableMixins;
+        }
+
+        /// <summary>
+        /// Adds all classes of a <see cref="DartFile"/> to the <see cref="NamespaceDeclarationSyntax"/>.
+        /// </summary>
+        public NamespaceDeclarationSyntax AddFileInfoToNamespace()
+        {
+            // Add classes
+            foreach (var classModel in _file.Classes)
             {
-                var classDeclaration = GenerateClass(classModel, availableMixins);
-                // Add class to namespace
-                namespaceDeclartion = namespaceDeclartion.AddMembers(classDeclaration);
+                var classDeclaration = GenerateClass(classModel, _availableMixins); 
+                _namespaceDeclartion = _namespaceDeclartion.AddMembers(classDeclaration);
             }
 
-            return namespaceDeclartion;
+            // Add enums
+            foreach (var section in _file.Sections.Where(x => x.Type == SectionType.Enum))
+            {
+                _namespaceDeclartion = _namespaceDeclartion.AddMembers(GenerateEnum(section));
+            } 
+
+            AddMixinInterfaces();
+
+            return _namespaceDeclartion;
+        }
+
+        private EnumDeclarationSyntax GenerateEnum(Section section)
+        {
+            // Find members
+            var values = section.RawCode.Split(',', StringSplitOptions.RemoveEmptyEntries);
+            var members = new List<EnumMemberDeclarationSyntax>();
+            foreach (var value in values)
+            {
+                var member = NormalizationHelper.CamelCase(value.Trim());
+                members.Add(SyntaxFactory.EnumMemberDeclaration(member));
+            }
+
+            // Create normalized name 
+            var name = NormalizationHelper.NormalizeTypeName(section.Name);
+             
+            // Create enum
+            return SyntaxFactory.EnumDeclaration(name)
+                .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
+                .AddMembers(members.ToArray());
         }
 
         /// <summary>
@@ -32,7 +72,7 @@ namespace Dart2CSharpTranspiler.Writer
         /// <param name="classModel"></param>
         /// <param name="name"></param>
         /// <returns></returns>
-        private static InterfaceDeclarationSyntax GenerateMixinInterface(DartClass classModel, string name)
+        private InterfaceDeclarationSyntax GenerateMixinInterface(DartClass classModel, string name)
         {
             var interfaceDeclaration = SyntaxFactory.InterfaceDeclaration(name);
             interfaceDeclaration = interfaceDeclaration.AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword));
@@ -46,14 +86,26 @@ namespace Dart2CSharpTranspiler.Writer
         /// <param name="classModel">Model the classed will be based on.</param>
         /// <param name="availableMixins">All known mixins of the library.</param>
         /// <returns></returns>
-        private static ClassDeclarationSyntax GenerateClass(DartClass classModel, Dictionary<string, string> availableMixins)
+        private ClassDeclarationSyntax GenerateClass(DartClass classModel, Dictionary<string, string> availableMixins)
         {
             var className = classModel.Name;
-            var classDeclaration = SyntaxFactory.ClassDeclaration(NormalizationHelper.NormalizeTypeName(className));
-            classDeclaration = (ClassDeclarationSyntax)AddConstraints(classModel, classDeclaration);
-            classDeclaration = classDeclaration.AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword));
+
+            // find modifiers
+            var modifiers = new List<SyntaxKind>
+            {
+                SyntaxKind.PublicKeyword
+            };
+            if (classModel.IsAbstract)
+                modifiers.Add(SyntaxKind.AbstractKeyword); 
+            if (classModel.IsImmutable)
+                modifiers.Add(SyntaxKind.AbstractKeyword); 
+            
+            var classDeclaration = SyntaxFactory.ClassDeclaration(NormalizationHelper.NormalizeTypeName(className))
+                .AddModifiers(modifiers.Select(SyntaxFactory.Token).ToArray()); 
+
+            classDeclaration = (ClassDeclarationSyntax)AddConstraints(classModel, classDeclaration); 
             classDeclaration = AddBaseTypes(classModel, className, classDeclaration, availableMixins);
-            classDeclaration = ClassSectionGenerator.AddSections(classModel, classDeclaration);
+            classDeclaration = ClassSectionGenerator.AddSections(classModel, classDeclaration, _namespaceDeclartion);
             return classDeclaration;
         }
 
@@ -64,16 +116,16 @@ namespace Dart2CSharpTranspiler.Writer
         /// <param name="className">The name for the class.</param>
         /// <param name="classDeclaration">The <see cref="ClassDeclarationSyntax"/> the base types will be added to.</param>
         /// <param name="availableMixins">All known mixins of the library.</param> 
-        private static ClassDeclarationSyntax AddBaseTypes(DartClass classModel, string className, ClassDeclarationSyntax classDeclaration, Dictionary<string, string> availableMixins)
+        private ClassDeclarationSyntax AddBaseTypes(DartClass classModel, string className, ClassDeclarationSyntax classDeclaration, Dictionary<string, string> availableMixins)
         {
             if (classModel.Extends != null)
             {
                 // Add base classes
                 if (!string.IsNullOrEmpty(classModel.Extends.Name))
                 {
-                    var name = NormalizationHelper.NormalizeTypeName(classModel.Extends.Name);
+                    var name = NormalizationHelper.NormalizeTypeName(classModel.Extends.Name); 
+                    name = RewriteBaseClass(name); 
                     var type = SyntaxFactory.ParseTypeName(name);
-
                     classDeclaration = classDeclaration.AddBaseListTypes(
                         SyntaxFactory.SimpleBaseType(type));
                 }
@@ -105,9 +157,28 @@ namespace Dart2CSharpTranspiler.Writer
         }
 
         /// <summary>
+        /// Rewrites a base class if a rewriting rule exists.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        private string RewriteBaseClass(string name)
+        {
+            var rewriteRule = RewriteRuleProvider.FindRuleForClass(name);
+
+            if (rewriteRule != null)
+            {
+                _namespaceDeclartion = rewriteRule.ApplyToNamespace(_namespaceDeclartion); 
+                // Overwrite name with rule
+                name = rewriteRule.ReplacementClassName;
+            }
+
+            return name;
+        }
+
+        /// <summary>
         /// Adds constraints to a <see cref="TypeDeclarationSyntax"/>.
         /// </summary>
-        public static TypeDeclarationSyntax AddConstraints(DartClass classModel, TypeDeclarationSyntax classDeclaration)
+        public TypeDeclarationSyntax AddConstraints(DartClass classModel, TypeDeclarationSyntax classDeclaration)
         {
             foreach (var constraint in classModel.GenericConstraints)
             {
@@ -125,18 +196,18 @@ namespace Dart2CSharpTranspiler.Writer
         /// <summary>
         /// Adds the interface for a mixin to a <see cref="NamespaceDeclarationSyntax"/>.
         /// </summary>
-        public static NamespaceDeclarationSyntax AddMixinInterfaces(DartFile file, NamespaceDeclarationSyntax namespaceDeclartion, Dictionary<string, string> availableMixins)
+        public NamespaceDeclarationSyntax AddMixinInterfaces()
         {
-            foreach (var mixinClassModel in file.Classes.Where(x => availableMixins.Any(mixin => IsSameClassSignature(mixin.Key, x.RawName))))
+            foreach (var mixinClassModel in _file.Classes.Where(x =>_availableMixins.Any(mixin => IsSameClassSignature(mixin.Key, x.RawName))))
             {
-                var mixinName = availableMixins.First(mixin => IsSameClassSignature(mixin.Key, mixinClassModel.RawName)).Value;
+                var mixinName = _availableMixins.First(mixin => IsSameClassSignature(mixin.Key, mixinClassModel.RawName)).Value;
                 mixinName = RegexProvider.GenericParameterRegex.Replace(mixinName, "");
-                var interfaceDeclaration = ClassGenerator.GenerateMixinInterface(mixinClassModel, mixinName);
+                var interfaceDeclaration = GenerateMixinInterface(mixinClassModel, mixinName);
                 // Add class to namespace
-                namespaceDeclartion = namespaceDeclartion.AddMembers(interfaceDeclaration);
+                _namespaceDeclartion = _namespaceDeclartion.AddMembers(interfaceDeclaration);
             }
 
-            return namespaceDeclartion;
+            return _namespaceDeclartion;
         }
 
 
@@ -146,7 +217,7 @@ namespace Dart2CSharpTranspiler.Writer
         /// <param name="firstClass">First class to compare.</param>
         /// <param name="secondClass">Second class to compare.</param>
         /// <returns></returns>
-        private static bool IsSameClassSignature(string firstClass, string secondClass)
+        private bool IsSameClassSignature(string firstClass, string secondClass)
         {
             var c1GenericParameters = RegexProvider.GenericParameterRegex.Match(firstClass);
             var c2GenericParameters = RegexProvider.GenericParameterRegex.Match(secondClass);

@@ -21,6 +21,12 @@ namespace Dart2CSharpTranspiler.Writer
             return output;
         }
 
+        public static string PrivateField(string name)
+        {
+            var output = NormalizeTypeName(name);
+            return "_" + output[0].ToString().ToLower() + output.Remove(0, 1);
+        }
+
         /// <summary>
         /// Applies camel case, removes special characters.
         /// </summary>

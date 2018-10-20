@@ -34,9 +34,10 @@ namespace Dart2CSharpTranspiler.Writer
             var namespaceName = NameGenerator.GenerateNamespaceName(file.Folder, _namespaceRoot);
             var namespaceDeclartion = SyntaxFactory.NamespaceDeclaration(namespaceName)
                       .NormalizeWhitespace();
-            namespaceDeclartion = ReferenceGenerator.AddUsings(file, namespaceDeclartion);
-            namespaceDeclartion = ClassGenerator.AddClasses(file, namespaceDeclartion, Mixins); 
-            namespaceDeclartion = ClassGenerator.AddMixinInterfaces(file, namespaceDeclartion, Mixins);
+            namespaceDeclartion = ImportProcessor.AddUsings(file, namespaceDeclartion);
+
+            var classGenerator = new FileProcessor(file, namespaceDeclartion, Mixins);
+            namespaceDeclartion = classGenerator.AddFileInfoToNamespace();   
 
             return namespaceDeclartion;
         }

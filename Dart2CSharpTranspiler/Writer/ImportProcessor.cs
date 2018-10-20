@@ -7,9 +7,8 @@ using Transpiler;
 
 namespace Dart2CSharpTranspiler.Writer
 {
-    public static class ReferenceGenerator
+    public static class ImportProcessor
     {
-
         /// <summary>
         /// Adds usings to a <see cref="NamespaceDeclarationSyntax"/>.
         /// </summary>
@@ -32,7 +31,11 @@ namespace Dart2CSharpTranspiler.Writer
                 var packagedImport = Regex.Match(import.Name, "flutter\\/([a-z]+).dart");
                 if (packagedImport.Success)
                 {
-                    usings.Add(SyntaxFactory.UsingDirective(NameGenerator.GenerateNamespaceName(packagedImport.Groups.Last().Value)));
+                    var importName = packagedImport.Groups.Last().Value; 
+                    if (!RewriteRuleProvider.ShouldImportGetRemoved(importName))
+                    { 
+                        usings.Add(SyntaxFactory.UsingDirective(NameGenerator.GenerateNamespaceName(importName)));
+                    }
                 }
             }
 
@@ -40,7 +43,7 @@ namespace Dart2CSharpTranspiler.Writer
         }
 
         private static List<UsingDirectiveSyntax> GenerateDefaultUsings()
-        { 
+        {
             return new List<UsingDirectiveSyntax>
             {
                 SyntaxFactory.UsingDirective(NameGenerator.GenerateNamespaceName("System"))
