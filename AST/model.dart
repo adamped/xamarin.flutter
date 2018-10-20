@@ -27,7 +27,9 @@ class ResolvedElement {
   String name;
 }
 
-class ResolvedMethodElement extends ResolvedExecutableElement {}
+class ResolvedMethodElement extends ResolvedExecutableElement {
+  ResolvedMethodDeclaration methodDeclaration;
+}
 
 class ResolvedTypeDefiningElement extends ResolvedElement {
   ResolvedDartType type;
@@ -158,4 +160,28 @@ class ResolvedInterfaceType extends ResolvedParamaterizedType {
   List<ResolvedInterfaceType> mixins;
   ResolvedInterfaceType superclass;
   List<ResolvedInterfaceType> superclassConstraints;
+}
+
+class ResolvedMethodDeclaration {
+  ResolvedFunctionBody body;
+}
+
+class ResolvedFunctionBody extends ResolvedAstNode {
+
+}
+
+class ResolvedAstNode
+{
+   ResolvedToken beginToken;
+}
+
+class ResolvedToken
+{
+  ResolvedToken next;
+  int kind;
+  String lexeme;
+  bool isKeyword;
+  bool isKeywordOrIdentifier;
+  bool isModifier;
+  bool isOperator;
 }

@@ -9,6 +9,8 @@ namespace Dart2CSharpTranspiler.Dart
     {
         public List<ClassElement> enums;
         public List<ClassElement> types;
+        public List<PropertyAccessorElement> accessors;
+        public List<FunctionElement> functions;
     }
 
     public class Element
@@ -34,9 +36,15 @@ namespace Dart2CSharpTranspiler.Dart
         public String name;
     }
 
-    public class MethodElement : ExecutableElement { }
+    public class MethodElement : ExecutableElement
+    {
+        public MethodDeclaration methodDeclaration;
+    }
 
-    public class TypeDefiningElement : Element { }
+    public class TypeDefiningElement : Element
+    {
+        public DartType type;
+    }
 
     public class ExecutableElement : FunctionTypeElement
     {
@@ -73,11 +81,57 @@ namespace Dart2CSharpTranspiler.Dart
         public bool? hasNonFinalField;
         public bool? hasReferenceToSuper;
         public bool? hasStaticMember;
+
+        public List<PropertyAccessorElement> accessors;
+        public InterfaceType supertype;
+        public List<ConstructorElement> constructors;
+        public List<InterfaceType> allSupertypes;
+        public List<InterfaceType> superclassConstraints;
+
+        public List<FieldElement> fields;
+    }
+
+    public class FieldElement : PropertyInducingElement
+    {
+        public bool? isEnumConstant;
+    }
+
+    public class PropertyInducingElement : VariableElement
+    {
+        public PropertyAccessorElement getter;
+        public PropertyAccessorElement setter;
+    }
+
+    public class PropertyAccessorElement : ExecutableElement
+    {
+        public bool? isGetter;
+        public bool? isSetter;
+    }
+
+    public class VariableElement
+    {
+        public Object constantValue;
+        public bool? hasImplicitType;
+        public FunctionElement initializer;
+        public bool? isConst;
+        public bool? isFinal;
+        public bool? isStatic;
+        public DartType type;
     }
 
     public class DartType
     {
         public String displayName;
+
+        public bool? isBottom;
+        public bool? isDartAsyncFuture;
+        public bool? isDartAsyncFutureOr;
+        public bool? isDartCoreFunction;
+        public bool? isDartCoreNull;
+        public bool? isDynamic;
+        public bool? isObject;
+        public bool? isUndefined;
+        public bool? isVoid;
     }
 
     public class FunctionType : DartType { }
@@ -91,5 +145,71 @@ namespace Dart2CSharpTranspiler.Dart
         public bool? isOptional;
         public bool? isOptionalPositional;
         public bool? isPositional;
+    }
+
+    public class FunctionElement : ExecutableElement
+    {
+        public bool? isEntryPoint;
+    }
+
+    public class ParamaterizedType : DartType
+    {
+        public List<DartType> typeArguments;
+        public List<TypeParameterElement> typeParameters;
+    }
+
+    public class TypeParameterElement : TypeDefiningElement
+    {
+        public DartType bound;
+    }
+
+    public class TypeParameterType : DartType
+    {
+        public DartType type;
+    }
+
+    public class ConstructorElement : ExecutableElement
+    {
+        public bool? isConst;
+        public bool? isDefaultConstructor;
+        public bool? isFactory;
+    }
+
+    public class InterfaceType : ParamaterizedType
+    {
+        public List<PropertyAccessorElement> accessors;
+        public List<ConstructorElement> constructors;
+        //ClassElement element;
+        public List<InterfaceType> interfaces;
+        public List<MethodElement> methods;
+        public List<InterfaceType> mixins;
+        public InterfaceType superclass;
+        public List<InterfaceType> superclassConstraints;
+    }
+
+    public class MethodDeclaration
+    {
+        public FunctionBody body;
+    }
+
+    public class FunctionBody : AstNode
+    {
+
+    }
+
+    public class AstNode
+    {
+        public Token beginToken;
+    }
+
+    public class Token
+    {
+        public Token next;
+        public int kind;
+        public String lexeme;
+        public bool? isKeyword;
+        public bool? isKeywordOrIdentifier;
+        public bool? isModifier;
+        public bool? isOperator;
     }
 }

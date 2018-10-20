@@ -34,22 +34,7 @@ namespace Dart2CSharpTranspiler
             Console.ReadLine();
         }
 
-        private static Dictionary<string, DartClass> ClassList { get; set; }
-
-        public static DartClass GetDartClass(string name)
-        {
-            if (name.Contains("<"))
-                name = name.Substring(0, name.IndexOf("<")) + "<>";
-            var baseClass = ClassList.SingleOrDefault(x => x.Key.EndsWith($".{name}")).Value;
-
-            if (baseClass == null)
-            {
-                // Attempt a Generic incase it was an @optionalTypeArgs
-                baseClass = ClassList.Single(x => x.Key.EndsWith($".{name}<>")).Value;
-            }
-
-            return baseClass;
-        }
+   
 
         private static DartModel BuildDartModel(string source)
         {
@@ -63,7 +48,8 @@ namespace Dart2CSharpTranspiler
                 {
                     // Create Model from Dart File
                     var sourceFileName = sourceFilePath.Replace(sourceDirectory, "").TrimStart('\\');
-                    var unit = JsonConvert.DeserializeObject<CompilationUnit>(File.ReadAllText(sourceFilePath));
+                    var file = File.ReadAllText(sourceFilePath);
+                    var unit = JsonConvert.DeserializeObject<CompilationUnit>(file);
 
                     if (model.ContainsKey(folder))
                         model[folder].Add(unit);
@@ -99,8 +85,8 @@ namespace Dart2CSharpTranspiler
                 foreach (var file in folder.Value)
                 {
 
-                  //  Create CSharp File
-                   var namespaceDeclaration = writer.GenerateFileSyntaxTree(file);
+                    //  Create CSharp File
+                    var namespaceDeclaration = writer.GenerateFileSyntaxTree(file);
                     var code = namespaceDeclaration
                         .NormalizeWhitespace()
                         .ToFullString();

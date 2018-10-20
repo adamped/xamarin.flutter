@@ -1,4 +1,5 @@
 import 'package:analyzer/analyzer.dart';
+import 'package:analyzer/dart/ast/token.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:analyzer/file_system/physical_file_system.dart';
 import 'dart:io';
@@ -146,6 +147,8 @@ List<ResolvedFieldElement> convertFields(List<FieldElement> elements) {
     var field = new ResolvedFieldElement()
       ..isEnumConstant = item.isEnumConstant;
 
+    convertPropertyInducingElement(field, item);
+
     list.add(field);
   }
 
@@ -153,10 +156,10 @@ List<ResolvedFieldElement> convertFields(List<FieldElement> elements) {
 }
 
 ResolvedPropertyInducingElement convertPropertyInducingElement(
-    PropertyInducingElement element) {
+    ResolvedFieldElement item, PropertyInducingElement element) {
   if (element == null) return null;
 
-  var item = new ResolvedPropertyInducingElement()
+  item
     ..getter = convertAccessor(element.getter)
     ..setter = convertAccessor(element.setter);
 
@@ -169,7 +172,7 @@ ResolvedVariableElement convertResolvedVariableElement(
     ResolvedPropertyInducingElement item, VariableElement element) {
   if (element == null) return item;
   item
-    ..constantValue = element.constantValue
+    //..constantValue = element.constantValue
     ..hasImplicitType = element.hasImplicitType
     ..isConst = element.isConst
     ..isFinal = element.isFinal
@@ -245,7 +248,8 @@ List<ResolvedMethodElement> methodList(List<MethodElement> methods) {
       ..isGenerator = item.isGenerator
       ..isOperator = item.isOperator
       ..isStatic = item.isStatic
-      ..isSynchronous = item.isSynchronous;
+      ..isSynchronous = item.isSynchronous
+      ..methodDeclaration = getMethodDeclaration(item);
 
     convertFunctionTypedElement(element, item);
 
@@ -253,6 +257,39 @@ List<ResolvedMethodElement> methodList(List<MethodElement> methods) {
   }
 
   return list;
+}
+
+ResolvedMethodDeclaration getMethodDeclaration(MethodElement item) {
+  var method = new ResolvedMethodDeclaration();
+
+  var resolved = item.computeNode();
+
+  method.body = getFunctionBody(resolved);
+
+  return method;
+}
+
+ResolvedFunctionBody getFunctionBody(MethodDeclaration node) {
+  if (node == null) return null;
+
+  var body = new ResolvedFunctionBody();
+
+  body.beginToken = getToken(node.beginToken);
+
+  return body;
+}
+
+ResolvedToken getToken(Token token) {
+  var t = new ResolvedToken()
+    ..kind = token.kind
+    ..lexeme = token.lexeme
+    ..isKeyword = token.isKeyword
+    ..isKeywordOrIdentifier = token.isKeywordOrIdentifier
+    ..isOperator = token.isOperator;
+
+  if (token.next != null && !token.isEof) t.next = getToken(token.next);
+
+  return t;
 }
 
 List<ResolvedParameterElement> parameterList(
