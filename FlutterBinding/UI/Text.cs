@@ -654,6 +654,7 @@ locale,
 
 
 
+
 ),
        _fontFamily = fontFamily,
        _fontSize = fontSize,
@@ -1031,10 +1032,10 @@ public class Paragraph : NativeFieldWrapperClass2
     //@pragma('vm:entry-point')
     Paragraph() { }
 
-  /// The amount of horizontal space this paragraph occupies.
-  ///
-  /// Valid only after [layout] has been called.
-  double get width native 'Paragraph_width';
+    /// The amount of horizontal space this paragraph occupies.
+    ///
+    /// Valid only after [layout] has been called.
+    double get width native 'Paragraph_width';
 
     /// The amount of vertical space this paragraph occupies.
     ///
@@ -1074,7 +1075,8 @@ public class Paragraph : NativeFieldWrapperClass2
     ///
     /// The [ParagraphConstraints] control how wide the text is allowed to be.
     public void layout(ParagraphConstraints constraints) => _layout(constraints.width);
-    void _layout(double width) {
+    void _layout(double width)
+    {
         // native 'Paragraph_layout';
     }
 
@@ -1087,7 +1089,7 @@ public class Paragraph : NativeFieldWrapperClass2
     /// Returns the text position closest to the given offset.
     TextPosition getPositionForOffset(Offset offset)
     {
-        final List<int> encoded = _getPositionForOffset(offset.dx, offset.dy);
+        List<int> encoded = _getPositionForOffset(offset.dx, offset.dy);
         return new TextPosition(offset: encoded[0], affinity: TextAffinity.values[encoded[1]]);
     }
     List<int> _getPositionForOffset(double dx, double dy)
@@ -1112,7 +1114,7 @@ public class Paragraph : NativeFieldWrapperClass2
     {
         // native 'Paragraph_paint';
     }
-    }
+}
 
 /// Builds a [Paragraph] containing text with the given styling information.
 ///
@@ -1151,18 +1153,25 @@ public class ParagraphBuilder : NativeFieldWrapperClass2
     /// added to the paragraph is affected by all the styles in the stack. Calling
     /// [pop] removes the topmost style in the stack, leaving the remaining styles
     /// in effect.
-    void pop() native 'ParagraphBuilder_pop';
-
-  /// Adds the given text to the paragraph.
-  ///
-  /// The text will be styled according to the current stack of text styles.
-  void addText(String text)
+    public void pop()
     {
-        final String error = _addText(text);
+        // native 'ParagraphBuilder_pop';
+    }
+
+    /// Adds the given text to the paragraph.
+    ///
+    /// The text will be styled according to the current stack of text styles.
+    public void addText(String text)
+    {
+        String error = _addText(text);
         if (error != null)
             throw new ArgumentException(error);
     }
-    String _addText(String text) native 'ParagraphBuilder_addText';
+    String _addText(String text)
+    {
+        // native 'ParagraphBuilder_addText';
+        return string.Empty; // Tmp to resolve build
+    }
 
   /// Applies the given paragraph style and returns a [Paragraph] containing the
   /// added text and associated styling.
