@@ -1,12 +1,13 @@
-﻿using System;
+﻿using FlutterBinding.UI;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace FlutterBinding.UI
 {
 
-/// How the pointer has changed since the last report.
-public enum PointerChange
+    /// How the pointer has changed since the last report.
+    public enum PointerChange
     {
         /// The input from the pointer is no longer directed towards this receiver.
         cancel,
@@ -224,7 +225,7 @@ public enum PointerChange
 }
 
 /// A sequence of reports about the state of pointers.
-class PointerDataPacket
+public class PointerDataPacket
 {
     /// Creates a packet of pointer data reports.
     const PointerDataPacket({ this.data: const <PointerData>[]
@@ -233,6 +234,6 @@ class PointerDataPacket
   /// Data about the individual pointers in this packet.
   ///
   /// This list might contain multiple pieces of data about the same pointer.
-  final List<PointerData> data;
+  readonly List<PointerData> data;
 }
 }

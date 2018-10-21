@@ -13,7 +13,7 @@ namespace FlutterBinding.UI
     {
         /// Creates a raster image representation of the current state of the scene.
         /// This is a slow operation that is performed on a background thread.
-        public Future<Image> toImage(int width, int height)
+        public Task<Image> toImage(int width, int height)
         {
             if (width <= 0 || height <= 0)
                 throw new Exception('Invalid image dimensions.');
@@ -60,9 +60,9 @@ namespace FlutterBinding.UI
         public void pushTransform(Float64List matrix4)
         {
             if (matrix4 == null)
-                throw new ArgumentError('"matrix4" argument cannot be null');
+                throw new ArgumentException('"matrix4" argument cannot be null');
             if (matrix4.length != 16)
-                throw new ArgumentError('"matrix4" must have 16 entries.');
+                throw new ArgumentException('"matrix4" must have 16 entries.');
             _pushTransform(matrix4);
         }
         void _pushTransform(Float64List matrix4)

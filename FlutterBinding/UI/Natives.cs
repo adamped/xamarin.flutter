@@ -4,7 +4,6 @@ using System.Text;
 
 namespace FlutterBinding.UI
 {
-    part of dart.ui;
 
 // Corelib 'print' implementation.
 void _print(dynamic arg)
@@ -22,7 +21,7 @@ void _print(dynamic arg)
 
     // A service protocol extension to schedule a frame to be rendered into the
     // window.
-    Future<developer.ServiceExtensionResponse> _scheduleFrame(
+    Task<developer.ServiceExtensionResponse> _scheduleFrame(
         String method,
         Map<String, String> parameters
         ) async {
@@ -34,7 +33,7 @@ void _print(dynamic arg)
   }));
 }
 
-@pragma('vm:entry-point')
+////@pragma('vm:entry-point')
 void _setupHooks()
 {
     assert(() {
@@ -64,9 +63,9 @@ Function _getCallbackFromHandle(int handle) native 'GetCallbackFromHandle';
 // Required for gen_snapshot to work correctly.
 int _isolateId;
 
-@pragma('vm:entry-point')
+////@pragma('vm:entry-point')
 Function _getPrintClosure() => _print;
-@pragma('vm:entry-point')
+////@pragma('vm:entry-point')
 Function _getScheduleMicrotaskClosure() => _scheduleMicrotask;
 
 // Though the "main" symbol is not included in any of the libraries imported
@@ -74,6 +73,6 @@ Function _getScheduleMicrotaskClosure() => _scheduleMicrotask;
 // symbol is only necessary for precompilation. It is marked as a stanalone
 // entry point into the VM. This prevents the precompiler from tree shaking
 // away "main".
-@pragma('vm:entry-point')
+////@pragma('vm:entry-point')
 Function _getMainClosure() => main;
 }

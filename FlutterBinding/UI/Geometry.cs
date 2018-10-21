@@ -416,7 +416,7 @@ public class Size : OffsetBase
             return new Offset(width - other.width, height - other.height);
         if (other is Offset)
             return new Size(width - other.dx, height - other.dy);
-        throw new ArgumentError(other);
+        throw new ArgumentException(other);
     }
 
     /// Binary addition operator for adding an [Offset] to a [Size].
@@ -1676,37 +1676,37 @@ public class RSTransform
     /// (which are computed each time this constructor is called) and reuse them
     /// over multiple [RSTransform] objects, it may be more efficient to directly
     /// use the more direct [new RSTransform] constructor instead.
-    factory RSTransform.fromComponents({
-        double rotation,
-      double scale,
-      double anchorX,
-      double anchorY,
-      double translateX,
-      double translateY
-    }) {
-    final double scos = math.cos(rotation) * scale;
-    final double ssin = math.sin(rotation) * scale;
-    final double tx = translateX + -scos * anchorX + ssin * anchorY;
-    final double ty = translateY + -ssin * anchorX - scos * anchorY;
-    return new RSTransform(scos, ssin, tx, ty);
-}
+    factory RSTransform.fromComponents(double rotation = 0.0,
+      double scale = 0.0,
+      double anchorX = 0.0,
+      double anchorY = 0.0,
+      double translateX = 0.0,
+      double translateY = 0.0
+    )
+    {
+        double scos = math.cos(rotation) * scale;
+        double ssin = math.sin(rotation) * scale;
+        double tx = translateX + -scos * anchorX + ssin * anchorY;
+        double ty = translateY + -ssin * anchorX - scos * anchorY;
+        return new RSTransform(scos, ssin, tx, ty);
+    }
 
-final Float32List _value = new Float32List(4);
+    readonly Float32List _value = new Float32List(4);
 
-/// The cosine of the rotation multiplied by the scale factor.
-double get scos => _value[0];
+    /// The cosine of the rotation multiplied by the scale factor.
+    public double scos => _value[0];
 
-  /// The sine of the rotation multiplied by that same scale factor.
-  double get ssin => _value[1];
+    /// The sine of the rotation multiplied by that same scale factor.
+    public double ssin => _value[1];
 
-  /// The x coordinate of the translation, minus [scos] multiplied by the
-  /// x-coordinate of the rotation point, plus [ssin] multiplied by the
-  /// y-coordinate of the rotation point.
-  double get tx => _value[2];
+    /// The x coordinate of the translation, minus [scos] multiplied by the
+    /// x-coordinate of the rotation point, plus [ssin] multiplied by the
+    /// y-coordinate of the rotation point.
+    public double tx => _value[2];
 
-  /// The y coordinate of the translation, minus [ssin] multiplied by the
-  /// x-coordinate of the rotation point, minus [scos] multiplied by the
-  /// y-coordinate of the rotation point.
-  double get ty => _value[3];
+    /// The y coordinate of the translation, minus [ssin] multiplied by the
+    /// x-coordinate of the rotation point, minus [scos] multiplied by the
+    /// y-coordinate of the rotation point.
+    public double ty => _value[3];
 }
 }

@@ -15,7 +15,7 @@ String _decodeUTF8(ByteData message)
         return message != null ? json.decode(message) : null;
     }
 
-    @pragma('vm:entry-point')
+    //@pragma('vm:entry-point')
 void _updateWindowMetrics(double devicePixelRatio,
                           double width,
                           double height,
@@ -44,14 +44,14 @@ void _updateWindowMetrics(double devicePixelRatio,
         _invoke(window.onMetricsChanged, window._onMetricsChangedZone);
     }
 
-    typedef _LocaleClosure = String Function();
+   delegate string _LocaleClosure();
 
     String _localeClosure() => window.locale.toString();
 
-    @pragma('vm:entry-point')
+    //@pragma('vm:entry-point')
 _LocaleClosure _getLocaleClosure() => _localeClosure;
 
-    @pragma('vm:entry-point')
+    //@pragma('vm:entry-point')
 void _updateLocales(List<String> locales)
     {
         const int stringsPerLocale = 4;
@@ -65,7 +65,7 @@ void _updateLocales(List<String> locales)
         _invoke(window.onLocaleChanged, window._onLocaleChangedZone);
     }
 
-    @pragma('vm:entry-point')
+    //@pragma('vm:entry-point')
 void _updateUserSettingsData(String jsonData)
     {
         final Map<String, dynamic> data = json.decode(jsonData);
@@ -84,14 +84,14 @@ void _updateUserSettingsData(String jsonData)
         window._alwaysUse24HourFormat = alwaysUse24HourFormat;
     }
 
-    @pragma('vm:entry-point')
+    ////@pragma('vm:entry-point')
 void _updateSemanticsEnabled(bool enabled)
     {
         window._semanticsEnabled = enabled;
         _invoke(window.onSemanticsEnabledChanged, window._onSemanticsEnabledChangedZone);
     }
 
-    @pragma('vm:entry-point')
+    //@pragma('vm:entry-point')
 void _updateAccessibilityFeatures(int values)
     {
         final AccessibilityFeatures newFeatures = new AccessibilityFeatures._(values);
@@ -101,7 +101,7 @@ void _updateAccessibilityFeatures(int values)
         _invoke(window.onAccessibilityFeaturesChanged, window._onAccessibilityFlagsChangedZone);
     }
 
-    @pragma('vm:entry-point')
+    //@pragma('vm:entry-point')
 void _dispatchPlatformMessage(String name, ByteData data, int responseId)
     {
         if (window.onPlatformMessage != null)
@@ -122,14 +122,14 @@ void _dispatchPlatformMessage(String name, ByteData data, int responseId)
         }
     }
 
-    @pragma('vm:entry-point')
+    //@pragma('vm:entry-point')
 void _dispatchPointerDataPacket(ByteData packet)
     {
         if (window.onPointerDataPacket != null)
             _invoke1<PointerDataPacket>(window.onPointerDataPacket, window._onPointerDataPacketZone, _unpackPointerDataPacket(packet));
     }
 
-    @pragma('vm:entry-point')
+    //@pragma('vm:entry-point')
 void _dispatchSemanticsAction(int id, int action, ByteData args)
     {
         _invoke3<int, SemanticsAction, ByteData>(
@@ -142,13 +142,13 @@ void _dispatchSemanticsAction(int id, int action, ByteData args)
         );
     }
 
-    @pragma('vm:entry-point')
+    //@pragma('vm:entry-point')
 void _beginFrame(int microseconds)
     {
         _invoke1<Duration>(window.onBeginFrame, window._onBeginFrameZone, new Duration(microseconds: microseconds));
     }
 
-    @pragma('vm:entry-point')
+    //@pragma('vm:entry-point')
 void _drawFrame()
     {
         _invoke(window.onDrawFrame, window._onDrawFrameZone);
@@ -238,9 +238,9 @@ void _drawFrame()
     {
         const int kStride = Int64List.bytesPerElement;
         const int kBytesPerPointerData = _kPointerDataFieldCount * kStride;
-        final int length = packet.lengthInBytes ~/ kBytesPerPointerData;
-        assert(length * kBytesPerPointerData == packet.lengthInBytes);
-        final List<PointerData> data = new List<PointerData>(length);
+        int length = packet.lengthInBytes ~/ kBytesPerPointerData;
+        //assert(length * kBytesPerPointerData == packet.lengthInBytes);
+        List<PointerData> data = new List<PointerData>(length);
         for (int i = 0; i < length; ++i)
         {
             int offset = i * _kPointerDataFieldCount;
@@ -265,7 +265,7 @@ void _drawFrame()
               orientation: packet.getFloat64(kStride * offset++, _kFakeHostEndian),
               tilt: packet.getFloat64(kStride * offset++, _kFakeHostEndian)
             );
-            assert(offset == (i + 1) * _kPointerDataFieldCount);
+            //assert(offset == (i + 1) * _kPointerDataFieldCount);
         }
         return new PointerDataPacket(data: data);
     }
