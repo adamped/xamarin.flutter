@@ -4,7 +4,7 @@ using System.Text;
 
 namespace FlutterBinding.UI
 {
-    class PictureRecorder
+    public class NativeFieldWrapperClass2
     {
     }
 }
