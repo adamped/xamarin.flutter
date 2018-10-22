@@ -597,14 +597,18 @@ namespace FlutterBinding.UI
     {
         private Rect() { }
 
-        /// Construct a rectangle from its left, top, right, and bottom edges.
-        public Rect fromLTRB(double left, double top, double right, double bottom)
+        public Rect(double one, double two, double three, double four)
         {
-            _value
-              ..[0] = left
-              ..[1] = top
-              ..[2] = right
-              ..[3] = bottom;
+            _value[0] = one;
+            _value[1] = two;
+            _value[2] = three;
+            _value[3] = four;
+        }
+
+        /// Construct a rectangle from its left, top, right, and bottom edges.
+        public static Rect fromLTRB(double left, double top, double right, double bottom)
+        {
+            return new Rect(left, top, right, bottom);
         }
 
         /// Construct a rectangle from its left and top edges, its width, and its
@@ -645,7 +649,7 @@ namespace FlutterBinding.UI
         }
 
         const int _kDataSize = 4;
-        readonly List<float> _value = new Float32List(_kDataSize);
+        readonly List<double> _value = new List<double>(_kDataSize);
 
         /// The offset of the left edge of this rectangle from the x axis.
         public double left => _value[0];
@@ -672,283 +676,280 @@ namespace FlutterBinding.UI
         /// A rectangle with left, top, right, and bottom edges all at zero.
         public static readonly Rect zero = new Rect._();
 
-        public static const double _giantScalar = 1.0E+9; // matches kGiantRect from default_layer_builder.cc
+        public const double _giantScalar = 1.0E+9; // matches kGiantRect from default_layer_builder.cc
 
         /// A rectangle that covers the entire coordinate space.
         ///
         /// This covers the space from -1e9,-1e9 to 1e9,1e9.
         /// This is the space over which graphics operations are valid.
-        public static readonly Rect largest = new Rect.fromLTRB(-_giantScalar, -_giantScalar, _giantScalar, _giantScalar);
+        public static readonly Rect largest = Rect.fromLTRB(-_giantScalar, -_giantScalar, _giantScalar, _giantScalar);
 
         /// Whether any of the coordinates of this rectangle are equal to positive infinity.
         // included for consistency with Offset and Size
-        public bool isInfinite
+        public bool isInfinite => left >= double.PositiveInfinity
+                                || top >= double.PositiveInfinity
+                                || right >= double.PositiveInfinity
+                                || bottom >= double.PositiveInfinity;
+
+
+        /// Whether all coordinates of this rectangle are finite.
+        public bool isFinite => left.isFinite && top.isFinite && right.isFinite && bottom.isFinite;
+
+        /// Whether this rectangle encloses a non-zero area. Negative areas are
+        /// considered empty.
+        public bool isEmpty => left >= right || top >= bottom;
+
+        /// Returns a new rectangle translated by the given offset.
+        ///
+        /// To translate a rectangle by separate x and y components rather than by an
+        /// [Offset], consider [translate].
+        public Rect shift(Offset offset)
         {
-    return left >= double.infinity
-        || top >= double.infinity
-        || right >= double.infinity
-        || bottom >= double.infinity;
-    }
-
-    /// Whether all coordinates of this rectangle are finite.
-    public bool isFinite => left.isFinite && top.isFinite && right.isFinite && bottom.isFinite;
-
-    /// Whether this rectangle encloses a non-zero area. Negative areas are
-    /// considered empty.
-    public bool isEmpty => left >= right || top >= bottom;
-
-    /// Returns a new rectangle translated by the given offset.
-    ///
-    /// To translate a rectangle by separate x and y components rather than by an
-    /// [Offset], consider [translate].
-    public Rect shift(Offset offset)
-    {
-        return new Rect.fromLTRB(left + offset.dx, top + offset.dy, right + offset.dx, bottom + offset.dy);
-    }
-
-    /// Returns a new rectangle with translateX added to the x components and
-    /// translateY added to the y components.
-    ///
-    /// To translate a rectangle by an [Offset] rather than by separate x and y
-    /// components, consider [shift].
-    public Rect translate(double translateX, double translateY)
-    {
-        return new Rect.fromLTRB(left + translateX, top + translateY, right + translateX, bottom + translateY);
-    }
-
-    /// Returns a new rectangle with edges moved outwards by the given delta.
-    public Rect inflate(double delta)
-    {
-        return new Rect.fromLTRB(left - delta, top - delta, right + delta, bottom + delta);
-    }
-
-    /// Returns a new rectangle with edges moved inwards by the given delta.
-    public Rect deflate(double delta) => inflate(-delta);
-
-    /// Returns a new rectangle that is the intersection of the given
-    /// rectangle and this rectangle. The two rectangles must overlap
-    /// for this to be meaningful. If the two rectangles do not overlap,
-    /// then the resulting Rect will have a negative width or height.
-    public Rect intersect(Rect other)
-    {
-        return new Rect.fromLTRB(
-          math.max(left, other.left),
-          math.max(top, other.top),
-          math.min(right, other.right),
-          math.min(bottom, other.bottom)
-        );
-    }
-
-    /// Returns a new rectangle which is the bounding box containing this
-    /// rectangle and the given rectangle.
-    public Rect expandToInclude(Rect other)
-    {
-        return new Rect.fromLTRB(
-            math.min(left, other.left),
-            math.min(top, other.top),
-            math.max(right, other.right),
-            math.max(bottom, other.bottom),
-
-
-        );
-    }
-
-    /// Whether `other` has a nonzero area of overlap with this rectangle.
-    public bool overlaps(Rect other)
-    {
-        if (right <= other.left || other.right <= left)
-            return false;
-        if (bottom <= other.top || other.bottom <= top)
-            return false;
-        return true;
-    }
-
-    /// The lesser of the magnitudes of the [width] and the [height] of this
-    /// rectangle.
-    public double shortestSide => math.min(width.abs(), height.abs());
-
-    /// The greater of the magnitudes of the [width] and the [height] of this
-    /// rectangle.
-    public double longestSide => math.max(width.abs(), height.abs());
-
-    /// The offset to the intersection of the top and left edges of this rectangle.
-    ///
-    /// See also [Size.topLeft].
-    public Offset topLeft => new Offset(left, top);
-
-    /// The offset to the center of the top edge of this rectangle.
-    ///
-    /// See also [Size.topCenter].
-    public Offset topCenter => new Offset(left + width / 2.0, top);
-
-    /// The offset to the intersection of the top and right edges of this rectangle.
-    ///
-    /// See also [Size.topRight].
-    public Offset topRight => new Offset(right, top);
-
-    /// The offset to the center of the left edge of this rectangle.
-    ///
-    /// See also [Size.centerLeft].
-    public Offset centerLeft => new Offset(left, top + height / 2.0);
-
-    /// The offset to the point halfway between the left and right and the top and
-    /// bottom edges of this rectangle.
-    ///
-    /// See also [Size.center].
-    public Offset center => new Offset(left + width / 2.0, top + height / 2.0);
-
-    /// The offset to the center of the right edge of this rectangle.
-    ///
-    /// See also [Size.centerLeft].
-    public Offset centerRight => new Offset(right, top + height / 2.0);
-
-    /// The offset to the intersection of the bottom and left edges of this rectangle.
-    ///
-    /// See also [Size.bottomLeft].
-    public Offset bottomLeft => new Offset(left, bottom);
-
-    /// The offset to the center of the bottom edge of this rectangle.
-    ///
-    /// See also [Size.bottomLeft].
-    public Offset bottomCenter => new Offset(left + width / 2.0, bottom);
-
-    /// The offset to the intersection of the bottom and right edges of this rectangle.
-    ///
-    /// See also [Size.bottomRight].
-    public Offset bottomRight => new Offset(right, bottom);
-
-    /// Whether the point specified by the given offset (which is assumed to be
-    /// relative to the origin) lies between the left and right and the top and
-    /// bottom edges of this rectangle.
-    ///
-    /// Rectangles include their top and left edges but exclude their bottom and
-    /// right edges.
-    public bool contains(Offset offset)
-    {
-        return offset.dx >= left && offset.dx < right && offset.dy >= top && offset.dy < bottom;
-    }
-
-    /// Linearly interpolate between two rectangles.
-    ///
-    /// If either rect is null, [Rect.zero] is used as a substitute.
-    ///
-    /// The `t` argument represents position on the timeline, with 0.0 meaning
-    /// that the interpolation has not started, returning `a` (or something
-    /// equivalent to `a`), 1.0 meaning that the interpolation has finished,
-    /// returning `b` (or something equivalent to `b`), and values in between
-    /// meaning that the interpolation is at the relevant point on the timeline
-    /// between `a` and `b`. The interpolation can be extrapolated beyond 0.0 and
-    /// 1.0, so negative values and values greater than 1.0 are valid (and can
-    /// easily be generated by curves such as [Curves.elasticInOut]).
-    ///
-    /// Values for `t` are usually obtained from an [Animation<double>], such as
-    /// an [AnimationController].
-    public static Rect lerp(Rect a, Rect b, double t)
-    {
-        assert(t != null);
-        if (a == null && b == null)
-            return null;
-        if (a == null)
-            return new Rect.fromLTRB(b.left * t, b.top * t, b.right * t, b.bottom * t);
-        if (b == null)
-        {
-            final double k = 1.0 - t;
-            return new Rect.fromLTRB(a.left * k, a.top * k, a.right * k, a.bottom * k);
+            return new Rect.fromLTRB(left + offset.dx, top + offset.dy, right + offset.dx, bottom + offset.dy);
         }
-        return new Rect.fromLTRB(
-          lerpDouble(a.left, b.left, t),
-          lerpDouble(a.top, b.top, t),
-          lerpDouble(a.right, b.right, t),
-          lerpDouble(a.bottom, b.bottom, t),
 
-
-        );
-    }
-
-    public bool operator ==(dynamic other)
-    {
-        if (identical(this, other))
-            return true;
-        if (runtimeType != other.runtimeType)
-            return false;
-        final Rect typedOther = other;
-        for (int i = 0; i < _kDataSize; i += 1)
+        /// Returns a new rectangle with translateX added to the x components and
+        /// translateY added to the y components.
+        ///
+        /// To translate a rectangle by an [Offset] rather than by separate x and y
+        /// components, consider [shift].
+        public Rect translate(double translateX, double translateY)
         {
-            if (_value[i] != typedOther._value[i])
+            return new Rect.fromLTRB(left + translateX, top + translateY, right + translateX, bottom + translateY);
+        }
+
+        /// Returns a new rectangle with edges moved outwards by the given delta.
+        public Rect inflate(double delta)
+        {
+            return new Rect.fromLTRB(left - delta, top - delta, right + delta, bottom + delta);
+        }
+
+        /// Returns a new rectangle with edges moved inwards by the given delta.
+        public Rect deflate(double delta) => inflate(-delta);
+
+        /// Returns a new rectangle that is the intersection of the given
+        /// rectangle and this rectangle. The two rectangles must overlap
+        /// for this to be meaningful. If the two rectangles do not overlap,
+        /// then the resulting Rect will have a negative width or height.
+        public Rect intersect(Rect other)
+        {
+            return new Rect.fromLTRB(
+              math.max(left, other.left),
+              math.max(top, other.top),
+              math.min(right, other.right),
+              math.min(bottom, other.bottom)
+            );
+        }
+
+        /// Returns a new rectangle which is the bounding box containing this
+        /// rectangle and the given rectangle.
+        public Rect expandToInclude(Rect other)
+        {
+            return new Rect.fromLTRB(
+                math.min(left, other.left),
+                math.min(top, other.top),
+                math.max(right, other.right),
+                math.max(bottom, other.bottom));
+        }
+
+        /// Whether `other` has a nonzero area of overlap with this rectangle.
+        public bool overlaps(Rect other)
+        {
+            if (right <= other.left || other.right <= left)
                 return false;
+            if (bottom <= other.top || other.bottom <= top)
+                return false;
+            return true;
         }
-        return true;
+
+        /// The lesser of the magnitudes of the [width] and the [height] of this
+        /// rectangle.
+        public double shortestSide => math.min(width.abs(), height.abs());
+
+        /// The greater of the magnitudes of the [width] and the [height] of this
+        /// rectangle.
+        public double longestSide => math.max(width.abs(), height.abs());
+
+        /// The offset to the intersection of the top and left edges of this rectangle.
+        ///
+        /// See also [Size.topLeft].
+        public Offset topLeft => new Offset(left, top);
+
+        /// The offset to the center of the top edge of this rectangle.
+        ///
+        /// See also [Size.topCenter].
+        public Offset topCenter => new Offset(left + width / 2.0, top);
+
+        /// The offset to the intersection of the top and right edges of this rectangle.
+        ///
+        /// See also [Size.topRight].
+        public Offset topRight => new Offset(right, top);
+
+        /// The offset to the center of the left edge of this rectangle.
+        ///
+        /// See also [Size.centerLeft].
+        public Offset centerLeft => new Offset(left, top + height / 2.0);
+
+        /// The offset to the point halfway between the left and right and the top and
+        /// bottom edges of this rectangle.
+        ///
+        /// See also [Size.center].
+        public Offset center => new Offset(left + width / 2.0, top + height / 2.0);
+
+        /// The offset to the center of the right edge of this rectangle.
+        ///
+        /// See also [Size.centerLeft].
+        public Offset centerRight => new Offset(right, top + height / 2.0);
+
+        /// The offset to the intersection of the bottom and left edges of this rectangle.
+        ///
+        /// See also [Size.bottomLeft].
+        public Offset bottomLeft => new Offset(left, bottom);
+
+        /// The offset to the center of the bottom edge of this rectangle.
+        ///
+        /// See also [Size.bottomLeft].
+        public Offset bottomCenter => new Offset(left + width / 2.0, bottom);
+
+        /// The offset to the intersection of the bottom and right edges of this rectangle.
+        ///
+        /// See also [Size.bottomRight].
+        public Offset bottomRight => new Offset(right, bottom);
+
+        /// Whether the point specified by the given offset (which is assumed to be
+        /// relative to the origin) lies between the left and right and the top and
+        /// bottom edges of this rectangle.
+        ///
+        /// Rectangles include their top and left edges but exclude their bottom and
+        /// right edges.
+        public bool contains(Offset offset)
+        {
+            return offset.dx >= left && offset.dx < right && offset.dy >= top && offset.dy < bottom;
+        }
+
+        /// Linearly interpolate between two rectangles.
+        ///
+        /// If either rect is null, [Rect.zero] is used as a substitute.
+        ///
+        /// The `t` argument represents position on the timeline, with 0.0 meaning
+        /// that the interpolation has not started, returning `a` (or something
+        /// equivalent to `a`), 1.0 meaning that the interpolation has finished,
+        /// returning `b` (or something equivalent to `b`), and values in between
+        /// meaning that the interpolation is at the relevant point on the timeline
+        /// between `a` and `b`. The interpolation can be extrapolated beyond 0.0 and
+        /// 1.0, so negative values and values greater than 1.0 are valid (and can
+        /// easily be generated by curves such as [Curves.elasticInOut]).
+        ///
+        /// Values for `t` are usually obtained from an [Animation<double>], such as
+        /// an [AnimationController].
+        public static Rect lerp(Rect a, Rect b, double t)
+        {
+            assert(t != null);
+            if (a == null && b == null)
+                return null;
+            if (a == null)
+                return new Rect.fromLTRB(b.left * t, b.top * t, b.right * t, b.bottom * t);
+            if (b == null)
+            {
+                final double k = 1.0 - t;
+                return new Rect.fromLTRB(a.left * k, a.top * k, a.right * k, a.bottom * k);
+            }
+            return new Rect.fromLTRB(
+              lerpDouble(a.left, b.left, t),
+              lerpDouble(a.top, b.top, t),
+              lerpDouble(a.right, b.right, t),
+              lerpDouble(a.bottom, b.bottom, t),
+
+
+
+
+            );
+        }
+
+        public bool operator ==(dynamic other)
+        {
+            if (identical(this, other))
+                return true;
+            if (runtimeType != other.runtimeType)
+                return false;
+            final Rect typedOther = other;
+            for (int i = 0; i < _kDataSize; i += 1)
+            {
+                if (_value[i] != typedOther._value[i])
+                    return false;
+            }
+            return true;
+        }
+
+        public int hashCode => hashList(_value);
+
+        String toString() => 'Rect.fromLTRB(${left.toStringAsFixed(1)}, ${top.toStringAsFixed(1)}, ${right.toStringAsFixed(1)}, ${bottom.toStringAsFixed(1)})';
     }
 
-    public int hashCode => hashList(_value);
+    /// A radius for either circular or elliptical shapes.
+    public class Radius
+    {
+        /// Constructs a circular radius. [x] and [y] will have the same radius value.
+        public const Radius.circular(double radius) : this.elliptical(radius, radius);
 
-    String toString() => 'Rect.fromLTRB(${left.toStringAsFixed(1)}, ${top.toStringAsFixed(1)}, ${right.toStringAsFixed(1)}, ${bottom.toStringAsFixed(1)})';
-}
+        /// Constructs an elliptical radius with the given radii.
+        public const Radius.elliptical(this.x, this.y);
 
-/// A radius for either circular or elliptical shapes.
-public class Radius
-{
-    /// Constructs a circular radius. [x] and [y] will have the same radius value.
-    public const Radius.circular(double radius) : this.elliptical(radius, radius);
+        /// The radius value on the horizontal axis.
+        public readonly double x;
 
-    /// Constructs an elliptical radius with the given radii.
-    public const Radius.elliptical(this.x, this.y);
+        /// The radius value on the vertical axis.
+        public readonly double y;
 
-    /// The radius value on the horizontal axis.
-    public readonly double x;
+        /// A radius with [x] and [y] values set to zero.
+        ///
+        /// You can use [Radius.zero] with [RRect] to have right-angle corners.
+        public static const Radius zero = const Radius.circular(0.0);
 
-    /// The radius value on the vertical axis.
-    public readonly double y;
+        /// Unary negation operator.
+        ///
+        /// Returns a Radius with the distances negated.
+        ///
+        /// Radiuses with negative values aren't geometrically meaningful, but could
+        /// occur as part of expressions. For example, negating a radius of one pixel
+        /// and then adding the result to another radius is equivalent to subtracting
+        /// a radius of one pixel from the other.
+        public Radius operator -() => new Radius.elliptical(-x, -y);
 
-    /// A radius with [x] and [y] values set to zero.
-    ///
-    /// You can use [Radius.zero] with [RRect] to have right-angle corners.
-    public static const Radius zero = const Radius.circular(0.0);
+        /// Binary subtraction operator.
+        ///
+        /// Returns a radius whose [x] value is the left-hand-side operand's [x]
+        /// minus the right-hand-side operand's [x] and whose [y] value is the
+        /// left-hand-side operand's [y] minus the right-hand-side operand's [y].
+        public Radius operator -(Radius other) => new Radius.elliptical(x - other.x, y - other.y);
 
-    /// Unary negation operator.
-    ///
-    /// Returns a Radius with the distances negated.
-    ///
-    /// Radiuses with negative values aren't geometrically meaningful, but could
-    /// occur as part of expressions. For example, negating a radius of one pixel
-    /// and then adding the result to another radius is equivalent to subtracting
-    /// a radius of one pixel from the other.
-    public Radius operator -() => new Radius.elliptical(-x, -y);
+        /// Binary addition operator.
+        ///
+        /// Returns a radius whose [x] value is the sum of the [x] values of the
+        /// two operands, and whose [y] value is the sum of the [y] values of the
+        /// two operands.
+        public Radius operator +(Radius other) => new Radius.elliptical(x + other.x, y + other.y);
 
-    /// Binary subtraction operator.
-    ///
-    /// Returns a radius whose [x] value is the left-hand-side operand's [x]
-    /// minus the right-hand-side operand's [x] and whose [y] value is the
-    /// left-hand-side operand's [y] minus the right-hand-side operand's [y].
-    public Radius operator -(Radius other) => new Radius.elliptical(x - other.x, y - other.y);
+        /// Multiplication operator.
+        ///
+        /// Returns a radius whose coordinates are the coordinates of the
+        /// left-hand-side operand (a radius) multiplied by the scalar
+        /// right-hand-side operand (a double).
+        public Radius operator *(double operand) => new Radius.elliptical(x * operand, y * operand);
 
-    /// Binary addition operator.
-    ///
-    /// Returns a radius whose [x] value is the sum of the [x] values of the
-    /// two operands, and whose [y] value is the sum of the [y] values of the
-    /// two operands.
-    public Radius operator +(Radius other) => new Radius.elliptical(x + other.x, y + other.y);
+        /// Division operator.
+        ///
+        /// Returns a radius whose coordinates are the coordinates of the
+        /// left-hand-side operand (a radius) divided by the scalar right-hand-side
+        /// operand (a double).
+        public Radius operator /(double operand) => new Radius.elliptical(x / operand, y / operand);
 
-    /// Multiplication operator.
-    ///
-    /// Returns a radius whose coordinates are the coordinates of the
-    /// left-hand-side operand (a radius) multiplied by the scalar
-    /// right-hand-side operand (a double).
-    public Radius operator *(double operand) => new Radius.elliptical(x * operand, y * operand);
-
-    /// Division operator.
-    ///
-    /// Returns a radius whose coordinates are the coordinates of the
-    /// left-hand-side operand (a radius) divided by the scalar right-hand-side
-    /// operand (a double).
-    public Radius operator /(double operand) => new Radius.elliptical(x / operand, y / operand);
-
-    /// Integer (truncating) division operator.
-    ///
-    /// Returns a radius whose coordinates are the coordinates of the
-    /// left-hand-side operand (a radius) divided by the scalar right-hand-side
-    /// operand (a double), rounded towards zero.
-    public Radius operator ~/(double operand) => new Radius.elliptical((x ~/ operand).toDouble(), (y ~/ operand).toDouble());
+        /// Integer (truncating) division operator.
+        ///
+        /// Returns a radius whose coordinates are the coordinates of the
+        /// left-hand-side operand (a radius) divided by the scalar right-hand-side
+        /// operand (a double), rounded towards zero.
+        public Radius operator ~/(double operand) => new Radius.elliptical((x ~/ operand).toDouble(), (y ~/ operand).toDouble());
 
   /// Modulo (remainder) operator.
   ///
@@ -957,70 +958,72 @@ public class Radius
   /// right-hand-side operand (a double).
   public Radius operator %(double operand) => new Radius.elliptical(x % operand, y % operand);
 
-    /// Linearly interpolate between two radii.
-    ///
-    /// If either is null, this function substitutes [Radius.zero] instead.
-    ///
-    /// The `t` argument represents position on the timeline, with 0.0 meaning
-    /// that the interpolation has not started, returning `a` (or something
-    /// equivalent to `a`), 1.0 meaning that the interpolation has finished,
-    /// returning `b` (or something equivalent to `b`), and values in between
-    /// meaning that the interpolation is at the relevant point on the timeline
-    /// between `a` and `b`. The interpolation can be extrapolated beyond 0.0 and
-    /// 1.0, so negative values and values greater than 1.0 are valid (and can
-    /// easily be generated by curves such as [Curves.elasticInOut]).
-    ///
-    /// Values for `t` are usually obtained from an [Animation<double>], such as
-    /// an [AnimationController].
-    public static Radius lerp(Radius a, Radius b, double t)
-    {
-        // assert(t != null);
-        if (a == null && b == null)
-            return null;
-        if (a == null)
-            return new Radius.elliptical(b.x * t, b.y * t);
-        if (b == null)
+        /// Linearly interpolate between two radii.
+        ///
+        /// If either is null, this function substitutes [Radius.zero] instead.
+        ///
+        /// The `t` argument represents position on the timeline, with 0.0 meaning
+        /// that the interpolation has not started, returning `a` (or something
+        /// equivalent to `a`), 1.0 meaning that the interpolation has finished,
+        /// returning `b` (or something equivalent to `b`), and values in between
+        /// meaning that the interpolation is at the relevant point on the timeline
+        /// between `a` and `b`. The interpolation can be extrapolated beyond 0.0 and
+        /// 1.0, so negative values and values greater than 1.0 are valid (and can
+        /// easily be generated by curves such as [Curves.elasticInOut]).
+        ///
+        /// Values for `t` are usually obtained from an [Animation<double>], such as
+        /// an [AnimationController].
+        public static Radius lerp(Radius a, Radius b, double t)
         {
-            final double k = 1.0 - t;
-            return new Radius.elliptical(a.x * k, a.y * k);
+            // assert(t != null);
+            if (a == null && b == null)
+                return null;
+            if (a == null)
+                return new Radius.elliptical(b.x * t, b.y * t);
+            if (b == null)
+            {
+                final double k = 1.0 - t;
+                return new Radius.elliptical(a.x * k, a.y * k);
+            }
+            return new Radius.elliptical(
+              lerpDouble(a.x, b.x, t),
+              lerpDouble(a.y, b.y, t),
+
+
+
+
+            );
         }
-        return new Radius.elliptical(
-          lerpDouble(a.x, b.x, t),
-          lerpDouble(a.y, b.y, t),
 
+        public bool operator ==(dynamic other)
+        {
+            if (identical(this, other))
+                return true;
+            if (runtimeType != other.runtimeType)
+                return false;
+            final Radius typedOther = other;
+            return typedOther.x == x && typedOther.y == y;
+        }
 
-        );
+        public int hashCode => hashValues(x, y);
+
+        public String toString()
+        {
+            return x == y ? 'Radius.circular(${x.toStringAsFixed(1)})' :
+                            'Radius.elliptical(${x.toStringAsFixed(1)}, '
+                          '${y.toStringAsFixed(1)})';
+        }
     }
 
-    public bool operator ==(dynamic other)
+    /// An immutable rounded rectangle with the custom radii for all four corners.
+    public class RRect
     {
-        if (identical(this, other))
-            return true;
-        if (runtimeType != other.runtimeType)
-            return false;
-        final Radius typedOther = other;
-        return typedOther.x == x && typedOther.y == y;
-    }
+        private RRect() { };
 
-    public int hashCode => hashValues(x, y);
-
-    public String toString()
-    {
-        return x == y ? 'Radius.circular(${x.toStringAsFixed(1)})' :
-                        'Radius.elliptical(${x.toStringAsFixed(1)}, '
-                      '${y.toStringAsFixed(1)})';
-    }
-}
-
-/// An immutable rounded rectangle with the custom radii for all four corners.
-public class RRect
-{
-    private RRect() { };
-
-    /// Construct a rounded rectangle from its left, top, right, and bottom edges,
-    /// and the same radii along its horizontal axis and its vertical axis.
-    RRect.fromLTRBXY(double left, double top, double right, double bottom,
-                     double radiusX, double radiusY) {
+        /// Construct a rounded rectangle from its left, top, right, and bottom edges,
+        /// and the same radii along its horizontal axis and its vertical axis.
+        RRect.fromLTRBXY(double left, double top, double right, double bottom,
+                         double radiusX, double radiusY) {
     _value
       ..[0] = left
       ..[1] = top
@@ -1036,10 +1039,10 @@ public class RRect
       ..[11] = radiusY;
   }
 
-/// Construct a rounded rectangle from its left, top, right, and bottom edges,
-/// and the same radius in each corner.
-RRect.fromLTRBR(double left, double top, double right, double bottom,
-                Radius radius) {
+    /// Construct a rounded rectangle from its left, top, right, and bottom edges,
+    /// and the same radius in each corner.
+    RRect.fromLTRBR(double left, double top, double right, double bottom,
+                    Radius radius) {
     _value
       ..[0] = left
       ..[1] = top
@@ -1055,9 +1058,9 @@ RRect.fromLTRBR(double left, double top, double right, double bottom,
       ..[11] = radius.y;
   }
 
-  /// Construct a rounded rectangle from its bounding box and the same radii
-  /// along its horizontal axis and its vertical axis.
-  RRect.fromRectXY(Rect rect, double radiusX, double radiusY) {
+/// Construct a rounded rectangle from its bounding box and the same radii
+/// along its horizontal axis and its vertical axis.
+RRect.fromRectXY(Rect rect, double radiusX, double radiusY) {
     _value
       ..[0] = rect.left
       ..[1] = rect.top
