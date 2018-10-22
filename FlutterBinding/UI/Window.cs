@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
+using static FlutterBinding.Mapping.Types;
 
 namespace FlutterBinding.UI
 {
-
-
     /// Signature of callbacks that have no arguments and return no data.
     public delegate void VoidCallback();
 
@@ -185,7 +184,7 @@ namespace FlutterBinding.UI
         /// Locale('he')` and `const Locale('iw')` are equal, and both have the
         /// [languageCode] `he`, because `iw` is a deprecated language subtag that was
         /// replaced by the subtag `he`.
-        String languageCode => _canonicalizeLanguageCode(_languageCode);
+        public String languageCode => _canonicalizeLanguageCode(_languageCode);
         readonly String _languageCode;
 
         static String _canonicalizeLanguageCode(String languageCode)
@@ -310,25 +309,27 @@ namespace FlutterBinding.UI
         }
 
 
-        public bool operator ==(dynamic other)
+        public static bool operator ==(Locale first, Locale second)
         {
-            if (identical(this, other))
+            if (first.Equals(second))
                 return true;
-            if (other is !Locale)
+            if (!(second is Locale))
                 return false;
-            Locale typedOther = other;
-            return languageCode == typedOther.languageCode
-                && countryCode == typedOther.countryCode;
+            Locale typedOther = second;
+            return second.languageCode == first.languageCode
+                && second.countryCode == first.countryCode;
         }
+
+        public static bool operator !=(Locale first, Locale second) => !(first == second);
 
         public int hashCode
         {
             get
             {
                 int result = 373;
-                result = 37 * result + languageCode.hashCode;
+                result = 37 * result + languageCode.GetHashCode();
                 if (_countryCode != null)
-                    result = 37 * result + countryCode.hashCode;
+                    result = 37 * result + countryCode.GetHashCode();
                 return result;
             }
         }
@@ -347,6 +348,10 @@ namespace FlutterBinding.UI
     /// obtain from the [window] property.
     public class Window
     {
+        static Window _instance = new Window();
+        public static Window Instance => _instance;
+
+
         private Window() { }
 
         /// The number of device pixels for each logical pixel. This number might not
@@ -442,14 +447,18 @@ namespace FlutterBinding.UI
         ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
         ///    register for notifications when this is called.
         ///  * [MediaQuery.of], a simpler mechanism for the same.
-        public VoidCallback onMetricsChanged => _onMetricsChanged;
+        public VoidCallback onMetricsChanged
+        {
+            get { return _onMetricsChanged; }
+            set
+            {
+                _onMetricsChanged = value;
+                _onMetricsChangedZone = Zone.current;
+            }
+        }
         VoidCallback _onMetricsChanged;
         Zone _onMetricsChangedZone;
-        set onMetricsChanged(VoidCallback callback)
-        {
-            _onMetricsChanged = callback;
-            _onMetricsChangedZone = Zone.current;
-        }
+
 
         /// The system-reported default locale of the device.
         ///
@@ -465,9 +474,9 @@ namespace FlutterBinding.UI
         {
             get
             {
-                if (_locales != null && _locales.isNotEmpty)
+                if (locales != null && locales.Count > 0)
                 {
-                    return _locales.first;
+                    return locales.First();
                 }
                 return Locale.none;
             }
@@ -487,8 +496,7 @@ namespace FlutterBinding.UI
         ///
         ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
         ///    observe when this value changes.
-        List<Locale> get locales => _locales;
-  List<Locale> _locales;
+        public List<Locale> locales { get; }
 
         /// A callback that is invoked whenever [locale] changes value.
         ///
@@ -499,14 +507,17 @@ namespace FlutterBinding.UI
         ///
         ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
         ///    observe when this callback is invoked.
-        VoidCallback get onLocaleChanged => _onLocaleChanged;
-  VoidCallback _onLocaleChanged;
-        Zone _onLocaleChangedZone;
-        set onLocaleChanged(VoidCallback callback)
+        public VoidCallback onLocaleChanged
         {
-            _onLocaleChanged = callback;
-            _onLocaleChangedZone = Zone.current;
+            get { return _onLocaleChanged; }
+            set
+            {
+                _onLocaleChanged = value;
+                _onLocaleChangedZone = Zone.current;
+            }
         }
+        VoidCallback _onLocaleChanged;
+        Zone _onLocaleChangedZone;
 
         /// The system-reported text scale.
         ///
@@ -520,15 +531,13 @@ namespace FlutterBinding.UI
         ///
         ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
         ///    observe when this value changes.
-        double get textScaleFactor => _textScaleFactor;
-  double _textScaleFactor = 1.0;
+        public double textScaleFactor { get; } = 1.0;
 
         /// The setting indicating whether time should always be shown in the 24-hour
         /// format.
         ///
         /// This option is used by [showTimePicker].
-        bool get alwaysUse24HourFormat => _alwaysUse24HourFormat;
-  bool _alwaysUse24HourFormat = false;
+        public bool alwaysUse24HourFormat { get; } = false;
 
         /// A callback that is invoked whenever [textScaleFactor] changes value.
         ///
@@ -539,14 +548,17 @@ namespace FlutterBinding.UI
         ///
         ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
         ///    observe when this callback is invoked.
-        VoidCallback get onTextScaleFactorChanged => _onTextScaleFactorChanged;
-  VoidCallback _onTextScaleFactorChanged;
-        Zone _onTextScaleFactorChangedZone;
-        set onTextScaleFactorChanged(VoidCallback callback)
+        public VoidCallback onTextScaleFactorChanged
         {
-            _onTextScaleFactorChanged = callback;
-            _onTextScaleFactorChangedZone = Zone.current;
+            get { return _onTextScaleFactorChanged; }
+            set
+            {
+                _onTextScaleFactorChanged = value;
+                _onTextScaleFactorChangedZone = Zone.current;
+            }
         }
+        VoidCallback _onTextScaleFactorChanged;
+        Zone _onTextScaleFactorChangedZone;
 
         /// A callback that is invoked to notify the application that it is an
         /// appropriate time to provide a scene using the [SceneBuilder] API and the
@@ -567,14 +579,17 @@ namespace FlutterBinding.UI
         ///    scheduling of frames.
         ///  * [RendererBinding], the Flutter framework class which manages layout and
         ///    painting.
-        FrameCallback get onBeginFrame => _onBeginFrame;
-  FrameCallback _onBeginFrame;
-        Zone _onBeginFrameZone;
-        set onBeginFrame(FrameCallback callback)
+        public FrameCallback onBeginFrame
         {
-            _onBeginFrame = callback;
-            _onBeginFrameZone = Zone.current;
+            get { return _onBeginFrame; }
+            set
+            {
+                _onBeginFrame = value;
+                _onBeginFrameZone = Zone.current;
+            }
         }
+        FrameCallback _onBeginFrame;
+        Zone _onBeginFrameZone;
 
         /// A callback that is invoked for each frame after [onBeginFrame] has
         /// completed and after the microtask queue has been drained. This can be
@@ -590,14 +605,17 @@ namespace FlutterBinding.UI
         ///    scheduling of frames.
         ///  * [RendererBinding], the Flutter framework class which manages layout and
         ///    painting.
-        VoidCallback get onDrawFrame => _onDrawFrame;
-  VoidCallback _onDrawFrame;
-        Zone _onDrawFrameZone;
-        set onDrawFrame(VoidCallback callback)
+        public VoidCallback onDrawFrame
         {
-            _onDrawFrame = callback;
-            _onDrawFrameZone = Zone.current;
+            get { return _onDrawFrame; }
+            set
+            {
+                _onDrawFrame = value;
+                _onDrawFrameZone = Zone.current;
+            }
         }
+        VoidCallback _onDrawFrame;
+        Zone _onDrawFrameZone;
 
         /// A callback that is invoked when pointer data is available.
         ///
@@ -608,14 +626,17 @@ namespace FlutterBinding.UI
         ///
         ///  * [GestureBinding], the Flutter framework class which manages pointer
         ///    events.
-        PointerDataPacketCallback get onPointerDataPacket => _onPointerDataPacket;
-  PointerDataPacketCallback _onPointerDataPacket;
-        Zone _onPointerDataPacketZone;
-        set onPointerDataPacket(PointerDataPacketCallback callback)
+        PointerDataPacketCallback onPointerDataPacket
         {
-            _onPointerDataPacket = callback;
-            _onPointerDataPacketZone = Zone.current;
+            get { return _onPointerDataPacket; }
+            set
+            {
+                _onPointerDataPacket = value;
+                _onPointerDataPacketZone = Zone.current;
+            }
         }
+        PointerDataPacketCallback _onPointerDataPacket;
+        Zone _onPointerDataPacketZone;
 
         /// The route or path that the embedder requested when the application was
         /// launched.
@@ -651,6 +672,7 @@ namespace FlutterBinding.UI
         String _defaultRouteName()
         {
             // native 'Window_defaultRouteName';
+            return string.Empty; // Tmp to resolve build
         }
 
 
@@ -706,14 +728,17 @@ namespace FlutterBinding.UI
         ///
         /// The framework invokes this callback in the same zone in which the
         /// callback was set.
-        VoidCallback get onSemanticsEnabledChanged => _onSemanticsEnabledChanged;
-  VoidCallback _onSemanticsEnabledChanged;
-        Zone _onSemanticsEnabledChangedZone;
-        set onSemanticsEnabledChanged(VoidCallback callback)
+        public VoidCallback onSemanticsEnabledChanged
         {
-            _onSemanticsEnabledChanged = callback;
-            _onSemanticsEnabledChangedZone = Zone.current;
+            get { return _onSemanticsEnabledChanged; }
+            set
+            {
+                _onSemanticsEnabledChanged = value;
+                _onSemanticsEnabledChangedZone = Zone.current;
+            }
         }
+        VoidCallback _onSemanticsEnabledChanged;
+        Zone _onSemanticsEnabledChangedZone;
 
         /// A callback that is invoked whenever the user requests an action to be
         /// performed.
@@ -723,31 +748,36 @@ namespace FlutterBinding.UI
         ///
         /// The framework invokes this callback in the same zone in which the
         /// callback was set.
-        SemanticsActionCallback get onSemanticsAction => _onSemanticsAction;
-  SemanticsActionCallback _onSemanticsAction;
-        Zone _onSemanticsActionZone;
-        set onSemanticsAction(SemanticsActionCallback callback)
+        public SemanticsActionCallback onSemanticsAction
         {
-            _onSemanticsAction = callback;
-            _onSemanticsActionZone = Zone.current;
+            get { return _onSemanticsAction; }
+            set
+            {
+                _onSemanticsAction = value;
+                _onSemanticsActionZone = Zone.current;
+            }
         }
+        SemanticsActionCallback _onSemanticsAction;
+        Zone _onSemanticsActionZone;
 
         /// Additional accessibility features that may be enabled by the platform.
-        AccessibilityFeatures accessibilityFeatures => _accessibilityFeatures;
-        AccessibilityFeatures _accessibilityFeatures;
+        public AccessibilityFeatures accessibilityFeatures { get; }
 
         /// A callback that is invoked when the value of [accessibilityFlags] changes.
         ///
         /// The framework invokes this callback in the same zone in which the
         /// callback was set.
-        VoidCallback onAccessibilityFeaturesChanged => _onAccessibilityFeaturesChanged;
+        public VoidCallback onAccessibilityFeaturesChanged
+        {
+            get { return _onAccessibilityFeaturesChanged; }
+            set
+            {
+                _onAccessibilityFeaturesChanged = value;
+                _onAccessibilityFlagsChangedZone = Zone.current;
+            }
+        }
         VoidCallback _onAccessibilityFeaturesChanged;
         Zone _onAccessibilityFlagsChangedZone;
-        set onAccessibilityFeaturesChanged(VoidCallback callback)
-        {
-            _onAccessibilityFeaturesChanged = callback;
-            _onAccessibilityFlagsChangedZone = Zone.current;
-        }
 
         /// Change the retained semantics data about this window.
         ///
@@ -797,6 +827,7 @@ namespace FlutterBinding.UI
                                     ByteData data)
         {
             // native 'Window_sendPlatformMessage';
+            return string.Empty; // Tmp to resolve build
         }
 
         /// Called whenever this window receives a message from a platform-specific
@@ -812,14 +843,17 @@ namespace FlutterBinding.UI
         ///
         /// The framework invokes this callback in the same zone in which the
         /// callback was set.
-        PlatformMessageCallback onPlatformMessage => _onPlatformMessage;
+        public PlatformMessageCallback onPlatformMessage
+        {
+            get { return _onPlatformMessage; }
+            set
+            {
+                _onPlatformMessage = value;
+                _onPlatformMessageZone = Zone.current;
+            }
+        }
         PlatformMessageCallback _onPlatformMessage;
         Zone _onPlatformMessageZone;
-        set onPlatformMessage(PlatformMessageCallback callback)
-        {
-            _onPlatformMessage = callback;
-            _onPlatformMessageZone = Zone.current;
-        }
 
         /// Called by [_dispatchPlatformMessage].
         void _respondToPlatformMessage(int responseId, ByteData data)
@@ -836,9 +870,8 @@ namespace FlutterBinding.UI
             // Store the zone in which the callback is being registered.
             Zone registrationZone = Zone.current;
 
-            return (ByteData data) {
-                registrationZone.runUnaryGuarded(callback, data);
-            };
+            return (data) => registrationZone.runUnaryGuarded(callback, data);
+            
         }
     }
 
@@ -864,24 +897,24 @@ namespace FlutterBinding.UI
         /// interaction model of the device.
         ///
         /// For example, TalkBack on Android and VoiceOver on iOS enable this flag.
-        public bool accessibleNavigation => _kAccessibleNavigation & _index != 0;
+        public bool accessibleNavigation => (_kAccessibleNavigation & _index) != 0;
 
         /// The platform is inverting the colors of the application.
-        public bool invertColors => _kInvertColorsIndex & _index != 0;
+        public bool invertColors => (_kInvertColorsIndex & _index) != 0;
 
         /// The platform is requesting that animations be disabled or simplified.
-        public bool disableAnimations => _kDisableAnimationsIndex & _index != 0;
+        public bool disableAnimations => (_kDisableAnimationsIndex & _index) != 0;
 
         /// The platform is requesting that text be rendered at a bold font weight.
         ///
         /// Only supported on iOS.
-        public bool boldText => _kBoldTextIndex & _index != 0;
+        public bool boldText => (_kBoldTextIndex & _index) != 0;
 
         /// The platform is requesting that certain animations be simplified and
         /// parallax effects removed.
         ///
         /// Only supported on iOS.
-        public bool reduceMotion => _kReduceMotionIndex & _index != 0;
+        public bool reduceMotion => (_kReduceMotionIndex & _index) != 0;
 
         public String toString()
         {
@@ -899,20 +932,22 @@ namespace FlutterBinding.UI
             return $"AccessibilityFeatures{features}";
         }
 
-        public bool operator ==(dynamic other)
+        public static bool operator ==(AccessibilityFeatures first, AccessibilityFeatures other)
         {
-            if (other.runtimeType != runtimeType)
+            if (other.GetType() != first.GetType())
                 return false;
             AccessibilityFeatures typedOther = other;
-            return _index == typedOther._index;
+            return first._index == typedOther._index;
         }
 
+        public static bool operator !=(AccessibilityFeatures first, AccessibilityFeatures other) => !(first == other);
 
-        public int hashCode => _index.hashCode;
+        public int hashCode => _index.GetHashCode();
     }
 
     /// The [Window] singleton. This object exposes the size of the display, the
     /// core scheduler API, the input event callback, the graphics drawing API, and
     /// other such core services.
-    readonly Window window = new Window();
+    //readonly Window window = new Window();
+    // Do Window.Instance instead
 }

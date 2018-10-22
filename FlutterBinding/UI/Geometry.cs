@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using static FlutterBinding.UI.Lerp;
 
 namespace FlutterBinding.UI
 {
@@ -14,266 +14,268 @@ namespace FlutterBinding.UI
         ///
         /// The first argument sets the horizontal component, and the second the
         /// vertical component.
-        public const OffsetBase(this._dx, this._dy) 
-            {
-            }
+        public OffsetBase(double _dx, double _dy)
+        {
+            this._dx = _dx;
+            this._dy = _dy;
+        }
 
-    readonly double _dx;
-    readonly double _dy;
+        protected readonly double _dx;
+        protected readonly double _dy;
 
-    /// Returns true if either component is [double.infinity], and false if both
-    /// are finite (or negative infinity, or NaN).
-    ///
-    /// This is different than comparing for equality with an instance that has
-    /// _both_ components set to [double.infinity].
-    ///
-    /// See also:
-    ///
-    ///  * [isFinite], which is true if both components are finite (and not NaN).
-    public bool isInfinite => _dx >= double.infinity || _dy >= double.infinity;
+        /// Returns true if either component is [double.infinity], and false if both
+        /// are finite (or negative infinity, or NaN).
+        ///
+        /// This is different than comparing for equality with an instance that has
+        /// _both_ components set to [double.infinity].
+        ///
+        /// See also:
+        ///
+        ///  * [isFinite], which is true if both components are finite (and not NaN).
+        public bool isInfinite => _dx >= double.PositiveInfinity || _dy >= double.PositiveInfinity;
 
-    /// Whether both components are finite (neither infinite nor NaN).
-    ///
-    /// See also:
-    ///
-    ///  * [isInfinite], which returns true if either component is equal to
-    ///    positive infinity.
-    public bool isFinite => _dx.isFinite && _dy.isFinite;
+        /// Whether both components are finite (neither infinite nor NaN).
+        ///
+        /// See also:
+        ///
+        ///  * [isInfinite], which returns true if either component is equal to
+        ///    positive infinity.
+        public bool isFinite => _dx.isFinite && _dy.isFinite;
 
-    /// Less-than operator. Compares an [Offset] or [Size] to another [Offset] or
-    /// [Size], and returns true if both the horizontal and vertical values of the
-    /// left-hand-side operand are smaller than the horizontal and vertical values
-    /// of the right-hand-side operand respectively. Returns false otherwise.
-    ///
-    /// This is a partial ordering. It is possible for two values to be neither
-    /// less, nor greater than, nor equal to, another.
-    public bool operator <(OffsetBase other) => _dx < other._dx && _dy < other._dy;
+        /// Less-than operator. Compares an [Offset] or [Size] to another [Offset] or
+        /// [Size], and returns true if both the horizontal and vertical values of the
+        /// left-hand-side operand are smaller than the horizontal and vertical values
+        /// of the right-hand-side operand respectively. Returns false otherwise.
+        ///
+        /// This is a partial ordering. It is possible for two values to be neither
+        /// less, nor greater than, nor equal to, another.
+        public bool operator <(OffsetBase other) => _dx < other._dx && _dy < other._dy;
 
-    /// Less-than-or-equal-to operator. Compares an [Offset] or [Size] to another
-    /// [Offset] or [Size], and returns true if both the horizontal and vertical
-    /// values of the left-hand-side operand are smaller than or equal to the
-    /// horizontal and vertical values of the right-hand-side operand
-    /// respectively. Returns false otherwise.
-    ///
-    /// This is a partial ordering. It is possible for two values to be neither
-    /// less, nor greater than, nor equal to, another.
-    public bool operator <=(OffsetBase other) => _dx <= other._dx && _dy <= other._dy;
+        /// Less-than-or-equal-to operator. Compares an [Offset] or [Size] to another
+        /// [Offset] or [Size], and returns true if both the horizontal and vertical
+        /// values of the left-hand-side operand are smaller than or equal to the
+        /// horizontal and vertical values of the right-hand-side operand
+        /// respectively. Returns false otherwise.
+        ///
+        /// This is a partial ordering. It is possible for two values to be neither
+        /// less, nor greater than, nor equal to, another.
+        public bool operator <=(OffsetBase other) => _dx <= other._dx && _dy <= other._dy;
 
-    /// Greater-than operator. Compares an [Offset] or [Size] to another [Offset]
-    /// or [Size], and returns true if both the horizontal and vertical values of
-    /// the left-hand-side operand are bigger than the horizontal and vertical
-    /// values of the right-hand-side operand respectively. Returns false
-    /// otherwise.
-    ///
-    /// This is a partial ordering. It is possible for two values to be neither
-    /// less, nor greater than, nor equal to, another.
-    public bool operator >(OffsetBase other) => _dx > other._dx && _dy > other._dy;
+        /// Greater-than operator. Compares an [Offset] or [Size] to another [Offset]
+        /// or [Size], and returns true if both the horizontal and vertical values of
+        /// the left-hand-side operand are bigger than the horizontal and vertical
+        /// values of the right-hand-side operand respectively. Returns false
+        /// otherwise.
+        ///
+        /// This is a partial ordering. It is possible for two values to be neither
+        /// less, nor greater than, nor equal to, another.
+        public bool operator >(OffsetBase other) => _dx > other._dx && _dy > other._dy;
 
-    /// Greater-than-or-equal-to operator. Compares an [Offset] or [Size] to
-    /// another [Offset] or [Size], and returns true if both the horizontal and
-    /// vertical values of the left-hand-side operand are bigger than or equal to
-    /// the horizontal and vertical values of the right-hand-side operand
-    /// respectively. Returns false otherwise.
-    ///
-    /// This is a partial ordering. It is possible for two values to be neither
-    /// less, nor greater than, nor equal to, another.
-    public bool operator >=(OffsetBase other) => _dx > other._dx && _dy >= other._dy;
+        /// Greater-than-or-equal-to operator. Compares an [Offset] or [Size] to
+        /// another [Offset] or [Size], and returns true if both the horizontal and
+        /// vertical values of the left-hand-side operand are bigger than or equal to
+        /// the horizontal and vertical values of the right-hand-side operand
+        /// respectively. Returns false otherwise.
+        ///
+        /// This is a partial ordering. It is possible for two values to be neither
+        /// less, nor greater than, nor equal to, another.
+        public bool operator >=(OffsetBase other) => _dx > other._dx && _dy >= other._dy;
 
-    /// Equality operator. Compares an [Offset] or [Size] to another [Offset] or
-    /// [Size], and returns true if the horizontal and vertical values of the
-    /// left-hand-side operand are equal to the horizontal and vertical values of
-    /// the right-hand-side operand respectively. Returns false otherwise.
+        /// Equality operator. Compares an [Offset] or [Size] to another [Offset] or
+        /// [Size], and returns true if the horizontal and vertical values of the
+        /// left-hand-side operand are equal to the horizontal and vertical values of
+        /// the right-hand-side operand respectively. Returns false otherwise.
 
-    public bool operator ==(dynamic other)
-    {
-        if (other is !OffsetBase)
-            return false;
-        final OffsetBase typedOther = other;
-        return _dx == typedOther._dx &&
-               _dy == typedOther._dy;
+        public bool operator ==(dynamic other)
+        {
+            if (other is !OffsetBase)
+                return false;
+            final OffsetBase typedOther = other;
+            return _dx == typedOther._dx &&
+                   _dy == typedOther._dy;
+        }
+
+
+        public int hashCode => hashValues(_dx, _dy);
+
+        public String toString() => $"{nameof(OffsetBase)}({_dx.toStringAsFixed(1)}, {_dy.toStringAsFixed(1)})";
     }
 
-
-    public int hashCode => hashValues(_dx, _dy);
-
-    public String toString() => '$runtimeType(${_dx?.toStringAsFixed(1)}, ${_dy?.toStringAsFixed(1)})';
-}
-
-/// An immutable 2D floating-point offset.
-///
-/// Generally speaking, Offsets can be interpreted in two ways:
-///
-/// 1. As representing a point in Cartesian space a specified distance from a
-///    separately-maintained origin. For example, the top-left position of
-///    children in the [RenderBox] protocol is typically represented as an
-///    [Offset] from the top left of the parent box.
-///
-/// 2. As a vector that can be applied to coordinates. For example, when
-///    painting a [RenderObject], the parent is passed an [Offset] from the
-///    screen's origin which it can add to the offsets of its children to find
-///    the [Offset] from the screen's origin to each of the children.
-///
-/// Because a particular [Offset] can be interpreted as one sense at one time
-/// then as the other sense at a later time, the same class is used for both
-/// senses.
-///
-/// See also:
-///
-///  * [Size], which represents a vector describing the size of a rectangle.
-public class Offset : OffsetBase
-{
-    /// Creates an offset. The first argument sets [dx], the horizontal component,
-    /// and the second sets [dy], the vertical component.
-    public const Offset(double dx, double dy) : super(dx, dy) { }
-
-    /// The x component of the offset.
+    /// An immutable 2D floating-point offset.
     ///
-    /// The y component is given by [dy].
-    public double dx => _dx;
-
-    /// The y component of the offset.
+    /// Generally speaking, Offsets can be interpreted in two ways:
     ///
-    /// The x component is given by [dx].
-    public double dy => _dy;
-
-    /// The magnitude of the offset.
+    /// 1. As representing a point in Cartesian space a specified distance from a
+    ///    separately-maintained origin. For example, the top-left position of
+    ///    children in the [RenderBox] protocol is typically represented as an
+    ///    [Offset] from the top left of the parent box.
     ///
-    /// If you need this value to compare it to another [Offset]'s distance,
-    /// consider using [distanceSquared] instead, since it is cheaper to compute.
-    public double distance => math.sqrt(_dx * _dx + _dy * _dy);
-
-    /// The square of the magnitude of the offset.
+    /// 2. As a vector that can be applied to coordinates. For example, when
+    ///    painting a [RenderObject], the parent is passed an [Offset] from the
+    ///    screen's origin which it can add to the offsets of its children to find
+    ///    the [Offset] from the screen's origin to each of the children.
     ///
-    /// This is cheaper than computing the [distance] itself.
-    public double distanceSquared => _dx * _dx + _dy * _dy;
-
-    /// The angle of this offset as radians clockwise from the positive x-axis, in
-    /// the range -[pi] to [pi], assuming positive values of the x-axis go to the
-    /// left and positive values of the y-axis go down.
-    ///
-    /// Zero means that [dy] is zero and [dx] is zero or positive.
-    ///
-    /// Values from zero to [pi]/2 indicate positive values of [dx] and [dy], the
-    /// bottom-right quadrant.
-    ///
-    /// Values from [pi]/2 to [pi] indicate negative values of [dx] and positive
-    /// values of [dy], the bottom-left quadrant.
-    ///
-    /// Values from zero to -[pi]/2 indicate positive values of [dx] and negative
-    /// values of [dy], the top-right quadrant.
-    ///
-    /// Values from -[pi]/2 to -[pi] indicate negative values of [dx] and [dy],
-    /// the top-left quadrant.
-    ///
-    /// When [dy] is zero and [dx] is negative, the [direction] is [pi].
-    ///
-    /// When [dx] is zero, [direction] is [pi]/2 if [dy] is positive and -[pi]/2
-    /// if [dy] is negative.
+    /// Because a particular [Offset] can be interpreted as one sense at one time
+    /// then as the other sense at a later time, the same class is used for both
+    /// senses.
     ///
     /// See also:
     ///
-    ///  * [distance], to compute the magnitude of the vector.
-    ///  * [Canvas.rotate], which uses the same convention for its angle.
-    public double direction => math.atan2(dy, dx);
+    ///  * [Size], which represents a vector describing the size of a rectangle.
+    public class Offset : OffsetBase
+    {
+        /// Creates an offset. The first argument sets [dx], the horizontal component,
+        /// and the second sets [dy], the vertical component.
+        public Offset(double dx, double dy) : base(dx, dy) { }
 
-    /// An offset with zero magnitude.
-    ///
-    /// This can be used to represent the origin of a coordinate space.
-    public static const Offset zero = const Offset(0.0, 0.0);
+        /// The x component of the offset.
+        ///
+        /// The y component is given by [dy].
+        public double dx => _dx;
 
-    /// An offset with infinite x and y components.
-    ///
-    /// See also:
-    ///
-    ///  * [isInfinite], which checks whether either component is infinite.
-    ///  * [isFinite], which checks whether both components are finite.
-    // This is included for completeness, because [Size.infinite] exists.
-    public static const Offset infinite = const Offset(double.infinity, double.infinity);
+        /// The y component of the offset.
+        ///
+        /// The x component is given by [dx].
+        public double dy => _dy;
 
-    /// Returns a new offset with the x component scaled by `scaleX` and the y
-    /// component scaled by `scaleY`.
-    ///
-    /// If the two scale arguments are the same, consider using the `*` operator
-    /// instead:
-    ///
-    /// ```dart
-    /// Offset a = const Offset(10.0, 10.0);
-    /// Offset b = a * 2.0; // same as: a.scale(2.0, 2.0)
-    /// ```
-    ///
-    /// If the two arguments are -1, consider using the unary `-` operator
-    /// instead:
-    ///
-    /// ```dart
-    /// Offset a = const Offset(10.0, 10.0);
-    /// Offset b = -a; // same as: a.scale(-1.0, -1.0)
-    /// ```
-    public Offset scale(double scaleX, double scaleY) => new Offset(dx * scaleX, dy * scaleY);
+        /// The magnitude of the offset.
+        ///
+        /// If you need this value to compare it to another [Offset]'s distance,
+        /// consider using [distanceSquared] instead, since it is cheaper to compute.
+        public double distance => Math.Sqrt(_dx * _dx + _dy * _dy);
 
-    /// Returns a new offset with translateX added to the x component and
-    /// translateY added to the y component.
-    ///
-    /// If the arguments come from another [Offset], consider using the `+` or `-`
-    /// operators instead:
-    ///
-    /// ```dart
-    /// Offset a = const Offset(10.0, 10.0);
-    /// Offset b = const Offset(10.0, 10.0);
-    /// Offset c = a + b; // same as: a.translate(b.dx, b.dy)
-    /// Offset d = a - b; // same as: a.translate(-b.dx, -b.dy)
-    /// ```
-    public Offset translate(double translateX, double translateY) => new Offset(dx + translateX, dy + translateY);
+        /// The square of the magnitude of the offset.
+        ///
+        /// This is cheaper than computing the [distance] itself.
+        public double distanceSquared => _dx * _dx + _dy * _dy;
 
-    /// Unary negation operator.
-    ///
-    /// Returns an offset with the coordinates negated.
-    ///
-    /// If the [Offset] represents an arrow on a plane, this operator returns the
-    /// same arrow but pointing in the reverse direction.
-    public Offset operator -() => new Offset(-dx, -dy);
+        /// The angle of this offset as radians clockwise from the positive x-axis, in
+        /// the range -[pi] to [pi], assuming positive values of the x-axis go to the
+        /// left and positive values of the y-axis go down.
+        ///
+        /// Zero means that [dy] is zero and [dx] is zero or positive.
+        ///
+        /// Values from zero to [pi]/2 indicate positive values of [dx] and [dy], the
+        /// bottom-right quadrant.
+        ///
+        /// Values from [pi]/2 to [pi] indicate negative values of [dx] and positive
+        /// values of [dy], the bottom-left quadrant.
+        ///
+        /// Values from zero to -[pi]/2 indicate positive values of [dx] and negative
+        /// values of [dy], the top-right quadrant.
+        ///
+        /// Values from -[pi]/2 to -[pi] indicate negative values of [dx] and [dy],
+        /// the top-left quadrant.
+        ///
+        /// When [dy] is zero and [dx] is negative, the [direction] is [pi].
+        ///
+        /// When [dx] is zero, [direction] is [pi]/2 if [dy] is positive and -[pi]/2
+        /// if [dy] is negative.
+        ///
+        /// See also:
+        ///
+        ///  * [distance], to compute the magnitude of the vector.
+        ///  * [Canvas.rotate], which uses the same convention for its angle.
+        public double direction => Math.Atan2(dy, dx);
 
-    /// Binary subtraction operator.
-    ///
-    /// Returns an offset whose [dx] value is the left-hand-side operand's [dx]
-    /// minus the right-hand-side operand's [dx] and whose [dy] value is the
-    /// left-hand-side operand's [dy] minus the right-hand-side operand's [dy].
-    ///
-    /// See also [translate].
-    public Offset operator -(Offset other) => new Offset(dx - other.dx, dy - other.dy);
+        /// An offset with zero magnitude.
+        ///
+        /// This can be used to represent the origin of a coordinate space.
+        public static Offset zero = new Offset(0.0, 0.0);
 
-    /// Binary addition operator.
-    ///
-    /// Returns an offset whose [dx] value is the sum of the [dx] values of the
-    /// two operands, and whose [dy] value is the sum of the [dy] values of the
-    /// two operands.
-    ///
-    /// See also [translate].
-    public Offset operator +(Offset other) => new Offset(dx + other.dx, dy + other.dy);
+        /// An offset with infinite x and y components.
+        ///
+        /// See also:
+        ///
+        ///  * [isInfinite], which checks whether either component is infinite.
+        ///  * [isFinite], which checks whether both components are finite.
+        // This is included for completeness, because [Size.infinite] exists.
+        public static Offset infinite = new Offset(double.infinity, double.infinity);
 
-    /// Multiplication operator.
-    ///
-    /// Returns an offset whose coordinates are the coordinates of the
-    /// left-hand-side operand (an Offset) multiplied by the scalar
-    /// right-hand-side operand (a double).
-    ///
-    /// See also [scale].
-    public Offset operator *(double operand) => new Offset(dx * operand, dy * operand);
+        /// Returns a new offset with the x component scaled by `scaleX` and the y
+        /// component scaled by `scaleY`.
+        ///
+        /// If the two scale arguments are the same, consider using the `*` operator
+        /// instead:
+        ///
+        /// ```dart
+        /// Offset a = const Offset(10.0, 10.0);
+        /// Offset b = a * 2.0; // same as: a.scale(2.0, 2.0)
+        /// ```
+        ///
+        /// If the two arguments are -1, consider using the unary `-` operator
+        /// instead:
+        ///
+        /// ```dart
+        /// Offset a = const Offset(10.0, 10.0);
+        /// Offset b = -a; // same as: a.scale(-1.0, -1.0)
+        /// ```
+        public Offset scale(double scaleX, double scaleY) => new Offset(dx * scaleX, dy * scaleY);
 
-    /// Division operator.
-    ///
-    /// Returns an offset whose coordinates are the coordinates of the
-    /// left-hand-side operand (an Offset) divided by the scalar right-hand-side
-    /// operand (a double).
-    ///
-    /// See also [scale].
-    public Offset operator /(double operand) => new Offset(dx / operand, dy / operand);
+        /// Returns a new offset with translateX added to the x component and
+        /// translateY added to the y component.
+        ///
+        /// If the arguments come from another [Offset], consider using the `+` or `-`
+        /// operators instead:
+        ///
+        /// ```dart
+        /// Offset a = const Offset(10.0, 10.0);
+        /// Offset b = const Offset(10.0, 10.0);
+        /// Offset c = a + b; // same as: a.translate(b.dx, b.dy)
+        /// Offset d = a - b; // same as: a.translate(-b.dx, -b.dy)
+        /// ```
+        public Offset translate(double translateX, double translateY) => new Offset(dx + translateX, dy + translateY);
 
-    /// Integer (truncating) division operator.
-    ///
-    /// Returns an offset whose coordinates are the coordinates of the
-    /// left-hand-side operand (an Offset) divided by the scalar right-hand-side
-    /// operand (a double), rounded towards zero.
-    public Offset operator ~/ (double operand) => new Offset((dx ~/ operand).toDouble(), (dy ~/ operand).toDouble());
+        /// Unary negation operator.
+        ///
+        /// Returns an offset with the coordinates negated.
+        ///
+        /// If the [Offset] represents an arrow on a plane, this operator returns the
+        /// same arrow but pointing in the reverse direction.
+        public Offset operator -() => new Offset(-dx, -dy);
+
+        /// Binary subtraction operator.
+        ///
+        /// Returns an offset whose [dx] value is the left-hand-side operand's [dx]
+        /// minus the right-hand-side operand's [dx] and whose [dy] value is the
+        /// left-hand-side operand's [dy] minus the right-hand-side operand's [dy].
+        ///
+        /// See also [translate].
+        public Offset operator -(Offset other) => new Offset(dx - other.dx, dy - other.dy);
+
+        /// Binary addition operator.
+        ///
+        /// Returns an offset whose [dx] value is the sum of the [dx] values of the
+        /// two operands, and whose [dy] value is the sum of the [dy] values of the
+        /// two operands.
+        ///
+        /// See also [translate].
+        public Offset operator +(Offset other) => new Offset(dx + other.dx, dy + other.dy);
+
+        /// Multiplication operator.
+        ///
+        /// Returns an offset whose coordinates are the coordinates of the
+        /// left-hand-side operand (an Offset) multiplied by the scalar
+        /// right-hand-side operand (a double).
+        ///
+        /// See also [scale].
+        public Offset operator *(double operand) => new Offset(dx * operand, dy * operand);
+
+        /// Division operator.
+        ///
+        /// Returns an offset whose coordinates are the coordinates of the
+        /// left-hand-side operand (an Offset) divided by the scalar right-hand-side
+        /// operand (a double).
+        ///
+        /// See also [scale].
+        public Offset operator /(double operand) => new Offset(dx / operand, dy / operand);
+
+        /// Integer (truncating) division operator.
+        ///
+        /// Returns an offset whose coordinates are the coordinates of the
+        /// left-hand-side operand (an Offset) divided by the scalar right-hand-side
+        /// operand (a double), rounded towards zero.
+        public Offset operator ~/ (double operand) => new Offset((dx ~/ operand).toDouble(), (dy ~/ operand).toDouble());
 
         /// Modulo (remainder) operator.
         ///
@@ -282,172 +284,172 @@ public class Offset : OffsetBase
         /// right-hand-side operand (a double).
         public Offset operator %(double operand) => new Offset(dx % operand, dy % operand);
 
-    /// Rectangle constructor operator.
-    ///
-    /// Combines an [Offset] and a [Size] to form a [Rect] whose top-left
-    /// coordinate is the point given by adding this offset, the left-hand-side
-    /// operand, to the origin, and whose size is the right-hand-side operand.
-    ///
-    /// ```dart
-    /// Rect myRect = Offset.zero & const Size(100.0, 100.0);
-    /// // same as: new Rect.fromLTWH(0.0, 0.0, 100.0, 100.0)
-    /// ```
-    public Rect operator &(Size other) => new Rect.fromLTWH(dx, dy, other.width, other.height);
+        /// Rectangle constructor operator.
+        ///
+        /// Combines an [Offset] and a [Size] to form a [Rect] whose top-left
+        /// coordinate is the point given by adding this offset, the left-hand-side
+        /// operand, to the origin, and whose size is the right-hand-side operand.
+        ///
+        /// ```dart
+        /// Rect myRect = Offset.zero & const Size(100.0, 100.0);
+        /// // same as: new Rect.fromLTWH(0.0, 0.0, 100.0, 100.0)
+        /// ```
+        public Rect operator &(Size other) => new Rect.fromLTWH(dx, dy, other.width, other.height);
 
-    /// Linearly interpolate between two offsets.
-    ///
-    /// If either offset is null, this function interpolates from [Offset.zero].
-    ///
-    /// The `t` argument represents position on the timeline, with 0.0 meaning
-    /// that the interpolation has not started, returning `a` (or something
-    /// equivalent to `a`), 1.0 meaning that the interpolation has finished,
-    /// returning `b` (or something equivalent to `b`), and values in between
-    /// meaning that the interpolation is at the relevant point on the timeline
-    /// between `a` and `b`. The interpolation can be extrapolated beyond 0.0 and
-    /// 1.0, so negative values and values greater than 1.0 are valid (and can
-    /// easily be generated by curves such as [Curves.elasticInOut]).
-    ///
-    /// Values for `t` are usually obtained from an [Animation<double>], such as
-    /// an [AnimationController].
-    public static Offset lerp(Offset a, Offset b, double t)
-    {
-        //assert(t != null);
-        if (a == null && b == null)
-            return null;
-        if (a == null)
-            return b * t;
-        if (b == null)
-            return a * (1.0 - t);
-        return new Offset(lerpDouble(a.dx, b.dx, t), lerpDouble(a.dy, b.dy, t));
+        /// Linearly interpolate between two offsets.
+        ///
+        /// If either offset is null, this function interpolates from [Offset.zero].
+        ///
+        /// The `t` argument represents position on the timeline, with 0.0 meaning
+        /// that the interpolation has not started, returning `a` (or something
+        /// equivalent to `a`), 1.0 meaning that the interpolation has finished,
+        /// returning `b` (or something equivalent to `b`), and values in between
+        /// meaning that the interpolation is at the relevant point on the timeline
+        /// between `a` and `b`. The interpolation can be extrapolated beyond 0.0 and
+        /// 1.0, so negative values and values greater than 1.0 are valid (and can
+        /// easily be generated by curves such as [Curves.elasticInOut]).
+        ///
+        /// Values for `t` are usually obtained from an [Animation<double>], such as
+        /// an [AnimationController].
+        public static Offset lerp(Offset a, Offset b, double t)
+        {
+            //assert(t != null);
+            if (a == null && b == null)
+                return null;
+            if (a == null)
+                return b * t;
+            if (b == null)
+                return a * (1.0 - t);
+            return new Offset(lerpDouble(a.dx, b.dx, t), lerpDouble(a.dy, b.dy, t));
+        }
+
+        /// Compares two Offsets for equality.
+        public bool operator ==(dynamic other)
+        {
+            if (other is !Offset)
+                return false;
+            Offset typedOther = other;
+            return _dx == typedOther._dx &&
+                   _dy == typedOther._dy;
+        }
+
+        public int hashCode => hashValues(_dx, _dy);
+
+        public String toString() => $"Offset({dx.toStringAsFixed(1)}, {dy.toStringAsFixed(1)})";
     }
 
-    /// Compares two Offsets for equality.
-    public bool operator ==(dynamic other)
+    /// Holds a 2D floating-point size.
+    ///
+    /// You can think of this as an [Offset] from the origin.
+    public class Size : OffsetBase
     {
-        if (other is !Offset)
-            return false;
-        final Offset typedOther = other;
-        return _dx == typedOther._dx &&
-               _dy == typedOther._dy;
-    }
+        /// Creates a [Size] with the given [width] and [height].
+        public Size(double width, double height) : super(width, height) { }
 
-    public int hashCode => hashValues(_dx, _dy);
+        /// Creates an instance of [Size] that has the same values as another.
+        // Used by the rendering library's _DebugSize hack.
+        public Size.copy(Size source) : super(source.width, source.height) { }
 
-    public String toString() => 'Offset(${dx?.toStringAsFixed(1)}, ${dy?.toStringAsFixed(1)})';
-}
+        /// Creates a square [Size] whose [width] and [height] are the given dimension.
+        ///
+        /// See also:
+        ///
+        ///  * [new Size.fromRadius], which is more convenient when the available size
+        ///    is the radius of a circle.
+        public Size.square(double dimension) : super(dimension, dimension) { }
 
-/// Holds a 2D floating-point size.
-///
-/// You can think of this as an [Offset] from the origin.
-public class Size : OffsetBase
-{
-    /// Creates a [Size] with the given [width] and [height].
-    public Size(double width, double height) : super(width, height) { }
+        /// Creates a [Size] with the given [width] and an infinite [height].
+        public Size.fromWidth(double width) : super(width, double.infinity) { }
 
-    /// Creates an instance of [Size] that has the same values as another.
-    // Used by the rendering library's _DebugSize hack.
-    public Size.copy(Size source) : super(source.width, source.height) { }
+        /// Creates a [Size] with the given [height] and an infinite [width].
+        public Size.fromHeight(double height) : super(double.infinity, height) { }
 
-    /// Creates a square [Size] whose [width] and [height] are the given dimension.
-    ///
-    /// See also:
-    ///
-    ///  * [new Size.fromRadius], which is more convenient when the available size
-    ///    is the radius of a circle.
-    public Size.square(double dimension) : super(dimension, dimension) { }
+        /// Creates a square [Size] whose [width] and [height] are twice the given
+        /// dimension.
+        ///
+        /// This is a square that contains a circle with the given radius.
+        ///
+        /// See also:
+        ///
+        ///  * [new Size.square], which creates a square with the given dimension.
+        public Size.fromRadius(double radius) : super(radius* 2.0, radius* 2.0) { }
 
-    /// Creates a [Size] with the given [width] and an infinite [height].
-    public Size.fromWidth(double width) : super(width, double.infinity) { }
+        /// The horizontal extent of this size.
+        public double width => _dx;
 
-    /// Creates a [Size] with the given [height] and an infinite [width].
-    public Size.fromHeight(double height) : super(double.infinity, height) { }
+        /// The vertical extent of this size.
+        public double height => _dy;
 
-    /// Creates a square [Size] whose [width] and [height] are twice the given
-    /// dimension.
-    ///
-    /// This is a square that contains a circle with the given radius.
-    ///
-    /// See also:
-    ///
-    ///  * [new Size.square], which creates a square with the given dimension.
-    public Size.fromRadius(double radius) : super(radius* 2.0, radius* 2.0) { }
+        /// An empty size, one with a zero width and a zero height.
+        public static Size zero = new Size(0.0, 0.0);
 
-    /// The horizontal extent of this size.
-    double width => _dx;
+        /// A size whose [width] and [height] are infinite.
+        ///
+        /// See also:
+        ///
+        ///  * [isInfinite], which checks whether either dimension is infinite.
+        ///  * [isFinite], which checks whether both dimensions are finite.
+        public static Size infinite = new Size(double.PositiveInfinity, double.PositiveInfinity);
 
-    /// The vertical extent of this size.
-    public double height => _dy;
+        /// Whether this size encloses a non-zero area.
+        ///
+        /// Negative areas are considered empty.
+        public bool isEmpty => width <= 0.0 || height <= 0.0;
 
-    /// An empty size, one with a zero width and a zero height.
-    public static const Size zero = const Size(0.0, 0.0);
+        /// Binary subtraction operator for [Size].
+        ///
+        /// Subtracting a [Size] from a [Size] returns the [Offset] that describes how
+        /// much bigger the left-hand-side operand is than the right-hand-side
+        /// operand. Adding that resulting [Offset] to the [Size] that was the
+        /// right-hand-side operand would return a [Size] equal to the [Size] that was
+        /// the left-hand-side operand. (i.e. if `sizeA - sizeB -> offsetA`, then
+        /// `offsetA + sizeB -> sizeA`)
+        ///
+        /// Subtracting an [Offset] from a [Size] returns the [Size] that is smaller than
+        /// the [Size] operand by the difference given by the [Offset] operand. In other
+        /// words, the returned [Size] has a [width] consisting of the [width] of the
+        /// left-hand-side operand minus the [Offset.dx] dimension of the
+        /// right-hand-side operand, and a [height] consisting of the [height] of the
+        /// left-hand-side operand minus the [Offset.dy] dimension of the
+        /// right-hand-side operand.
+        public OffsetBase operator -(OffsetBase other)
+        {
+            if (other is Size)
+                return new Offset(width - other.width, height - other.height);
+            if (other is Offset)
+                return new Size(width - other.dx, height - other.dy);
+            throw new ArgumentException(other);
+        }
 
-    /// A size whose [width] and [height] are infinite.
-    ///
-    /// See also:
-    ///
-    ///  * [isInfinite], which checks whether either dimension is infinite.
-    ///  * [isFinite], which checks whether both dimensions are finite.
-    public static const Size infinite = const Size(double.infinity, double.infinity);
+        /// Binary addition operator for adding an [Offset] to a [Size].
+        ///
+        /// Returns a [Size] whose [width] is the sum of the [width] of the
+        /// left-hand-side operand, a [Size], and the [Offset.dx] dimension of the
+        /// right-hand-side operand, an [Offset], and whose [height] is the sum of the
+        /// [height] of the left-hand-side operand and the [Offset.dy] dimension of
+        /// the right-hand-side operand.
+        public Size operator +(Offset other) => new Size(width + other.dx, height + other.dy);
 
-    /// Whether this size encloses a non-zero area.
-    ///
-    /// Negative areas are considered empty.
-    public bool isEmpty => width <= 0.0 || height <= 0.0;
+        /// Multiplication operator.
+        ///
+        /// Returns a [Size] whose dimensions are the dimensions of the left-hand-side
+        /// operand (a [Size]) multiplied by the scalar right-hand-side operand (a
+        /// [double]).
+        public Size operator *(double operand) => new Size(width * operand, height * operand);
 
-    /// Binary subtraction operator for [Size].
-    ///
-    /// Subtracting a [Size] from a [Size] returns the [Offset] that describes how
-    /// much bigger the left-hand-side operand is than the right-hand-side
-    /// operand. Adding that resulting [Offset] to the [Size] that was the
-    /// right-hand-side operand would return a [Size] equal to the [Size] that was
-    /// the left-hand-side operand. (i.e. if `sizeA - sizeB -> offsetA`, then
-    /// `offsetA + sizeB -> sizeA`)
-    ///
-    /// Subtracting an [Offset] from a [Size] returns the [Size] that is smaller than
-    /// the [Size] operand by the difference given by the [Offset] operand. In other
-    /// words, the returned [Size] has a [width] consisting of the [width] of the
-    /// left-hand-side operand minus the [Offset.dx] dimension of the
-    /// right-hand-side operand, and a [height] consisting of the [height] of the
-    /// left-hand-side operand minus the [Offset.dy] dimension of the
-    /// right-hand-side operand.
-    public OffsetBase operator -(OffsetBase other)
-    {
-        if (other is Size)
-            return new Offset(width - other.width, height - other.height);
-        if (other is Offset)
-            return new Size(width - other.dx, height - other.dy);
-        throw new ArgumentException(other);
-    }
+        /// Division operator.
+        ///
+        /// Returns a [Size] whose dimensions are the dimensions of the left-hand-side
+        /// operand (a [Size]) divided by the scalar right-hand-side operand (a
+        /// [double]).
+        public Size operator /(double operand) => new Size(width / operand, height / operand);
 
-    /// Binary addition operator for adding an [Offset] to a [Size].
-    ///
-    /// Returns a [Size] whose [width] is the sum of the [width] of the
-    /// left-hand-side operand, a [Size], and the [Offset.dx] dimension of the
-    /// right-hand-side operand, an [Offset], and whose [height] is the sum of the
-    /// [height] of the left-hand-side operand and the [Offset.dy] dimension of
-    /// the right-hand-side operand.
-    public Size operator +(Offset other) => new Size(width + other.dx, height + other.dy);
-
-    /// Multiplication operator.
-    ///
-    /// Returns a [Size] whose dimensions are the dimensions of the left-hand-side
-    /// operand (a [Size]) multiplied by the scalar right-hand-side operand (a
-    /// [double]).
-    public Size operator *(double operand) => new Size(width * operand, height * operand);
-
-    /// Division operator.
-    ///
-    /// Returns a [Size] whose dimensions are the dimensions of the left-hand-side
-    /// operand (a [Size]) divided by the scalar right-hand-side operand (a
-    /// [double]).
-    public Size operator /(double operand) => new Size(width / operand, height / operand);
-
-    /// Integer (truncating) division operator.
-    ///
-    /// Returns a [Size] whose dimensions are the dimensions of the left-hand-side
-    /// operand (a [Size]) divided by the scalar right-hand-side operand (a
-    /// [double]), rounded towards zero.
-    public Size operator ~/ (double operand) => new Size((width ~/ operand).toDouble(), (height ~/ operand).toDouble());
+        /// Integer (truncating) division operator.
+        ///
+        /// Returns a [Size] whose dimensions are the dimensions of the left-hand-side
+        /// operand (a [Size]) divided by the scalar right-hand-side operand (a
+        /// [double]), rounded towards zero.
+        public Size operator ~/ (double operand) => new Size((width ~/ operand).toDouble(), (height ~/ operand).toDouble());
 
         /// Modulo (remainder) operator.
         ///
@@ -456,147 +458,147 @@ public class Size : OffsetBase
         /// [double]).
         public Size operator %(double operand) => new Size(width % operand, height % operand);
 
-    /// The lesser of the magnitudes of the [width] and the [height].
-    public double shortestSide => math.min(width.abs(), height.abs());
+        /// The lesser of the magnitudes of the [width] and the [height].
+        public double shortestSide => math.min(width.abs(), height.abs());
 
-    /// The greater of the magnitudes of the [width] and the [height].
-    public double longestSide => math.max(width.abs(), height.abs());
+        /// The greater of the magnitudes of the [width] and the [height].
+        public double longestSide => math.max(width.abs(), height.abs());
 
-    // Convenience methods that do the equivalent of calling the similarly named
-    // methods on a Rect constructed from the given origin and this size.
+        // Convenience methods that do the equivalent of calling the similarly named
+        // methods on a Rect constructed from the given origin and this size.
 
-    /// The offset to the intersection of the top and left edges of the rectangle
-    /// described by the given [Offset] (which is interpreted as the top-left corner)
-    /// and this [Size].
-    ///
-    /// See also [Rect.topLeft].
-    public Offset topLeft(Offset origin) => origin;
+        /// The offset to the intersection of the top and left edges of the rectangle
+        /// described by the given [Offset] (which is interpreted as the top-left corner)
+        /// and this [Size].
+        ///
+        /// See also [Rect.topLeft].
+        public Offset topLeft(Offset origin) => origin;
 
-    /// The offset to the center of the top edge of the rectangle described by the
-    /// given offset (which is interpreted as the top-left corner) and this size.
-    ///
-    /// See also [Rect.topCenter].
-    public Offset topCenter(Offset origin) => new Offset(origin.dx + width / 2.0, origin.dy);
+        /// The offset to the center of the top edge of the rectangle described by the
+        /// given offset (which is interpreted as the top-left corner) and this size.
+        ///
+        /// See also [Rect.topCenter].
+        public Offset topCenter(Offset origin) => new Offset(origin.dx + width / 2.0, origin.dy);
 
-    /// The offset to the intersection of the top and right edges of the rectangle
-    /// described by the given offset (which is interpreted as the top-left corner)
-    /// and this size.
-    ///
-    /// See also [Rect.topRight].
-    public Offset topRight(Offset origin) => new Offset(origin.dx + width, origin.dy);
+        /// The offset to the intersection of the top and right edges of the rectangle
+        /// described by the given offset (which is interpreted as the top-left corner)
+        /// and this size.
+        ///
+        /// See also [Rect.topRight].
+        public Offset topRight(Offset origin) => new Offset(origin.dx + width, origin.dy);
 
-    /// The offset to the center of the left edge of the rectangle described by the
-    /// given offset (which is interpreted as the top-left corner) and this size.
-    ///
-    /// See also [Rect.centerLeft].
-    public Offset centerLeft(Offset origin) => new Offset(origin.dx, origin.dy + height / 2.0);
+        /// The offset to the center of the left edge of the rectangle described by the
+        /// given offset (which is interpreted as the top-left corner) and this size.
+        ///
+        /// See also [Rect.centerLeft].
+        public Offset centerLeft(Offset origin) => new Offset(origin.dx, origin.dy + height / 2.0);
 
-    /// The offset to the point halfway between the left and right and the top and
-    /// bottom edges of the rectangle described by the given offset (which is
-    /// interpreted as the top-left corner) and this size.
-    ///
-    /// See also [Rect.center].
-    public Offset center(Offset origin) => new Offset(origin.dx + width / 2.0, origin.dy + height / 2.0);
+        /// The offset to the point halfway between the left and right and the top and
+        /// bottom edges of the rectangle described by the given offset (which is
+        /// interpreted as the top-left corner) and this size.
+        ///
+        /// See also [Rect.center].
+        public Offset center(Offset origin) => new Offset(origin.dx + width / 2.0, origin.dy + height / 2.0);
 
-    /// The offset to the center of the right edge of the rectangle described by the
-    /// given offset (which is interpreted as the top-left corner) and this size.
-    ///
-    /// See also [Rect.centerLeft].
-    public Offset centerRight(Offset origin) => new Offset(origin.dx + width, origin.dy + height / 2.0);
+        /// The offset to the center of the right edge of the rectangle described by the
+        /// given offset (which is interpreted as the top-left corner) and this size.
+        ///
+        /// See also [Rect.centerLeft].
+        public Offset centerRight(Offset origin) => new Offset(origin.dx + width, origin.dy + height / 2.0);
 
-    /// The offset to the intersection of the bottom and left edges of the
-    /// rectangle described by the given offset (which is interpreted as the
-    /// top-left corner) and this size.
-    ///
-    /// See also [Rect.bottomLeft].
-    public Offset bottomLeft(Offset origin) => new Offset(origin.dx, origin.dy + height);
+        /// The offset to the intersection of the bottom and left edges of the
+        /// rectangle described by the given offset (which is interpreted as the
+        /// top-left corner) and this size.
+        ///
+        /// See also [Rect.bottomLeft].
+        public Offset bottomLeft(Offset origin) => new Offset(origin.dx, origin.dy + height);
 
-    /// The offset to the center of the bottom edge of the rectangle described by
-    /// the given offset (which is interpreted as the top-left corner) and this
-    /// size.
-    ///
-    /// See also [Rect.bottomLeft].
-    public Offset bottomCenter(Offset origin) => new Offset(origin.dx + width / 2.0, origin.dy + height);
+        /// The offset to the center of the bottom edge of the rectangle described by
+        /// the given offset (which is interpreted as the top-left corner) and this
+        /// size.
+        ///
+        /// See also [Rect.bottomLeft].
+        public Offset bottomCenter(Offset origin) => new Offset(origin.dx + width / 2.0, origin.dy + height);
 
-    /// The offset to the intersection of the bottom and right edges of the
-    /// rectangle described by the given offset (which is interpreted as the
-    /// top-left corner) and this size.
-    ///
-    /// See also [Rect.bottomRight].
-    public Offset bottomRight(Offset origin) => new Offset(origin.dx + width, origin.dy + height);
+        /// The offset to the intersection of the bottom and right edges of the
+        /// rectangle described by the given offset (which is interpreted as the
+        /// top-left corner) and this size.
+        ///
+        /// See also [Rect.bottomRight].
+        public Offset bottomRight(Offset origin) => new Offset(origin.dx + width, origin.dy + height);
 
-    /// Whether the point specified by the given offset (which is assumed to be
-    /// relative to the top left of the size) lies between the left and right and
-    /// the top and bottom edges of a rectangle of this size.
-    ///
-    /// Rectangles include their top and left edges but exclude their bottom and
-    /// right edges.
-    public bool contains(Offset offset)
-    {
-        return offset.dx >= 0.0 && offset.dx < width && offset.dy >= 0.0 && offset.dy < height;
+        /// Whether the point specified by the given offset (which is assumed to be
+        /// relative to the top left of the size) lies between the left and right and
+        /// the top and bottom edges of a rectangle of this size.
+        ///
+        /// Rectangles include their top and left edges but exclude their bottom and
+        /// right edges.
+        public bool contains(Offset offset)
+        {
+            return offset.dx >= 0.0 && offset.dx < width && offset.dy >= 0.0 && offset.dy < height;
+        }
+
+        /// A [Size] with the [width] and [height] swapped.
+        public Size flipped => new Size(height, width);
+
+        /// Linearly interpolate between two sizes
+        ///
+        /// If either size is null, this function interpolates from [Size.zero].
+        ///
+        /// The `t` argument represents position on the timeline, with 0.0 meaning
+        /// that the interpolation has not started, returning `a` (or something
+        /// equivalent to `a`), 1.0 meaning that the interpolation has finished,
+        /// returning `b` (or something equivalent to `b`), and values in between
+        /// meaning that the interpolation is at the relevant point on the timeline
+        /// between `a` and `b`. The interpolation can be extrapolated beyond 0.0 and
+        /// 1.0, so negative values and values greater than 1.0 are valid (and can
+        /// easily be generated by curves such as [Curves.elasticInOut]).
+        ///
+        /// Values for `t` are usually obtained from an [Animation<double>], such as
+        /// an [AnimationController].
+        public static Size lerp(Size a, Size b, double t)
+        {
+            assert(t != null);
+            if (a == null && b == null)
+                return null;
+            if (a == null)
+                return b * t;
+            if (b == null)
+                return a * (1.0 - t);
+            return new Size(lerpDouble(a.width, b.width, t), lerpDouble(a.height, b.height, t));
+        }
+
+        /// Compares two Sizes for equality.
+        // We don't compare the runtimeType because of _DebugSize in the framework.
+        public bool operator ==(dynamic other)
+        {
+            if (other is !Size)
+                return false;
+            final Size typedOther = other;
+            return _dx == typedOther._dx &&
+                   _dy == typedOther._dy;
+        }
+
+        public int hashCode => hashValues(_dx, _dy);
+
+        public String toString() => 'Size(${width?.toStringAsFixed(1)}, ${height?.toStringAsFixed(1)})';
     }
 
-    /// A [Size] with the [width] and [height] swapped.
-    public Size flipped => new Size(height, width);
-
-    /// Linearly interpolate between two sizes
+    /// An immutable, 2D, axis-aligned, floating-point rectangle whose coordinates
+    /// are relative to a given origin.
     ///
-    /// If either size is null, this function interpolates from [Size.zero].
+    /// A Rect can be created with one its constructors or from an [Offset] and a
+    /// [Size] using the `&` operator:
     ///
-    /// The `t` argument represents position on the timeline, with 0.0 meaning
-    /// that the interpolation has not started, returning `a` (or something
-    /// equivalent to `a`), 1.0 meaning that the interpolation has finished,
-    /// returning `b` (or something equivalent to `b`), and values in between
-    /// meaning that the interpolation is at the relevant point on the timeline
-    /// between `a` and `b`. The interpolation can be extrapolated beyond 0.0 and
-    /// 1.0, so negative values and values greater than 1.0 are valid (and can
-    /// easily be generated by curves such as [Curves.elasticInOut]).
-    ///
-    /// Values for `t` are usually obtained from an [Animation<double>], such as
-    /// an [AnimationController].
-    public static Size lerp(Size a, Size b, double t)
+    /// ```dart
+    /// Rect myRect = const Offset(1.0, 2.0) & const Size(3.0, 4.0);
+    /// ```
+    public class Rect
     {
-        assert(t != null);
-        if (a == null && b == null)
-            return null;
-        if (a == null)
-            return b * t;
-        if (b == null)
-            return a * (1.0 - t);
-        return new Size(lerpDouble(a.width, b.width, t), lerpDouble(a.height, b.height, t));
-    }
+        private Rect() { }
 
-    /// Compares two Sizes for equality.
-    // We don't compare the runtimeType because of _DebugSize in the framework.
-    public bool operator ==(dynamic other)
-    {
-        if (other is !Size)
-            return false;
-        final Size typedOther = other;
-        return _dx == typedOther._dx &&
-               _dy == typedOther._dy;
-    }
-
-    public int hashCode => hashValues(_dx, _dy);
-
-    public String toString() => 'Size(${width?.toStringAsFixed(1)}, ${height?.toStringAsFixed(1)})';
-}
-
-/// An immutable, 2D, axis-aligned, floating-point rectangle whose coordinates
-/// are relative to a given origin.
-///
-/// A Rect can be created with one its constructors or from an [Offset] and a
-/// [Size] using the `&` operator:
-///
-/// ```dart
-/// Rect myRect = const Offset(1.0, 2.0) & const Size(3.0, 4.0);
-/// ```
-public class Rect
-{
-    private Rect() { }
-
-    /// Construct a rectangle from its left, top, right, and bottom edges.
-    Rect.fromLTRB(double left, double top, double right, double bottom) {
+        /// Construct a rectangle from its left, top, right, and bottom edges.
+        Rect.fromLTRB(double left, double top, double right, double bottom) {
     _value
       ..[0] = left
       ..[1] = top
@@ -604,12 +606,12 @@ public class Rect
       ..[3] = bottom;
   }
 
-/// Construct a rectangle from its left and top edges, its width, and its
-/// height.
-///
-/// To construct a [Rect] from an [Offset] and a [Size], you can use the
-/// rectangle constructor operator `&`. See [Offset.&].
-Rect.fromLTWH(double left, double top, double width, double height) {
+    /// Construct a rectangle from its left and top edges, its width, and its
+    /// height.
+    ///
+    /// To construct a [Rect] from an [Offset] and a [Size], you can use the
+    /// rectangle constructor operator `&`. See [Offset.&].
+    Rect.fromLTWH(double left, double top, double width, double height) {
     _value
       ..[0] = left
       ..[1] = top
@@ -638,7 +640,7 @@ Rect.fromCircle(Offset center = null, double radius = 0.0) {
       ..[3] = math.max(a.dy, b.dy);
   }
 
-  static const int _kDataSize = 4;
+const int _kDataSize = 4;
 readonly Float32List _value = new Float32List(_kDataSize);
 
 /// The offset of the left edge of this rectangle from the x axis.
