@@ -14,7 +14,11 @@ namespace FlutterBinding.Mapping
         }
 
         public class ByteData
-        { }
+        {
+            public ByteData() { }
+            public ByteData(int value) { }
+
+        }
 
         public class Zone
         {

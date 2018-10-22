@@ -598,283 +598,291 @@ namespace FlutterBinding.UI
         private Rect() { }
 
         /// Construct a rectangle from its left, top, right, and bottom edges.
-        Rect.fromLTRB(double left, double top, double right, double bottom) {
-    _value
-      ..[0] = left
-      ..[1] = top
-      ..[2] = right
-      ..[3] = bottom;
-  }
+        public Rect fromLTRB(double left, double top, double right, double bottom)
+        {
+            _value
+              ..[0] = left
+              ..[1] = top
+              ..[2] = right
+              ..[3] = bottom;
+        }
 
-    /// Construct a rectangle from its left and top edges, its width, and its
-    /// height.
-    ///
-    /// To construct a [Rect] from an [Offset] and a [Size], you can use the
-    /// rectangle constructor operator `&`. See [Offset.&].
-    Rect.fromLTWH(double left, double top, double width, double height) {
-    _value
-      ..[0] = left
-      ..[1] = top
-      ..[2] = left + width
-      ..[3] = top + height;
-  }
+        /// Construct a rectangle from its left and top edges, its width, and its
+        /// height.
+        ///
+        /// To construct a [Rect] from an [Offset] and a [Size], you can use the
+        /// rectangle constructor operator `&`. See [Offset.&].
+        public Rect fromLTWH(double left, double top, double width, double height)
+        {
+            _value
+              ..[0] = left
+              ..[1] = top
+              ..[2] = left + width
+              ..[3] = top + height;
+        }
 
-/// Construct a rectangle that bounds the given circle.
-///
-/// The `center` argument is assumed to be an offset from the origin.
-Rect.fromCircle(Offset center = null, double radius = 0.0) {
-    _value
-      ..[0] = center.dx - radius
-      ..[1] = center.dy - radius
-      ..[2] = center.dx + radius
-      ..[3] = center.dy + radius;
-  }
+        /// Construct a rectangle that bounds the given circle.
+        ///
+        /// The `center` argument is assumed to be an offset from the origin.
+        public Rect fromCircle(Offset center = null, double radius = 0.0)
+        {
+            _value
+              ..[0] = center.dx - radius
+              ..[1] = center.dy - radius
+              ..[2] = center.dx + radius
+              ..[3] = center.dy + radius;
+        }
 
-  /// Construct the smallest rectangle that encloses the given offsets, treating
-  /// them as vectors from the origin.
-  Rect.fromPoints(Offset a, Offset b) {
-    _value
-      ..[0] = math.min(a.dx, b.dx)
-      ..[1] = math.min(a.dy, b.dy)
-      ..[2] = math.max(a.dx, b.dx)
-      ..[3] = math.max(a.dy, b.dy);
-  }
+        /// Construct the smallest rectangle that encloses the given offsets, treating
+        /// them as vectors from the origin.
+        public Rect fromPoints(Offset a, Offset b)
+        {
+            _value
+              ..[0] = math.min(a.dx, b.dx)
+              ..[1] = math.min(a.dy, b.dy)
+              ..[2] = math.max(a.dx, b.dx)
+              ..[3] = math.max(a.dy, b.dy);
+        }
 
-const int _kDataSize = 4;
-readonly Float32List _value = new Float32List(_kDataSize);
+        const int _kDataSize = 4;
+        readonly List<float> _value = new Float32List(_kDataSize);
 
-/// The offset of the left edge of this rectangle from the x axis.
-public double left => _value[0];
+        /// The offset of the left edge of this rectangle from the x axis.
+        public double left => _value[0];
 
-/// The offset of the top edge of this rectangle from the y axis.
-public double top => _value[1];
+        /// The offset of the top edge of this rectangle from the y axis.
+        public double top => _value[1];
 
-/// The offset of the right edge of this rectangle from the x axis.
-public double right => _value[2];
+        /// The offset of the right edge of this rectangle from the x axis.
+        public double right => _value[2];
 
-/// The offset of the bottom edge of this rectangle from the y axis.
-public double bottom => _value[3];
+        /// The offset of the bottom edge of this rectangle from the y axis.
+        public double bottom => _value[3];
 
-/// The distance between the left and right edges of this rectangle.
-public double width => right - left;
+        /// The distance between the left and right edges of this rectangle.
+        public double width => right - left;
 
-/// The distance between the top and bottom edges of this rectangle.
-public double height => bottom - top;
+        /// The distance between the top and bottom edges of this rectangle.
+        public double height => bottom - top;
 
-/// The distance between the upper-left corner and the lower-right corner of
-/// this rectangle.
-public Size size => new Size(width, height);
+        /// The distance between the upper-left corner and the lower-right corner of
+        /// this rectangle.
+        public Size size => new Size(width, height);
 
-/// A rectangle with left, top, right, and bottom edges all at zero.
-public static readonly Rect zero = new Rect._();
+        /// A rectangle with left, top, right, and bottom edges all at zero.
+        public static readonly Rect zero = new Rect._();
 
-public static const double _giantScalar = 1.0E+9; // matches kGiantRect from default_layer_builder.cc
+        public static const double _giantScalar = 1.0E+9; // matches kGiantRect from default_layer_builder.cc
 
-/// A rectangle that covers the entire coordinate space.
-///
-/// This covers the space from -1e9,-1e9 to 1e9,1e9.
-/// This is the space over which graphics operations are valid.
-public static readonly Rect largest = new Rect.fromLTRB(-_giantScalar, -_giantScalar, _giantScalar, _giantScalar);
+        /// A rectangle that covers the entire coordinate space.
+        ///
+        /// This covers the space from -1e9,-1e9 to 1e9,1e9.
+        /// This is the space over which graphics operations are valid.
+        public static readonly Rect largest = new Rect.fromLTRB(-_giantScalar, -_giantScalar, _giantScalar, _giantScalar);
 
-/// Whether any of the coordinates of this rectangle are equal to positive infinity.
-// included for consistency with Offset and Size
-public bool isInfinite
-{
+        /// Whether any of the coordinates of this rectangle are equal to positive infinity.
+        // included for consistency with Offset and Size
+        public bool isInfinite
+        {
     return left >= double.infinity
         || top >= double.infinity
         || right >= double.infinity
         || bottom >= double.infinity;
-}
-
-/// Whether all coordinates of this rectangle are finite.
-public bool isFinite => left.isFinite && top.isFinite && right.isFinite && bottom.isFinite;
-
-/// Whether this rectangle encloses a non-zero area. Negative areas are
-/// considered empty.
-public bool isEmpty => left >= right || top >= bottom;
-
-/// Returns a new rectangle translated by the given offset.
-///
-/// To translate a rectangle by separate x and y components rather than by an
-/// [Offset], consider [translate].
-public Rect shift(Offset offset)
-{
-    return new Rect.fromLTRB(left + offset.dx, top + offset.dy, right + offset.dx, bottom + offset.dy);
-}
-
-/// Returns a new rectangle with translateX added to the x components and
-/// translateY added to the y components.
-///
-/// To translate a rectangle by an [Offset] rather than by separate x and y
-/// components, consider [shift].
-public Rect translate(double translateX, double translateY)
-{
-    return new Rect.fromLTRB(left + translateX, top + translateY, right + translateX, bottom + translateY);
-}
-
-/// Returns a new rectangle with edges moved outwards by the given delta.
-public Rect inflate(double delta)
-{
-    return new Rect.fromLTRB(left - delta, top - delta, right + delta, bottom + delta);
-}
-
-/// Returns a new rectangle with edges moved inwards by the given delta.
-public Rect deflate(double delta) => inflate(-delta);
-
-/// Returns a new rectangle that is the intersection of the given
-/// rectangle and this rectangle. The two rectangles must overlap
-/// for this to be meaningful. If the two rectangles do not overlap,
-/// then the resulting Rect will have a negative width or height.
-public Rect intersect(Rect other)
-{
-    return new Rect.fromLTRB(
-      math.max(left, other.left),
-      math.max(top, other.top),
-      math.min(right, other.right),
-      math.min(bottom, other.bottom)
-    );
-}
-
-/// Returns a new rectangle which is the bounding box containing this
-/// rectangle and the given rectangle.
-public Rect expandToInclude(Rect other)
-{
-    return new Rect.fromLTRB(
-        math.min(left, other.left),
-        math.min(top, other.top),
-        math.max(right, other.right),
-        math.max(bottom, other.bottom),
-    );
-}
-
-/// Whether `other` has a nonzero area of overlap with this rectangle.
-public bool overlaps(Rect other)
-{
-    if (right <= other.left || other.right <= left)
-        return false;
-    if (bottom <= other.top || other.bottom <= top)
-        return false;
-    return true;
-}
-
-/// The lesser of the magnitudes of the [width] and the [height] of this
-/// rectangle.
-public double shortestSide => math.min(width.abs(), height.abs());
-
-/// The greater of the magnitudes of the [width] and the [height] of this
-/// rectangle.
-public double longestSide => math.max(width.abs(), height.abs());
-
-/// The offset to the intersection of the top and left edges of this rectangle.
-///
-/// See also [Size.topLeft].
-public Offset topLeft => new Offset(left, top);
-
-/// The offset to the center of the top edge of this rectangle.
-///
-/// See also [Size.topCenter].
-public Offset topCenter => new Offset(left + width / 2.0, top);
-
-/// The offset to the intersection of the top and right edges of this rectangle.
-///
-/// See also [Size.topRight].
-public Offset topRight => new Offset(right, top);
-
-/// The offset to the center of the left edge of this rectangle.
-///
-/// See also [Size.centerLeft].
-public Offset centerLeft => new Offset(left, top + height / 2.0);
-
-/// The offset to the point halfway between the left and right and the top and
-/// bottom edges of this rectangle.
-///
-/// See also [Size.center].
-public Offset center => new Offset(left + width / 2.0, top + height / 2.0);
-
-/// The offset to the center of the right edge of this rectangle.
-///
-/// See also [Size.centerLeft].
-public Offset centerRight => new Offset(right, top + height / 2.0);
-
-/// The offset to the intersection of the bottom and left edges of this rectangle.
-///
-/// See also [Size.bottomLeft].
-public Offset bottomLeft => new Offset(left, bottom);
-
-/// The offset to the center of the bottom edge of this rectangle.
-///
-/// See also [Size.bottomLeft].
-public Offset bottomCenter => new Offset(left + width / 2.0, bottom);
-
-/// The offset to the intersection of the bottom and right edges of this rectangle.
-///
-/// See also [Size.bottomRight].
-public Offset bottomRight => new Offset(right, bottom);
-
-/// Whether the point specified by the given offset (which is assumed to be
-/// relative to the origin) lies between the left and right and the top and
-/// bottom edges of this rectangle.
-///
-/// Rectangles include their top and left edges but exclude their bottom and
-/// right edges.
-public bool contains(Offset offset)
-{
-    return offset.dx >= left && offset.dx < right && offset.dy >= top && offset.dy < bottom;
-}
-
-/// Linearly interpolate between two rectangles.
-///
-/// If either rect is null, [Rect.zero] is used as a substitute.
-///
-/// The `t` argument represents position on the timeline, with 0.0 meaning
-/// that the interpolation has not started, returning `a` (or something
-/// equivalent to `a`), 1.0 meaning that the interpolation has finished,
-/// returning `b` (or something equivalent to `b`), and values in between
-/// meaning that the interpolation is at the relevant point on the timeline
-/// between `a` and `b`. The interpolation can be extrapolated beyond 0.0 and
-/// 1.0, so negative values and values greater than 1.0 are valid (and can
-/// easily be generated by curves such as [Curves.elasticInOut]).
-///
-/// Values for `t` are usually obtained from an [Animation<double>], such as
-/// an [AnimationController].
-public static Rect lerp(Rect a, Rect b, double t)
-{
-    assert(t != null);
-    if (a == null && b == null)
-        return null;
-    if (a == null)
-        return new Rect.fromLTRB(b.left * t, b.top * t, b.right * t, b.bottom * t);
-    if (b == null)
-    {
-        final double k = 1.0 - t;
-        return new Rect.fromLTRB(a.left * k, a.top * k, a.right * k, a.bottom * k);
     }
-    return new Rect.fromLTRB(
-      lerpDouble(a.left, b.left, t),
-      lerpDouble(a.top, b.top, t),
-      lerpDouble(a.right, b.right, t),
-      lerpDouble(a.bottom, b.bottom, t),
-    );
-}
 
-public bool operator ==(dynamic other)
-{
-    if (identical(this, other))
-        return true;
-    if (runtimeType != other.runtimeType)
-        return false;
-    final Rect typedOther = other;
-    for (int i = 0; i < _kDataSize; i += 1)
+    /// Whether all coordinates of this rectangle are finite.
+    public bool isFinite => left.isFinite && top.isFinite && right.isFinite && bottom.isFinite;
+
+    /// Whether this rectangle encloses a non-zero area. Negative areas are
+    /// considered empty.
+    public bool isEmpty => left >= right || top >= bottom;
+
+    /// Returns a new rectangle translated by the given offset.
+    ///
+    /// To translate a rectangle by separate x and y components rather than by an
+    /// [Offset], consider [translate].
+    public Rect shift(Offset offset)
     {
-        if (_value[i] != typedOther._value[i])
+        return new Rect.fromLTRB(left + offset.dx, top + offset.dy, right + offset.dx, bottom + offset.dy);
+    }
+
+    /// Returns a new rectangle with translateX added to the x components and
+    /// translateY added to the y components.
+    ///
+    /// To translate a rectangle by an [Offset] rather than by separate x and y
+    /// components, consider [shift].
+    public Rect translate(double translateX, double translateY)
+    {
+        return new Rect.fromLTRB(left + translateX, top + translateY, right + translateX, bottom + translateY);
+    }
+
+    /// Returns a new rectangle with edges moved outwards by the given delta.
+    public Rect inflate(double delta)
+    {
+        return new Rect.fromLTRB(left - delta, top - delta, right + delta, bottom + delta);
+    }
+
+    /// Returns a new rectangle with edges moved inwards by the given delta.
+    public Rect deflate(double delta) => inflate(-delta);
+
+    /// Returns a new rectangle that is the intersection of the given
+    /// rectangle and this rectangle. The two rectangles must overlap
+    /// for this to be meaningful. If the two rectangles do not overlap,
+    /// then the resulting Rect will have a negative width or height.
+    public Rect intersect(Rect other)
+    {
+        return new Rect.fromLTRB(
+          math.max(left, other.left),
+          math.max(top, other.top),
+          math.min(right, other.right),
+          math.min(bottom, other.bottom)
+        );
+    }
+
+    /// Returns a new rectangle which is the bounding box containing this
+    /// rectangle and the given rectangle.
+    public Rect expandToInclude(Rect other)
+    {
+        return new Rect.fromLTRB(
+            math.min(left, other.left),
+            math.min(top, other.top),
+            math.max(right, other.right),
+            math.max(bottom, other.bottom),
+
+
+        );
+    }
+
+    /// Whether `other` has a nonzero area of overlap with this rectangle.
+    public bool overlaps(Rect other)
+    {
+        if (right <= other.left || other.right <= left)
             return false;
+        if (bottom <= other.top || other.bottom <= top)
+            return false;
+        return true;
     }
-    return true;
-}
 
-public int hashCode => hashList(_value);
+    /// The lesser of the magnitudes of the [width] and the [height] of this
+    /// rectangle.
+    public double shortestSide => math.min(width.abs(), height.abs());
 
-String toString() => 'Rect.fromLTRB(${left.toStringAsFixed(1)}, ${top.toStringAsFixed(1)}, ${right.toStringAsFixed(1)}, ${bottom.toStringAsFixed(1)})';
+    /// The greater of the magnitudes of the [width] and the [height] of this
+    /// rectangle.
+    public double longestSide => math.max(width.abs(), height.abs());
+
+    /// The offset to the intersection of the top and left edges of this rectangle.
+    ///
+    /// See also [Size.topLeft].
+    public Offset topLeft => new Offset(left, top);
+
+    /// The offset to the center of the top edge of this rectangle.
+    ///
+    /// See also [Size.topCenter].
+    public Offset topCenter => new Offset(left + width / 2.0, top);
+
+    /// The offset to the intersection of the top and right edges of this rectangle.
+    ///
+    /// See also [Size.topRight].
+    public Offset topRight => new Offset(right, top);
+
+    /// The offset to the center of the left edge of this rectangle.
+    ///
+    /// See also [Size.centerLeft].
+    public Offset centerLeft => new Offset(left, top + height / 2.0);
+
+    /// The offset to the point halfway between the left and right and the top and
+    /// bottom edges of this rectangle.
+    ///
+    /// See also [Size.center].
+    public Offset center => new Offset(left + width / 2.0, top + height / 2.0);
+
+    /// The offset to the center of the right edge of this rectangle.
+    ///
+    /// See also [Size.centerLeft].
+    public Offset centerRight => new Offset(right, top + height / 2.0);
+
+    /// The offset to the intersection of the bottom and left edges of this rectangle.
+    ///
+    /// See also [Size.bottomLeft].
+    public Offset bottomLeft => new Offset(left, bottom);
+
+    /// The offset to the center of the bottom edge of this rectangle.
+    ///
+    /// See also [Size.bottomLeft].
+    public Offset bottomCenter => new Offset(left + width / 2.0, bottom);
+
+    /// The offset to the intersection of the bottom and right edges of this rectangle.
+    ///
+    /// See also [Size.bottomRight].
+    public Offset bottomRight => new Offset(right, bottom);
+
+    /// Whether the point specified by the given offset (which is assumed to be
+    /// relative to the origin) lies between the left and right and the top and
+    /// bottom edges of this rectangle.
+    ///
+    /// Rectangles include their top and left edges but exclude their bottom and
+    /// right edges.
+    public bool contains(Offset offset)
+    {
+        return offset.dx >= left && offset.dx < right && offset.dy >= top && offset.dy < bottom;
+    }
+
+    /// Linearly interpolate between two rectangles.
+    ///
+    /// If either rect is null, [Rect.zero] is used as a substitute.
+    ///
+    /// The `t` argument represents position on the timeline, with 0.0 meaning
+    /// that the interpolation has not started, returning `a` (or something
+    /// equivalent to `a`), 1.0 meaning that the interpolation has finished,
+    /// returning `b` (or something equivalent to `b`), and values in between
+    /// meaning that the interpolation is at the relevant point on the timeline
+    /// between `a` and `b`. The interpolation can be extrapolated beyond 0.0 and
+    /// 1.0, so negative values and values greater than 1.0 are valid (and can
+    /// easily be generated by curves such as [Curves.elasticInOut]).
+    ///
+    /// Values for `t` are usually obtained from an [Animation<double>], such as
+    /// an [AnimationController].
+    public static Rect lerp(Rect a, Rect b, double t)
+    {
+        assert(t != null);
+        if (a == null && b == null)
+            return null;
+        if (a == null)
+            return new Rect.fromLTRB(b.left * t, b.top * t, b.right * t, b.bottom * t);
+        if (b == null)
+        {
+            final double k = 1.0 - t;
+            return new Rect.fromLTRB(a.left * k, a.top * k, a.right * k, a.bottom * k);
+        }
+        return new Rect.fromLTRB(
+          lerpDouble(a.left, b.left, t),
+          lerpDouble(a.top, b.top, t),
+          lerpDouble(a.right, b.right, t),
+          lerpDouble(a.bottom, b.bottom, t),
+
+
+        );
+    }
+
+    public bool operator ==(dynamic other)
+    {
+        if (identical(this, other))
+            return true;
+        if (runtimeType != other.runtimeType)
+            return false;
+        final Rect typedOther = other;
+        for (int i = 0; i < _kDataSize; i += 1)
+        {
+            if (_value[i] != typedOther._value[i])
+                return false;
+        }
+        return true;
+    }
+
+    public int hashCode => hashList(_value);
+
+    String toString() => 'Rect.fromLTRB(${left.toStringAsFixed(1)}, ${top.toStringAsFixed(1)}, ${right.toStringAsFixed(1)}, ${bottom.toStringAsFixed(1)})';
 }
 
 /// A radius for either circular or elliptical shapes.
@@ -1143,8 +1151,8 @@ RRect.fromLTRBR(double left, double top, double right, double bottom,
       _value[i] = list[i];
   }
 
- public static const int _kDataSize = 12;
-readonly Float32List _value = new Float32List(_kDataSize);
+const int _kDataSize = 12;
+readonly List<float> _value = new List<float>(_kDataSize);
 RRect _scaled; // same RRect with scaled radii per side
 
 /// The offset of the left edge of this rectangle from the x axis.
@@ -1693,7 +1701,7 @@ public class RSTransform
         return new RSTransform(scos, ssin, tx, ty);
     }
 
-    readonly Float32List _value = new Float32List(4);
+    readonly List<float> _value = new Float32List(4);
 
     /// The cosine of the rotation multiplied by the scale factor.
     public double scos => _value[0];

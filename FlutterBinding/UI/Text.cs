@@ -1,6 +1,7 @@
 ﻿using FlutterBinding.UI;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using static FlutterBinding.UI.Lerp;
 
 namespace FlutterBinding.UI
@@ -278,7 +279,7 @@ Int32List _encodeTextStyle(
   List<Shadow> shadows
 )
 {
-    final Int32List result = new Int32List(8);
+    List<int> result = new List<int>(8);
     if (color != null)
     {
         result[0] |= 1 << 1;
@@ -651,6 +652,8 @@ fontSize,
 lineHeight,
 ellipsis,
 locale,
+
+
 
 
 
@@ -1173,12 +1176,16 @@ public class ParagraphBuilder : NativeFieldWrapperClass2
         return string.Empty; // Tmp to resolve build
     }
 
-  /// Applies the given paragraph style and returns a [Paragraph] containing the
-  /// added text and associated styling.
-  ///
-  /// After calling this function, the paragraph builder object is invalid and
-  /// cannot be used further.
-  Paragraph build() native 'ParagraphBuilder_build';
+    /// Applies the given paragraph style and returns a [Paragraph] containing the
+    /// added text and associated styling.
+    ///
+    /// After calling this function, the paragraph builder object is invalid and
+    /// cannot be used further.
+    public Paragraph build()
+    {
+        // native 'ParagraphBuilder_build';
+        return null; // Tmp to resolve build
+    }
 }
 
 /// Loads a font from a buffer and makes it available for rendering text.
@@ -1186,11 +1193,16 @@ public class ParagraphBuilder : NativeFieldWrapperClass2
 /// * `list`: A list of bytes containing the font file.
 /// * `fontFamily`: The family name used to identify the font in text styles.
 ///  If this is not provided, then the family name will be extracted from the font file.
-Task<void> loadFontFromList(Uint8List list, { String fontFamily}) {
-  return _futurize(
-    (_Callback<void> callback) => _loadFontFromList(list, callback, fontFamily)
-  );
+Task<void> loadFontFromList(Uint8List list, String fontFamily = "")
+{
+    return _futurize(
+      (_Callback<void> callback) => _loadFontFromList(list, callback, fontFamily)
+    );
 }
 
-String _loadFontFromList(Uint8List list, _Callback<void> callback, String fontFamily) native 'loadFontFromList';
+String _loadFontFromList(Uint8List list, _Callback<void> callback, String fontFamily)
+{
+    // native 'loadFontFromList';
+    return string.Empty; // Tmp to resolve build
+}
 }

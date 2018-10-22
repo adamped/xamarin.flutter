@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace FlutterBinding.UI
 {
@@ -78,6 +79,7 @@ namespace FlutterBinding.UI
         public EngineLayer pushOffset(double dx, double dy)
         {
             // native 'SceneBuilder_pushOffset';
+            return null; // Tmp to resolve build
         }
 
         /// Pushes a rectangular clip operation onto the operation stack.
@@ -144,8 +146,11 @@ namespace FlutterBinding.UI
         /// opacity).
         ///
         /// See [pop] for details about the operation stack.
-        public void pushOpacity(int alpha, Offset offset = Offset.zero)
+        public void pushOpacity(int alpha, Offset offset = null)
         {
+            if (offset == null)
+                offset = Offset.zero;
+
             _pushOpacity(alpha, offset.dx, offset.dy);
         }
         void _pushOpacity(int alpha, double dx, double dy)
@@ -161,7 +166,7 @@ namespace FlutterBinding.UI
         /// See [pop] for details about the operation stack.
         public void pushColorFilter(Color color, BlendMode blendMode)
         {
-            _pushColorFilter(color.value, blendMode.index);
+            _pushColorFilter(color.value, (int)blendMode);
         }
         void _pushColorFilter(int color, int blendMode)
         {
@@ -192,7 +197,7 @@ namespace FlutterBinding.UI
                             maskRect.right,
                             maskRect.top,
                             maskRect.bottom,
-                            blendMode.index);
+                            (int)blendMode);
         }
         void _pushShaderMask(Shader shader,
                              double maskRectLeft,
@@ -219,11 +224,12 @@ namespace FlutterBinding.UI
         // ignore: deprecated_member_use
         public EngineLayer pushPhysicalShape(Path path, double elevation, Color color, Color shadowColor, Clip clipBehavior = defaultClipBehavior)
         {
-            return _pushPhysicalShape(path, elevation, color.value, shadowColor?.value ?? 0xFF000000, clipBehavior.index);
+            return _pushPhysicalShape(path, elevation, color.value, shadowColor?.value ?? 0xFF000000, (int)clipBehavior);
         }
         EngineLayer _pushPhysicalShape(Path path, double elevation, int color, int shadowColor, int clipBehavior)
         {
             // native 'SceneBuilder_pushPhysicalShape';
+            return null; // Tmp to resolve build
         }
 
         /// Ends the effect of the most recently pushed operation.
@@ -248,6 +254,7 @@ namespace FlutterBinding.UI
         public EngineLayer addRetained(EngineLayer retainedLayer)
         {
             // native 'SceneBuilder_addRetained';
+            return null; // Tmp to resolve build
         }
 
         /// Adds an object to the scene that displays performance statistics.
