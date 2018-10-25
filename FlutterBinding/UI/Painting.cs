@@ -167,7 +167,7 @@ namespace FlutterBinding.UI
         /// * Bits 16-23 are the red value.
         /// * Bits 8-15 are the green value.
         /// * Bits 0-7 are the blue value.
-        public int value;
+        public uint value;
 
         /// The alpha channel of this color in an 8 bit value.
         ///

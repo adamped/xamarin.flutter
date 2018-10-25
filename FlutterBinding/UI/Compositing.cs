@@ -1,5 +1,6 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using FlutterBinding.Mapping;
+using System;
+using System.Collections.Generic;
 
 namespace FlutterBinding.UI
 {
@@ -14,10 +15,10 @@ namespace FlutterBinding.UI
     {
         /// Creates a raster image representation of the current state of the scene.
         /// This is a slow operation that is performed on a background thread.
-        public Task<Image> toImage(int width, int height)
+        public Future<Image> toImage(int width, int height)
         {
             if (width <= 0 || height <= 0)
-                throw new Exception('Invalid image dimensions.');
+                throw new Exception("Invalid image dimensions.");
             return _futurize(
               (_Callback<Image> callback) => _toImage(width, height, callback)
             );
@@ -25,7 +26,11 @@ namespace FlutterBinding.UI
 
         String _toImage(int width, int height, _Callback<Image> callback)
         {
+            // create image and send via callback
+            // only send string if an error occurs.
+
             // native 'Scene_toImage';
+            return string.Empty; // Tmp to resolve build
         }
 
         /// Releases the resources used by this scene.
@@ -58,15 +63,15 @@ namespace FlutterBinding.UI
         /// The objects are transformed by the given matrix before rasterization.
         ///
         /// See [pop] for details about the operation stack.
-        public void pushTransform(Float64List matrix4)
+        public void pushTransform(List<double> matrix4)
         {
             if (matrix4 == null)
-                throw new ArgumentException('"matrix4" argument cannot be null');
-            if (matrix4.length != 16)
-                throw new ArgumentException('"matrix4" must have 16 entries.');
+                throw new ArgumentException("'matrix4' argument cannot be null");
+            if (matrix4.Count != 16)
+                throw new ArgumentException("'matrix4' must have 16 entries.");
             _pushTransform(matrix4);
         }
-        void _pushTransform(Float64List matrix4)
+        void _pushTransform(List<double> matrix4)
         {
             // native 'SceneBuilder_pushTransform';
         }
@@ -92,7 +97,7 @@ namespace FlutterBinding.UI
         {
             //assert(clipBehavior != null);
             //assert(clipBehavior != Clip.none);
-            _pushClipRect(rect.left, rect.right, rect.top, rect.bottom, clipBehavior.index);
+            _pushClipRect(rect.left, rect.right, rect.top, rect.bottom, (int)clipBehavior);
         }
 
         void _pushClipRect(double left,
@@ -114,9 +119,9 @@ namespace FlutterBinding.UI
         {
             //assert(clipBehavior != null);
             //assert(clipBehavior != Clip.none);
-            _pushClipRRect(rrect._value, clipBehavior.index);
+            _pushClipRRect(rrect._value, (int)clipBehavior);
         }
-        void _pushClipRRect(Float32List rrect, int clipBehavior)
+        void _pushClipRRect(List<double> rrect, int clipBehavior)
         {
             // native 'SceneBuilder_pushClipRRect';
         }
@@ -131,7 +136,7 @@ namespace FlutterBinding.UI
         {
             //assert(clipBehavior != null);
             //assert(clipBehavior != Clip.none);
-            _pushClipPath(path, clipBehavior.index);
+            _pushClipPath(path, (int)clipBehavior);
         }
         void _pushClipPath(Path path, int clipBehavior)
         {
@@ -168,7 +173,7 @@ namespace FlutterBinding.UI
         {
             _pushColorFilter(color.value, (int)blendMode);
         }
-        void _pushColorFilter(int color, int blendMode)
+        void _pushColorFilter(uint color, int blendMode)
         {
             // native 'SceneBuilder_pushColorFilter';
         }
@@ -222,11 +227,11 @@ namespace FlutterBinding.UI
         ///
         /// See [pop] for details about the operation stack, and [Clip] for different clip modes.
         // ignore: deprecated_member_use
-        public EngineLayer pushPhysicalShape(Path path, double elevation, Color color, Color shadowColor, Clip clipBehavior = defaultClipBehavior)
+        public EngineLayer pushPhysicalShape(Path path, double elevation, Color color, Color shadowColor, Clip clipBehavior = Clip.none)
         {
             return _pushPhysicalShape(path, elevation, color.value, shadowColor?.value ?? 0xFF000000, (int)clipBehavior);
         }
-        EngineLayer _pushPhysicalShape(Path path, double elevation, int color, int shadowColor, int clipBehavior)
+        EngineLayer _pushPhysicalShape(Path path, double elevation, uint color, uint shadowColor, int clipBehavior)
         {
             // native 'SceneBuilder_pushPhysicalShape';
             return null; // Tmp to resolve build
@@ -326,8 +331,11 @@ namespace FlutterBinding.UI
         /// previous or new size, to workaround this the framework "freezes" the
         /// texture just before resizing the Android view and unfreezes it when it is
         /// certain that a frame with the new size is ready.
-        public void addTexture(int textureId, Offset offset = Offset.zero, double width = 0.0, double height = 0.0, bool freeze = false)
+        public void addTexture(int textureId, Offset offset = null, double width = 0.0, double height = 0.0, bool freeze = false)
         {
+            if (offset == null)
+                offset = Offset.zero;
+
             //assert(offset != null, 'Offset argument was null');
             _addTexture(offset.dx, offset.dy, width, height, textureId, freeze);
         }
@@ -339,8 +347,10 @@ namespace FlutterBinding.UI
         /// Adds a platform view (e.g an iOS UIView) to the scene.
         ///
         /// This is work in progress and is not currently supported on any platform.
-        public void addPlatformView(int viewId, Offset offset = Offset.zero, double width = 0.0, double height = 0.0)
+        public void addPlatformView(int viewId, Offset offset = null, double width = 0.0, double height = 0.0)
         {
+            if (offset == null)
+                offset = Offset.zero;
             //assert(offset != null, 'Offset argument was null');
             _addPlatformView(offset.dx, offset.dy, width, height, viewId);
         }
@@ -352,13 +362,16 @@ namespace FlutterBinding.UI
         /// (Fuchsia-only) Adds a scene rendered by another application to the scene
         /// for this application.
         public void addChildScene(
-                  Offset offset = Offset.zero,
+                  Offset offset = null,
           double width = 0.0,
           double height = 0.0,
           SceneHost sceneHost = null,
           bool hitTestable = true
         )
         {
+            if (offset == null)
+                offset = Offset.zero;
+
             _addChildScene(offset.dx,
                            offset.dy,
                            width,
@@ -429,6 +442,7 @@ namespace FlutterBinding.UI
         public Scene build()
         {
             // native 'SceneBuilder_build';
+            return null; // Tmp to resolve build
         }
     }
 
