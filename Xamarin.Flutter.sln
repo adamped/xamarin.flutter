@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28010.2036
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dart2CSharpTranspiler", "Dart2CSharpTranspiler\Dart2CSharpTranspiler.csproj", "{DF9E7018-6549-4273-93F9-B81A00977CF3}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlutterSDK", "FlutterSDK\FlutterSDK.csproj", "{0781218D-0BCF-4528-AA32-A1937572E43B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{0D75E496-44EB-4553-B1D1-D16F2F2301ED}"
@@ -27,14 +25,15 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flutter.Sample.UWP", "Flutter.Sample.UWP\Flutter.Sample.UWP.csproj", "{F02BD326-5760-4246-9EDC-C41B489E965B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Flutter", "Flutter", "{A3093869-0FE2-4929-8A5C-D384A14F0065}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\Downloads\model.json = ..\..\Downloads\model.json
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flutter.Shell.Droid", "Flutter.Shell.Droid\Flutter.Shell.Droid.csproj", "{C9E1CAA4-53F3-4032-92A0-81F5322D446B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flutter.Sample.Droid", "Flutter.Sample.Droid\Flutter.Sample.Droid.csproj", "{48483C42-37B1-4258-BD46-8387A4FA71C1}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flutter.Sample.App", "Flutter.Sample.App\Flutter.Sample.App.csproj", "{E0FB1BF8-E32C-4A8A-9AE6-E501CC68F279}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Parser", "Parser", "{493C58A3-EDDC-41E7-81C2-CEA8A0C3AB55}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -48,22 +47,6 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{DF9E7018-6549-4273-93F9-B81A00977CF3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DF9E7018-6549-4273-93F9-B81A00977CF3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DF9E7018-6549-4273-93F9-B81A00977CF3}.Debug|ARM.ActiveCfg = Debug|Any CPU
-		{DF9E7018-6549-4273-93F9-B81A00977CF3}.Debug|ARM.Build.0 = Debug|Any CPU
-		{DF9E7018-6549-4273-93F9-B81A00977CF3}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{DF9E7018-6549-4273-93F9-B81A00977CF3}.Debug|x64.Build.0 = Debug|Any CPU
-		{DF9E7018-6549-4273-93F9-B81A00977CF3}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{DF9E7018-6549-4273-93F9-B81A00977CF3}.Debug|x86.Build.0 = Debug|Any CPU
-		{DF9E7018-6549-4273-93F9-B81A00977CF3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DF9E7018-6549-4273-93F9-B81A00977CF3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DF9E7018-6549-4273-93F9-B81A00977CF3}.Release|ARM.ActiveCfg = Release|Any CPU
-		{DF9E7018-6549-4273-93F9-B81A00977CF3}.Release|ARM.Build.0 = Release|Any CPU
-		{DF9E7018-6549-4273-93F9-B81A00977CF3}.Release|x64.ActiveCfg = Release|Any CPU
-		{DF9E7018-6549-4273-93F9-B81A00977CF3}.Release|x64.Build.0 = Release|Any CPU
-		{DF9E7018-6549-4273-93F9-B81A00977CF3}.Release|x86.ActiveCfg = Release|Any CPU
-		{DF9E7018-6549-4273-93F9-B81A00977CF3}.Release|x86.Build.0 = Release|Any CPU
 		{0781218D-0BCF-4528-AA32-A1937572E43B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0781218D-0BCF-4528-AA32-A1937572E43B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0781218D-0BCF-4528-AA32-A1937572E43B}.Debug|ARM.ActiveCfg = Debug|Any CPU
@@ -193,7 +176,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{DF9E7018-6549-4273-93F9-B81A00977CF3} = {493C58A3-EDDC-41E7-81C2-CEA8A0C3AB55}
 		{0781218D-0BCF-4528-AA32-A1937572E43B} = {A3093869-0FE2-4929-8A5C-D384A14F0065}
 		{C9313643-3357-4872-9B00-03E2C79AD297} = {A3093869-0FE2-4929-8A5C-D384A14F0065}
 		{A5BF7067-2A28-4002-AEB4-1965D0DEDC14} = {AEF05715-89B3-4BDE-96B4-A8C502ADD1E5}
