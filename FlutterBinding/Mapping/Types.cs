@@ -1,7 +1,5 @@
 ﻿using FlutterBinding.UI;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace FlutterBinding.Mapping
 {

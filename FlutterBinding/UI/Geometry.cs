@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using static FlutterBinding.UI.Lerp;
+using static FlutterBinding.Mapping.Helper;
 
 namespace FlutterBinding.UI
 {
@@ -344,11 +345,11 @@ namespace FlutterBinding.UI
     public class Size : OffsetBase
     {
         /// Creates a [Size] with the given [width] and [height].
-        public Size(double width, double height) : super(width, height) { }
+        public Size(double width, double height) : base(width, height) { }
 
         /// Creates an instance of [Size] that has the same values as another.
         // Used by the rendering library's _DebugSize hack.
-        public Size.copy(Size source) : super(source.width, source.height) { }
+        public static Size copy(Size source) => new Size(source.width, source.height);
 
         /// Creates a square [Size] whose [width] and [height] are the given dimension.
         ///
@@ -356,13 +357,13 @@ namespace FlutterBinding.UI
         ///
         ///  * [new Size.fromRadius], which is more convenient when the available size
         ///    is the radius of a circle.
-        public Size.square(double dimension) : super(dimension, dimension) { }
+        public static Size square(double dimension) => new Size(dimension, dimension);
 
         /// Creates a [Size] with the given [width] and an infinite [height].
-        public Size.fromWidth(double width) : super(width, double.infinity) { }
+        public static Size fromWidth(double width) => new Size(width, double.PositiveInfinity);
 
         /// Creates a [Size] with the given [height] and an infinite [width].
-        public Size.fromHeight(double height) : super(double.infinity, height) { }
+        public static Size fromHeight(double height) => new Size(double.PositiveInfinity, height);
 
         /// Creates a square [Size] whose [width] and [height] are twice the given
         /// dimension.
@@ -372,7 +373,7 @@ namespace FlutterBinding.UI
         /// See also:
         ///
         ///  * [new Size.square], which creates a square with the given dimension.
-        public Size.fromRadius(double radius) : super(radius* 2.0, radius* 2.0) { }
+        public static Size fromRadius(double radius) => new Size(radius * 2.0, radius * 2.0);
 
         /// The horizontal extent of this size.
         public double width => _dx;
@@ -412,13 +413,13 @@ namespace FlutterBinding.UI
         /// right-hand-side operand, and a [height] consisting of the [height] of the
         /// left-hand-side operand minus the [Offset.dy] dimension of the
         /// right-hand-side operand.
-        public OffsetBase operator -(OffsetBase other)
+        public static OffsetBase operator -(OffsetBase other)
         {
             if (other is Size)
                 return new Offset(width - other.width, height - other.height);
             if (other is Offset)
                 return new Size(width - other.dx, height - other.dy);
-            throw new ArgumentException(other);
+            throw new ArgumentException(other.toString());
         }
 
         /// Binary addition operator for adding an [Offset] to a [Size].
@@ -459,10 +460,10 @@ namespace FlutterBinding.UI
         public Size operator %(double operand) => new Size(width % operand, height % operand);
 
         /// The lesser of the magnitudes of the [width] and the [height].
-        public double shortestSide => math.min(width.abs(), height.abs());
+        public double shortestSide => Math.Min(width.abs(), height.abs());
 
         /// The greater of the magnitudes of the [width] and the [height].
-        public double longestSide => math.max(width.abs(), height.abs());
+        public double longestSide => Math.Max(width.abs(), height.abs());
 
         // Convenience methods that do the equivalent of calling the similarly named
         // methods on a Rect constructed from the given origin and this size.
@@ -642,10 +643,10 @@ namespace FlutterBinding.UI
         public Rect fromPoints(Offset a, Offset b)
         {
             _value
-              ..[0] = math.min(a.dx, b.dx)
-              ..[1] = math.min(a.dy, b.dy)
-              ..[2] = math.max(a.dx, b.dx)
-              ..[3] = math.max(a.dy, b.dy);
+              ..[0] = Math.Min(a.dx, b.dx)
+              ..[1] = Math.Min(a.dy, b.dy)
+              ..[2] = Math.Max(a.dx, b.dx)
+              ..[3] = Math.Max(a.dy, b.dy);
         }
 
         const int _kDataSize = 4;
@@ -734,10 +735,10 @@ namespace FlutterBinding.UI
         public Rect intersect(Rect other)
         {
             return new Rect.fromLTRB(
-              math.max(left, other.left),
-              math.max(top, other.top),
-              math.min(right, other.right),
-              math.min(bottom, other.bottom)
+              Math.Max(left, other.left),
+              Math.Max(top, other.top),
+              Math.Min(right, other.right),
+              Math.Min(bottom, other.bottom)
             );
         }
 
@@ -746,10 +747,10 @@ namespace FlutterBinding.UI
         public Rect expandToInclude(Rect other)
         {
             return new Rect.fromLTRB(
-                math.min(left, other.left),
-                math.min(top, other.top),
-                math.max(right, other.right),
-                math.max(bottom, other.bottom));
+                Math.Min(left, other.left),
+                Math.Min(top, other.top),
+                Math.Max(right, other.right),
+                Math.Max(bottom, other.bottom));
         }
 
         /// Whether `other` has a nonzero area of overlap with this rectangle.
@@ -764,11 +765,11 @@ namespace FlutterBinding.UI
 
         /// The lesser of the magnitudes of the [width] and the [height] of this
         /// rectangle.
-        public double shortestSide => math.min(width.abs(), height.abs());
+        public double shortestSide => Math.Min(width.abs(), height.abs());
 
         /// The greater of the magnitudes of the [width] and the [height] of this
         /// rectangle.
-        public double longestSide => math.max(width.abs(), height.abs());
+        public double longestSide => Math.Max(width.abs(), height.abs());
 
         /// The offset to the intersection of the top and left edges of this rectangle.
         ///
@@ -982,17 +983,12 @@ namespace FlutterBinding.UI
                 return new Radius.elliptical(b.x * t, b.y * t);
             if (b == null)
             {
-                final double k = 1.0 - t;
+                double k = 1.0 - t;
                 return new Radius.elliptical(a.x * k, a.y * k);
             }
             return new Radius.elliptical(
               lerpDouble(a.x, b.x, t),
-              lerpDouble(a.y, b.y, t),
-
-
-
-
-            );
+              lerpDouble(a.y, b.y, t));
         }
 
         public bool operator ==(dynamic other)
@@ -1001,7 +997,7 @@ namespace FlutterBinding.UI
                 return true;
             if (runtimeType != other.runtimeType)
                 return false;
-            final Radius typedOther = other;
+            Radius typedOther = other;
             return typedOther.x == x && typedOther.y == y;
         }
 
@@ -1009,9 +1005,9 @@ namespace FlutterBinding.UI
 
         public String toString()
         {
-            return x == y ? 'Radius.circular(${x.toStringAsFixed(1)})' :
-                            'Radius.elliptical(${x.toStringAsFixed(1)}, '
-                          '${y.toStringAsFixed(1)})';
+            return x == y ? $"Radius.circular({x.toStringAsFixed(1)})" :
+                            $"Radius.elliptical({x.toStringAsFixed(1)}, " +
+                            $"{y.toStringAsFixed(1)})";
         }
     }
 
@@ -1139,19 +1135,18 @@ namespace FlutterBinding.UI
             Radius bottomLeft = Radius.zero
         )
         {
-            _value
-              ..[0] = rect.left
-              ..[1] = rect.top
-              ..[2] = rect.right
-              ..[3] = rect.bottom
-              ..[4] = topLeft.x
-              ..[5] = topLeft.y
-              ..[6] = topRight.x
-              ..[7] = topRight.y
-              ..[8] = bottomRight.x
-              ..[9] = bottomRight.y
-              ..[10] = bottomLeft.x
-              ..[11] = bottomLeft.y;
+            _value[0] = rect.left;
+            _value[1] = rect.top;
+            _value[2] = rect.right;
+            _value[3] = rect.bottom;
+            _value[4] = topLeft.x;
+            _value[5] = topLeft.y;
+            _value[6] = topRight.x;
+            _value[7] = topRight.y;
+            _value[8] = bottomRight.x;
+            _value[9] = bottomRight.y;
+            _value[10] = bottomLeft.x;
+              _value[11] = bottomLeft.y;
         }
 
         RRect _fromList(List<double> list)
@@ -1292,10 +1287,10 @@ namespace FlutterBinding.UI
             {
                 const double kInsetFactor = 0.29289321881; // 1-cos(pi/4)
 
-                final double leftRadius = math.max(blRadiusX, tlRadiusX);
-                final double topRadius = math.max(tlRadiusY, trRadiusY);
-                final double rightRadius = math.max(trRadiusX, brRadiusX);
-                final double bottomRadius = math.max(brRadiusY, blRadiusY);
+                double leftRadius = Math.Max(blRadiusX, tlRadiusX);
+                double topRadius = Math.Max(tlRadiusY, trRadiusY);
+                double rightRadius = Math.Max(trRadiusX, brRadiusX);
+                double bottomRadius = Math.Max(brRadiusY, blRadiusY);
 
                 return new Rect.fromLTRB(
                   left + leftRadius * kInsetFactor,
@@ -1315,10 +1310,9 @@ namespace FlutterBinding.UI
         {
             get
             {
-                final double leftRadius = math.max(blRadiusX, tlRadiusX);
-                final double topRadius = math.max(tlRadiusY, trRadiusY);
-                final double rightRadius = math.max(trRadiusX, brRadiusX);
-                final double bottomRadius = math.max(brRadiusY, blRadiusY);
+                double leftRadius = Math.Max(blRadiusX, tlRadiusX);
+                double topRadius = Math.Max(tlRadiusY, trRadiusY);
+                double bottomRadius = Math.Max(brRadiusY, blRadiusY);
                 return new Rect.fromLTRB(
                   left + leftRadius,
                   top + topRadius,
@@ -1336,8 +1330,8 @@ namespace FlutterBinding.UI
         {
             get
             {
-                final double topRadius = math.max(tlRadiusY, trRadiusY);
-                final double bottomRadius = math.max(brRadiusY, blRadiusY);
+                double topRadius = Math.Max(tlRadiusY, trRadiusY);
+                double bottomRadius = Math.Max(brRadiusY, blRadiusY);
                 return new Rect.fromLTRB(
                   left,
                   top + topRadius,
@@ -1355,9 +1349,9 @@ namespace FlutterBinding.UI
         {
             get
             {
-                final double leftRadius = math.max(blRadiusX, tlRadiusX);
-                final double rightRadius = math.max(trRadiusX, brRadiusX);
-                return new Rect.fromLTRB(
+                double leftRadius = Math.Max(blRadiusX, tlRadiusX);
+                double rightRadius = Math.Max(trRadiusX, brRadiusX);
+                return Rect.fromLTRB(
                   left + leftRadius,
                   top,
                   right - rightRadius,
@@ -1407,11 +1401,11 @@ namespace FlutterBinding.UI
 
     /// The lesser of the magnitudes of the [width] and the [height] of this
     /// rounded rectangle.
-    public double shortestSide => math.min(width.abs(), height.abs());
+    public double shortestSide => Math.Min(width.abs(), height.abs());
 
     /// The greater of the magnitudes of the [width] and the [height] of this
     /// rounded rectangle.
-    public double longestSide => math.max(width.abs(), height.abs());
+    public double longestSide => Math.Max(width.abs(), height.abs());
 
 
     /// The offset to the point halfway between the left and right and the top and
@@ -1424,7 +1418,7 @@ namespace FlutterBinding.UI
     {
         final double sum = radius1 + radius2;
         if (sum > limit && sum != 0.0)
-            return math.min(min, limit / sum);
+            return Math.Min(min, limit / sum);
         return min;
     }
 

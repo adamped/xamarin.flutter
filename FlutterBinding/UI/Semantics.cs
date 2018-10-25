@@ -697,7 +697,7 @@ void _updateNode(
    Float64List transform,
    Int32List childrenInTraversalOrder,
    Int32List childrenInHitTestOrder,
-   Int32List additionalActions,
+   List<int> additionalActions,
 
  )
 {

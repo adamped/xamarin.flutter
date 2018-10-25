@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using static FlutterBinding.Mapping.Types;
 using static FlutterBinding.UI.Lerp;
+using static FlutterBinding.Mapping.Helper;
 
 namespace FlutterBinding.UI
 {
@@ -115,9 +116,9 @@ namespace FlutterBinding.UI
         /// Color(0xFFFF9000)` (`FF` for the alpha, `FF` for the red, `90` for the
         /// green, and `00` for the blue).
         // //@pragma('vm:entry-point')
-        public Color(long value)
+        public Color(int value)
         {
-            this.value = (int)(value & 0xFFFFFFFF);
+            this.value = value & 0xFFFFFFFF;
         }
 
         /// Construct a color from the lower 8 bits of four integers.
@@ -132,7 +133,7 @@ namespace FlutterBinding.UI
         ///
         /// See also [fromRGBO], which takes the alpha value as a floating point
         /// value.
-        public static Color fromARGB(int a, int r, int g, int b)
+        public static Color fromARGB(uint a, uint r, uint g, uint b)
         {
             var value = (((a & 0xff) << 24) |
                      ((r & 0xff) << 16) |
@@ -154,7 +155,7 @@ namespace FlutterBinding.UI
         /// See also [fromARGB], which takes the opacity as an integer value.
         public Color fromRGBO(int r, int g, int b, double opacity)
         {
-            value = ((((opacity * 0xff ~/ 1) &0xff) << 24) |
+            value = (((Math.Truncate(opacity * 0xff / 1.0) & 0xff) << 24) |
                       ((r & 0xff) << 16) |
                       ((g & 0xff) << 8) |
                       ((b & 0xff) << 0)) &0xFFFFFFFF;
@@ -173,7 +174,7 @@ namespace FlutterBinding.UI
         ///
         /// A value of 0 means this color is fully transparent. A value of 255 means
         /// this color is fully opaque.
-        public int alpha => (0xff000000 & value) >> 24;
+        public uint alpha => (0xff000000 & value) >> 24;
 
         /// The alpha channel of this color as a double.
         ///
@@ -182,19 +183,19 @@ namespace FlutterBinding.UI
         public double opacity => alpha / 0xFF;
 
         /// The red channel of this color in an 8 bit value.
-        public int red => (0x00ff0000 & value) >> 16;
+        public uint red => (0x00ff0000 & value) >> 16;
 
         /// The green channel of this color in an 8 bit value.
-        public int green => (0x0000ff00 & value) >> 8;
+        public uint green => (0x0000ff00 & value) >> 8;
 
         /// The blue channel of this color in an 8 bit value.
-        public int blue => (0x000000ff & value) >> 0;
+        public uint blue => (0x000000ff & value) >> 0;
 
         /// Returns a new color that matches this color with the alpha channel
         /// replaced with `a` (which ranges from 0 to 255).
         ///
         /// Out of range values will have unexpected effects.
-        public Color withAlpha(int a)
+        public Color withAlpha(uint a)
         {
             return Color.fromARGB(a, red, green, blue);
         }
@@ -1219,7 +1220,7 @@ namespace FlutterBinding.UI
             set
             {
                 //assert(value != null);
-                int encoded = value.index ^ _kBlendModeDefault;
+                int encoded = (int)value ^ _kBlendModeDefault;
                 _data.setInt32(_kBlendModeOffset, encoded, _kFakeHostEndian);
             }
         }
@@ -4326,17 +4327,18 @@ namespace FlutterBinding.UI
             return result;
         }
 
-        public static bool operator ==(dynamic other)
+        public static bool operator ==(Shadow first, Shadow second)
         {
-            if (identical(this, other))
+            if (identical(first, second))
                 return true;
-            if (other is !Shadow)
-                return false;
-            Shadow typedOther = other;
-            return color == typedOther.color &&
-                   offset == typedOther.offset &&
-                   blurRadius == typedOther.blurRadius;
+          
+            Shadow typedOther = second;
+            return first.color == typedOther.color &&
+                   first.offset == typedOther.offset &&
+                   first.blurRadius == typedOther.blurRadius;
         }
+
+        public static bool operator !=(Shadow first, Shadow second) => !(first == second);
 
         public int hashCode => hashValues(color, offset, blurRadius);
 
