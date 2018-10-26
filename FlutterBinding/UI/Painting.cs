@@ -5,6 +5,7 @@ using static FlutterBinding.Mapping.Types;
 using static FlutterBinding.UI.Lerp;
 using static FlutterBinding.Mapping.Helper;
 using static FlutterBinding.UI.Painting;
+using System.Linq;
 
 namespace FlutterBinding.UI
 {
@@ -64,13 +65,13 @@ namespace FlutterBinding.UI
 
         public static Color _scaleAlpha(Color a, double factor)
         {
-            return a.withAlpha((a.alpha * factor).round().clamp(0, 255));
+            return a.withAlpha((uint)(a.alpha * factor).round().clamp(0, 255));
         }
 
-        public static List<Int32> _encodeColorList(List<Color> colors)
+        public static List<uint> _encodeColorList(List<Color> colors)
         {
             int colorCount = colors.Count;
-            List<Int32> result = new List<int>(colorCount);
+            List<uint> result = new List<uint>(colorCount);
             for (int i = 0; i < colorCount; ++i)
                 result[i] = colors[i].value;
             return result;
@@ -1384,13 +1385,13 @@ namespace FlutterBinding.UI
         {
             get
             {
-                return _data.getFloat32(_kStrokeMiterLimitOffset, _kFakeHostEndian);
+                return _data.getFloat32(_kStrokeMiterLimitOffset, (int)_kFakeHostEndian);
             }
             set
             {
                 //assert(value != null);
                 double encoded = value - _kStrokeMiterLimitDefault;
-                _data.setFloat32(_kStrokeMiterLimitOffset, encoded, _kFakeHostEndian);
+                _data.setFloat32(_kStrokeMiterLimitOffset, encoded, (int)_kFakeHostEndian);
             }
         }
 
@@ -1409,7 +1410,7 @@ namespace FlutterBinding.UI
                     case MaskFilter._TypeBlur:
                         return MaskFilter.blur(
                           (BlurStyle)_data.getInt32(_kMaskFilterBlurStyleOffset, (int)_kFakeHostEndian),
-                          _data.getFloat32(_kMaskFilterSigmaOffset, _kFakeHostEndian));
+                          _data.getFloat32(_kMaskFilterSigmaOffset, (int)_kFakeHostEndian));
                 }
                 return null;
             }
@@ -1417,16 +1418,16 @@ namespace FlutterBinding.UI
             {
                 if (value == null)
                 {
-                    _data.setInt32(_kMaskFilterOffset, MaskFilter._TypeNone, _kFakeHostEndian);
-                    _data.setInt32(_kMaskFilterBlurStyleOffset, 0, _kFakeHostEndian);
-                    _data.setFloat32(_kMaskFilterSigmaOffset, 0.0, _kFakeHostEndian);
+                    _data.setInt32(_kMaskFilterOffset, MaskFilter._TypeNone, (int)_kFakeHostEndian);
+                    _data.setInt32(_kMaskFilterBlurStyleOffset, 0, (int)_kFakeHostEndian);
+                    _data.setFloat32(_kMaskFilterSigmaOffset, 0.0, (int)_kFakeHostEndian);
                 }
                 else
                 {
                     // For now we only support one kind of MaskFilter, so we don't need to
                     // check what the type is if it's not null.
-                    _data.setInt32(_kMaskFilterOffset, MaskFilter._TypeBlur, _kFakeHostEndian);
-                    _data.setInt32(_kMaskFilterBlurStyleOffset, value._style.index, _kFakeHostEndian);
+                    _data.setInt32(_kMaskFilterOffset, MaskFilter._TypeBlur, (int)_kFakeHostEndian);
+                    _data.setInt32(_kMaskFilterBlurStyleOffset, (int)value._style, _kFakeHostEndian);
                     _data.setFloat32(_kMaskFilterSigmaOffset, value._sigma, _kFakeHostEndian);
                 }
             }
@@ -1702,8 +1703,10 @@ namespace FlutterBinding.UI
         /// if encoding fails.
         Task<ByteData> toByteData(ImageByteFormat format = ImageByteFormat.rawRgba)
         {
-            return _futurize((_Callback < ByteData > callback) => {
-                return _toByteData((int)format, (Uint8List encoded) => {
+            return _futurize((_Callback<ByteData> callback) =>
+            {
+                return _toByteData((int)format, (Uint8List encoded) =>
+                {
                     callback(encoded?.buffer?.asByteData());
                 });
             });
@@ -2704,22 +2707,24 @@ namespace FlutterBinding.UI
             _sigma = sigma;
         }
 
-        readonly BlurStyle _style;
-        readonly double _sigma;
+        public readonly BlurStyle _style;
+        public readonly double _sigma;
 
         // The type of MaskFilter class to create for Skia.
         // These constants must be kept in sync with MaskFilterType in paint.cc.
         public const int _TypeNone = 0; // null
         public const int _TypeBlur = 1; // SkBlurMaskFilter
 
-        public static bool operator ==(dynamic other)
+        public static bool operator ==(MaskFilter mask, Object other)
         {
-            if (other is !MaskFilter)
+            if (!(other is MaskFilter))
                 return false;
-            MaskFilter typedOther = other;
-            return _style == typedOther._style &&
-                   _sigma == typedOther._sigma;
+            MaskFilter typedOther = (MaskFilter)other;
+            return mask._style == typedOther._style &&
+                   mask._sigma == typedOther._sigma;
         }
+
+        public static bool operator !=(MaskFilter mask, Object other) => !(mask == other);
 
         public int hashCode => hashValues(_style, _sigma);
 
@@ -2757,14 +2762,16 @@ namespace FlutterBinding.UI
         readonly Color _color;
         readonly BlendMode _blendMode;
 
-        public static bool operator ==(dynamic other)
+        public static bool operator ==(ColorFilter filter, Object other)
         {
-            if (other is !ColorFilter)
+            if (!(other is ColorFilter))
                 return false;
-            ColorFilter typedOther = other;
-            return _color == typedOther._color &&
-                   _blendMode == typedOther._blendMode;
+            ColorFilter typedOther = (ColorFilter)other;
+            return filter._color == typedOther._color &&
+                   filter._blendMode == typedOther._blendMode;
         }
+
+        public static bool operator !=(ColorFilter filter, Object other) => !(filter == other);
 
         public int hashCode => hashValues(_color, _blendMode);
 
@@ -2933,13 +2940,13 @@ namespace FlutterBinding.UI
             //assert(tileMode != null),
 
             _validateColorStops(colors, colorStops);
-            List<float> endPointsBuffer = _encodeTwoPoints(from, to);
-            List<Int32> colorsBuffer = _encodeColorList(colors);
-            List<float> colorStopsBuffer = colorStops == null ? null : new List<float>.fromList(colorStops);
+            List<double> endPointsBuffer = _encodeTwoPoints(from, to);
+            List<uint> colorsBuffer = _encodeColorList(colors);
+            List<double> colorStopsBuffer = colorStops == null ? null : new List<double>(colorStops);
             _constructor();
             _initLinear(endPointsBuffer, colorsBuffer, colorStopsBuffer, (int)tileMode);
         }
-        void _initLinear(List<float> endPoints, List<Int32> colors, List<float> colorStops, int tileMode)
+        void _initLinear(List<double> endPoints, List<uint> colors, List<double> colorStops, int tileMode)
         {
             // native 'Gradient_initLinear';
         }
@@ -2987,11 +2994,10 @@ namespace FlutterBinding.UI
             //assert(colors != null),
             //assert(tileMode != null),
             //assert(matrix4 == null || _matrix4IsValid(matrix4)),
-
-            focalRadius ??= 0.0;
+            
             _validateColorStops(colors, colorStops);
-            List<Int32> colorsBuffer = _encodeColorList(colors);
-            List<float> colorStopsBuffer = colorStops == null ? null : new List<float>.fromList(colorStops);
+            List<uint> colorsBuffer = _encodeColorList(colors);
+            List<double> colorStopsBuffer = colorStops == null ? null : new List<double>(colorStops);
 
             // If focal is null or focal radius is null, this should be treated as a regular radial gradient
             // If focal == center and the focal radius is 0.0, it's still a regular radial gradient
@@ -3062,12 +3068,12 @@ namespace FlutterBinding.UI
             //assert(matrix4 == null || _matrix4IsValid(matrix4)),
 
             _validateColorStops(colors, colorStops);
-            List<Int32> colorsBuffer = _encodeColorList(colors);
-            List<float> colorStopsBuffer = colorStops == null ? null : new List<float>.fromList(colorStops);
+            List<uint> colorsBuffer = _encodeColorList(colors);
+            List<double> colorStopsBuffer = colorStops == null ? null : new List<double>(colorStops);
             _constructor();
             _initSweep(center.dx, center.dy, colorsBuffer, colorStopsBuffer, (int)tileMode, startAngle, endAngle, matrix4);
         }
-        void _initSweep(double centerX, double centerY, List<Int32> colors, List<float> colorStops, int tileMode, double startAngle, double endAngle, List<float> matrix)
+        void _initSweep(double centerX, double centerY, List<uint> colors, List<double> colorStops, int tileMode, double startAngle, double endAngle, List<float> matrix)
         {
             // native 'Gradient_initSweep';
         }
@@ -3095,7 +3101,7 @@ namespace FlutterBinding.UI
         /// matrix to apply to the effect. All the arguments are required and must not
         /// be null.
         // //@pragma('vm:entry-point')
-        public ImageShader(Image image, TileMode tmx, TileMode tmy, List<float> matrix4)
+        public ImageShader(Image image, TileMode tmx, TileMode tmy, List<double> matrix4)
         {
             //assert(image != null), // image is checked on the engine side
             //assert(tmx != null),
@@ -3111,7 +3117,7 @@ namespace FlutterBinding.UI
             // native 'ImageShader_constructor';
         }
 
-        void _initWithImage(Image image, int tmx, int tmy, List<float> matrix4)
+        void _initWithImage(Image image, int tmx, int tmy, List<double> matrix4)
         {
             // native 'ImageShader_initWithImage';
         }
@@ -3150,18 +3156,18 @@ namespace FlutterBinding.UI
                 throw new ArgumentException("'positions' and 'textureCoordinates' lengths must match.");
             if (colors != null && colors.Count != positions.Count)
                 throw new ArgumentException("'positions' and 'colors' lengths must match.");
-            if (indices != null && indices.any((int i) => i < 0 || i >= positions.length))
+            if (indices != null && indices.Any((int i) => i < 0 || i >= positions.Count))
                 throw new ArgumentException("'indices' values must be valid indices in the positions list.");
 
-            List<float> encodedPositions = _encodePointList(positions);
-            List<float> encodedTextureCoordinates = (textureCoordinates != null)
+            List<double> encodedPositions = _encodePointList(positions);
+            List<double> encodedTextureCoordinates = (textureCoordinates != null)
                   ? _encodePointList(textureCoordinates)
                   : null;
             List<Int32> encodedColors = colors != null
               ? _encodeColorList(colors)
               : null;
             List<Int32> encodedIndices = indices != null
-              ? new Int32List.fromList(indices)
+              ? new List<int>(indices)
               : null;
 
             _constructor();
@@ -3170,8 +3176,8 @@ namespace FlutterBinding.UI
 
         public Vertices raw(
         VertexMode mode,
-        List<float> positions,
-        List<float> textureCoordinates = null,
+        List<double> positions,
+        List<double> textureCoordinates = null,
         List<Int32> colors = null,
     List<Int32> indices = null)
         { //assert(mode != null),
@@ -3181,11 +3187,22 @@ namespace FlutterBinding.UI
                 throw new ArgumentException("'positions' and 'textureCoordinates' lengths must match.");
             if (colors != null && colors.Count * 2 != positions.Count)
                 throw new ArgumentException("'positions' and 'colors' lengths must match.");
-            if (indices != null && indices.any((int i) => i < 0 || i >= positions.length))
+            if (indices != null && indices.Any((int i) => i < 0 || i >= positions.Count))
                 throw new ArgumentException("'indices' values must be valid indices in the positions list.");
 
+            return new Vertices(mode, positions, textureCoordinates, colors, indices);
+        }
+
+        private Vertices(
+        VertexMode mode,
+        List<double> positions,
+        List<double> textureCoordinates,
+        List<Int32> colors,
+    List<Int32> indices)
+        {
             _constructor();
             _init((int)mode, positions, textureCoordinates, colors, indices);
+
         }
 
         void _constructor()
@@ -3195,8 +3212,8 @@ namespace FlutterBinding.UI
 
 
         void _init(int mode,
-                   List<float> positions,
-                   List<float> textureCoordinates,
+                   List<double> positions,
+                   List<double> textureCoordinates,
                    List<Int32> colors,
                    List<Int32> indices)
         {
@@ -3286,7 +3303,8 @@ namespace FlutterBinding.UI
         {
             if (recorder.isRecording)
                 throw new ArgumentException("'recorder' must not already be associated with another Canvas.");
-            cullRect ??= Rect.largest;
+            if (cullRect == null)
+                cullRect = Rect.largest;
             _constructor(recorder, cullRect.left, cullRect.top, cullRect.right, cullRect.bottom);
         }
         void _constructor(PictureRecorder recorder,
@@ -3486,7 +3504,7 @@ namespace FlutterBinding.UI
         ///
         /// If [sy] is unspecified, [sx] will be used for the scale in both
         /// directions.
-        public void scale(double sx, double sy) => _scale(sx, sy ?? sx);
+        public void scale(double sx, double? sy) => _scale(sx, sy ?? sx);
 
         void _scale(double sx, double sy)
         {
@@ -3564,7 +3582,7 @@ namespace FlutterBinding.UI
             ////assert(doAntiAlias != null);
             _clipRRect(rrect._value, doAntiAlias);
         }
-        void _clipRRect(List<float> rrect, bool doAntiAlias)
+        void _clipRRect(List<double> rrect, bool doAntiAlias)
         {
             // native 'Canvas_clipRRect';
         }
@@ -3947,20 +3965,20 @@ namespace FlutterBinding.UI
         ///
         ///  * [drawPoints], which takes `points` as a [List<Offset>] rather than a
         ///    [List<List<float> >].
-        void drawRawPoints(PointMode pointMode, List<float> points, Paint paint)
+        void drawRawPoints(PointMode pointMode, List<double> points, Paint paint)
         {
             //assert(pointMode != null);
             //assert(points != null);
             //assert(paint != null);
             if (points.Count % 2 != 0)
-                throw new ArgumentException('"points" must have an even number of values.');
+                throw new ArgumentException("'points' must have an even number of values.");
             _drawPoints(paint._objects, paint._data, (int)pointMode, points);
         }
 
         void _drawPoints(List<dynamic> paintObjects,
                          ByteData paintData,
                          int pointMode,
-                         List<float> points)
+                         List<double> points)
         {
             // native 'Canvas_drawPoints';
         }
@@ -4002,9 +4020,9 @@ namespace FlutterBinding.UI
 
             int rectCount = rects.Count;
             if (transforms.Count != rectCount)
-                throw new ArgumentException('"transforms" and "rects" lengths must match.');
-            if (colors.isNotEmpty && colors.Count != rectCount)
-                throw new ArgumentException('If non-null, "colors" length must match that of "transforms" and "rects".');
+                throw new ArgumentException("'transforms' and 'rects' lengths must match.");
+            if (colors.Count > 0 && colors.Count != rectCount)
+                throw new ArgumentException("'If non-null, 'colors' length must match that of 'transforms' and 'rects'.");
 
             List<double> rstTransformBuffer = new List<double>(rectCount * 4);
             List<double> rectBuffer = new List<double>(rectCount * 4);
@@ -4028,8 +4046,8 @@ namespace FlutterBinding.UI
                 rectBuffer[index3] = rect.bottom;
             }
 
-            List<Int32> colorBuffer = colors.isEmpty ? null : _encodeColorList(colors);
-            List<float> cullRectBuffer = cullRect?._value;
+            List<Int32> colorBuffer = colors.Count == 0 ? null : _encodeColorList(colors);
+            List<double> cullRectBuffer = cullRect?._value;
 
             _drawAtlas(
               paint._objects, paint._data, atlas, rstTransformBuffer, rectBuffer,
@@ -4053,8 +4071,8 @@ namespace FlutterBinding.UI
         //  * [drawAtlas], which takes its arguments as objects rather than typed
         //    data lists.
         public void drawRawAtlas(Image atlas,
-                          List<float> rstTransforms,
-                          List<float> rects,
+                          List<double> rstTransforms,
+                          List<double> rects,
                           List<Int32> colors,
                           BlendMode blendMode,
                           Rect cullRect,
@@ -4077,18 +4095,18 @@ namespace FlutterBinding.UI
 
             _drawAtlas(
               paint._objects, paint._data, atlas, rstTransforms, rects,
-              colors, blendMode.index, cullRect?._value
+              colors, (int)blendMode, cullRect?._value
             );
         }
 
         void _drawAtlas(List<dynamic> paintObjects,
                         ByteData paintData,
                         Image atlas,
-                        List<float> rstTransforms,
-                        List<float> rects,
+                        List<double> rstTransforms,
+                        List<double> rects,
                         List<Int32> colors,
                         int blendMode,
-                        List<float> cullRect)
+                        List<double> cullRect)
         {
             // native 'Canvas_drawAtlas';
         }
@@ -4107,7 +4125,7 @@ namespace FlutterBinding.UI
             _drawShadow(path, color.value, elevation, transparentOccluder);
         }
         void _drawShadow(Path path,
-                         int color,
+                         uint color,
                          double elevation,
                          bool transparentOccluder)
         {
@@ -4286,11 +4304,13 @@ namespace FlutterBinding.UI
         /// This class does not provide a way to disable shadows to avoid inconsistencies
         /// in shadow blur rendering, primarily as a method of reducing test flakiness.
         /// [toPaint] should be overriden in subclasses to provide this functionality.
-        Paint toPaint()
+        public Paint toPaint()
         {
-            return new Paint()
-              ..color = color
-              ..maskFilter = MaskFilter.blur(BlurStyle.normal, blurSigma);
+            return new Paint
+            {
+                color = color,
+                maskFilter = MaskFilter.blur(BlurStyle.normal, blurSigma)
+            };
         }
 
         /// Returns a new shadow with its [offset] and [blurRadius] scaled by the given
@@ -4418,16 +4438,16 @@ namespace FlutterBinding.UI
                 shadowOffset = shadowIndex * _kBytesPerShadow;
 
                 shadowsData.setInt32(_kColorOffset + shadowOffset,
-                  shadow.color.value ^ Shadow._kColorDefault, _kFakeHostEndian);
+                 (int)(shadow.color.value ^ Shadow._kColorDefault), (int)_kFakeHostEndian);
 
                 shadowsData.setFloat32(_kXOffset + shadowOffset,
-                  shadow.offset.dx, (int)Paint._kFakeHostEndian);
+                  shadow.offset.dx, (int)_kFakeHostEndian);
 
                 shadowsData.setFloat32(_kYOffset + shadowOffset,
-                  shadow.offset.dy, _kFakeHostEndian);
+                  shadow.offset.dy, (int)_kFakeHostEndian);
 
                 shadowsData.setFloat32(_kBlurOffset + shadowOffset,
-                  shadow.blurRadius, _kFakeHostEndian);
+                  shadow.blurRadius, (int)_kFakeHostEndian);
             }
 
             return shadowsData;

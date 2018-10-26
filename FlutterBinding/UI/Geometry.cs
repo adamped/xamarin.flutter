@@ -671,7 +671,7 @@ namespace FlutterBinding.UI
         }
 
         const int _kDataSize = 4;
-        readonly List<double> _value = new List<double>(_kDataSize);
+        public readonly List<double> _value = new List<double>(_kDataSize);
 
         /// The offset of the left edge of this rectangle from the x axis.
         public double left => _value[0];

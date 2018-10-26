@@ -29,7 +29,10 @@ namespace FlutterBinding.Mapping
             public int getInt32(int first, int second) => 0; // TODO:
             public int getInt64(int first, int second) => 0; // TODO:
             public double getFloat64(int first, int second) => 0; // TODO:
+            public double getFloat32(int first, int second) => 0; // TODO:
+
             public void setInt32(int first, int second, int third) { }
+            public void setFloat32(double first, double second, int third) { }
 
             public int lengthInBytes => 0; // TODO;
         }

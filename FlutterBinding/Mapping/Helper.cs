@@ -7,7 +7,7 @@ namespace FlutterBinding.Mapping
     {
         public static bool identical(object first, object second) => first.Equals(second);
 
-        public static int hashValues(object first, object second) => 0; // TODO:
+        public static int hashValues(object first, object second, object third = null) => 0; // TODO:
 
         public static int hashList(List<double> list) => 0; // TODO:
 
@@ -21,6 +21,17 @@ namespace FlutterBinding.Mapping
         public static int toInt(this double value) => Convert.ToInt32(value);
 
         public static int clamp(this int value, int lower, int upper)
+        {
+            if (value > upper)
+                return upper;
+
+            if (value < lower)
+                return lower;
+
+            return value;
+        }
+
+        public static double clamp(this double value, int lower, int upper)
         {
             if (value > upper)
                 return upper;
