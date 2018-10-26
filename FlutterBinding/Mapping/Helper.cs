@@ -1,10 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace FlutterBinding.Mapping
 {
     public static class Helper
     {
         public static bool identical(object first, object second) => first.Equals(second);
+
+        public static int hashValues(object first, object second) => 0; // TODO:
+
+        public static int hashList(List<double> list) => 0; // TODO:
 
         public static string toStringAsFixed(this double value, int points)
         {

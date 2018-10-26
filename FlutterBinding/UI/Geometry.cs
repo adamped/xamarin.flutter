@@ -50,7 +50,7 @@ namespace FlutterBinding.UI
         ///
         /// This is a partial ordering. It is possible for two values to be neither
         /// less, nor greater than, nor equal to, another.
-        public bool operator <(OffsetBase other) => _dx < other._dx && _dy < other._dy;
+        public static bool operator <(OffsetBase offset, OffsetBase other) => offset._dx < other._dx && offset._dy < other._dy;
 
         /// Less-than-or-equal-to operator. Compares an [Offset] or [Size] to another
         /// [Offset] or [Size], and returns true if both the horizontal and vertical
@@ -60,7 +60,7 @@ namespace FlutterBinding.UI
         ///
         /// This is a partial ordering. It is possible for two values to be neither
         /// less, nor greater than, nor equal to, another.
-        public bool operator <=(OffsetBase other) => _dx <= other._dx && _dy <= other._dy;
+        public static bool operator <=(OffsetBase offset, OffsetBase other) => offset._dx <= other._dx && offset._dy <= other._dy;
 
         /// Greater-than operator. Compares an [Offset] or [Size] to another [Offset]
         /// or [Size], and returns true if both the horizontal and vertical values of
@@ -70,7 +70,7 @@ namespace FlutterBinding.UI
         ///
         /// This is a partial ordering. It is possible for two values to be neither
         /// less, nor greater than, nor equal to, another.
-        public bool operator >(OffsetBase other) => _dx > other._dx && _dy > other._dy;
+        public static bool operator >(OffsetBase offset, OffsetBase other) => offset._dx > other._dx && offset._dy > other._dy;
 
         /// Greater-than-or-equal-to operator. Compares an [Offset] or [Size] to
         /// another [Offset] or [Size], and returns true if both the horizontal and
@@ -80,22 +80,23 @@ namespace FlutterBinding.UI
         ///
         /// This is a partial ordering. It is possible for two values to be neither
         /// less, nor greater than, nor equal to, another.
-        public bool operator >=(OffsetBase other) => _dx > other._dx && _dy >= other._dy;
+        public static bool operator >=(OffsetBase offset, OffsetBase other) => offset._dx > other._dx && offset._dy >= other._dy;
 
         /// Equality operator. Compares an [Offset] or [Size] to another [Offset] or
         /// [Size], and returns true if the horizontal and vertical values of the
         /// left-hand-side operand are equal to the horizontal and vertical values of
         /// the right-hand-side operand respectively. Returns false otherwise.
 
-        public bool operator ==(dynamic other)
+        public static bool operator ==(OffsetBase offset, dynamic other)
         {
-            if (other is !OffsetBase)
+            if (!(other is OffsetBase))
                 return false;
-            final OffsetBase typedOther = other;
-            return _dx == typedOther._dx &&
-                   _dy == typedOther._dy;
+            OffsetBase typedOther = other;
+            return offset._dx == typedOther._dx &&
+                   offset._dy == typedOther._dy;
         }
 
+        public static bool operator !=(OffsetBase offset, dynamic other) => !(offset == other);
 
         public int hashCode => hashValues(_dx, _dy);
 
@@ -191,7 +192,7 @@ namespace FlutterBinding.UI
         ///  * [isInfinite], which checks whether either component is infinite.
         ///  * [isFinite], which checks whether both components are finite.
         // This is included for completeness, because [Size.infinite] exists.
-        public static Offset infinite = new Offset(double.infinity, double.infinity);
+        public static Offset infinite = new Offset(double.PositiveInfinity, double.PositiveInfinity);
 
         /// Returns a new offset with the x component scaled by `scaleX` and the y
         /// component scaled by `scaleY`.
@@ -233,7 +234,7 @@ namespace FlutterBinding.UI
         ///
         /// If the [Offset] represents an arrow on a plane, this operator returns the
         /// same arrow but pointing in the reverse direction.
-        public Offset operator -() => new Offset(-dx, -dy);
+        public static Offset operator -(Offset offset) => new Offset(-offset.dx, -offset.dy);
 
         /// Binary subtraction operator.
         ///
@@ -242,7 +243,7 @@ namespace FlutterBinding.UI
         /// left-hand-side operand's [dy] minus the right-hand-side operand's [dy].
         ///
         /// See also [translate].
-        public Offset operator -(Offset other) => new Offset(dx - other.dx, dy - other.dy);
+        public static Offset operator -(Offset offset, Offset other) => new Offset(offset.dx - other.dx, offset.dy - other.dy);
 
         /// Binary addition operator.
         ///
@@ -251,7 +252,7 @@ namespace FlutterBinding.UI
         /// two operands.
         ///
         /// See also [translate].
-        public Offset operator +(Offset other) => new Offset(dx + other.dx, dy + other.dy);
+        public static Offset operator +(Offset offset, Offset other) => new Offset(offset.dx + other.dx, offset.dy + other.dy);
 
         /// Multiplication operator.
         ///
@@ -260,7 +261,7 @@ namespace FlutterBinding.UI
         /// right-hand-side operand (a double).
         ///
         /// See also [scale].
-        public Offset operator *(double operand) => new Offset(dx * operand, dy * operand);
+        public static Offset operator *(Offset offset, double operand) => new Offset(offset.dx * operand, offset.dy * operand);
 
         /// Division operator.
         ///
@@ -269,21 +270,21 @@ namespace FlutterBinding.UI
         /// operand (a double).
         ///
         /// See also [scale].
-        public Offset operator /(double operand) => new Offset(dx / operand, dy / operand);
+        public static Offset operator /(Offset offset, double operand) => new Offset(offset.dx / operand, offset.dy / operand);
 
         /// Integer (truncating) division operator.
         ///
         /// Returns an offset whose coordinates are the coordinates of the
         /// left-hand-side operand (an Offset) divided by the scalar right-hand-side
         /// operand (a double), rounded towards zero.
-        public Offset operator ~/ (double operand) => new Offset((dx ~/ operand).toDouble(), (dy ~/ operand).toDouble());
+        //public Offset operator ~/ (double operand) => new Offset((dx ~/ operand).toDouble(), (dy ~/ operand).toDouble());
 
         /// Modulo (remainder) operator.
         ///
         /// Returns an offset whose coordinates are the remainder of dividing the
         /// coordinates of the left-hand-side operand (an Offset) by the scalar
         /// right-hand-side operand (a double).
-        public Offset operator %(double operand) => new Offset(dx % operand, dy % operand);
+        public static Offset operator %(Offset offset, double operand) => new Offset(offset.dx % operand, offset.dy % operand);
 
         /// Rectangle constructor operator.
         ///
@@ -295,7 +296,7 @@ namespace FlutterBinding.UI
         /// Rect myRect = Offset.zero & const Size(100.0, 100.0);
         /// // same as: new Rect.fromLTWH(0.0, 0.0, 100.0, 100.0)
         /// ```
-        public Rect operator &(Size other) => new Rect.fromLTWH(dx, dy, other.width, other.height);
+        public static Rect operator &(Offset offset, Size other) => Rect.fromLTWH(offset.dx, offset.dy, other.width, other.height);
 
         /// Linearly interpolate between two offsets.
         ///
@@ -325,14 +326,16 @@ namespace FlutterBinding.UI
         }
 
         /// Compares two Offsets for equality.
-        public bool operator ==(dynamic other)
+        public static bool operator ==(Offset offset, dynamic other)
         {
-            if (other is !Offset)
+            if (!(other is Offset))
                 return false;
             Offset typedOther = other;
-            return _dx == typedOther._dx &&
-                   _dy == typedOther._dy;
+            return offset._dx == typedOther._dx &&
+                   offset._dy == typedOther._dy;
         }
+
+        public static bool operator !=(Offset offset, dynamic other) => !(offset == other);
 
         public int hashCode => hashValues(_dx, _dy);
 
@@ -429,7 +432,7 @@ namespace FlutterBinding.UI
         /// right-hand-side operand, an [Offset], and whose [height] is the sum of the
         /// [height] of the left-hand-side operand and the [Offset.dy] dimension of
         /// the right-hand-side operand.
-        public Size operator +(Offset other) => new Size(width + other.dx, height + other.dy);
+        public static Size operator +(Size size, Offset other) => new Size(size.width + other.dx, size.height + other.dy);
 
         /// Multiplication operator.
         ///
@@ -443,21 +446,21 @@ namespace FlutterBinding.UI
         /// Returns a [Size] whose dimensions are the dimensions of the left-hand-side
         /// operand (a [Size]) divided by the scalar right-hand-side operand (a
         /// [double]).
-        public Size operator /(double operand) => new Size(width / operand, height / operand);
+        public static Size operator /(Size size, double operand) => new Size(size.width / operand, size.height / operand);
 
         /// Integer (truncating) division operator.
         ///
         /// Returns a [Size] whose dimensions are the dimensions of the left-hand-side
         /// operand (a [Size]) divided by the scalar right-hand-side operand (a
         /// [double]), rounded towards zero.
-        public Size operator ~/ (double operand) => new Size((width ~/ operand).toDouble(), (height ~/ operand).toDouble());
+        //public Size operator ~/ (double operand) => new Size((width ~/ operand).toDouble(), (height ~/ operand).toDouble());
 
         /// Modulo (remainder) operator.
         ///
         /// Returns a [Size] whose dimensions are the remainder of dividing the
         /// left-hand-side operand (a [Size]) by the scalar right-hand-side operand (a
         /// [double]).
-        public Size operator %(double operand) => new Size(width % operand, height % operand);
+        public static Size operator %(Size size, double operand) => new Size(size.width % operand, size.height % operand);
 
         /// The lesser of the magnitudes of the [width] and the [height].
         public double shortestSide => Math.Min(width.abs(), height.abs());
@@ -571,14 +574,16 @@ namespace FlutterBinding.UI
 
         /// Compares two Sizes for equality.
         // We don't compare the runtimeType because of _DebugSize in the framework.
-        public bool operator ==(dynamic other)
+        public static bool operator ==(Size size, dynamic other)
         {
-            if (other is !Size)
+            if (!(other is Size))
                 return false;
             Size typedOther = other;
-            return _dx == typedOther._dx &&
-                   _dy == typedOther._dy;
+            return size._dx == typedOther._dx &&
+                   size._dy == typedOther._dy;
         }
+
+        public static bool operator !=(Size size, dynamic other) => !(size == other);
 
         public int hashCode => hashValues(_dx, _dy);
 
@@ -861,46 +866,43 @@ namespace FlutterBinding.UI
         /// an [AnimationController].
         public static Rect lerp(Rect a, Rect b, double t)
         {
-            assert(t != null);
+            //assert(t != null);
             if (a == null && b == null)
                 return null;
             if (a == null)
-                return new Rect.fromLTRB(b.left * t, b.top * t, b.right * t, b.bottom * t);
+                return Rect.fromLTRB(b.left * t, b.top * t, b.right * t, b.bottom * t);
             if (b == null)
             {
-                final double k = 1.0 - t;
-                return new Rect.fromLTRB(a.left * k, a.top * k, a.right * k, a.bottom * k);
+                double k = 1.0 - t;
+                return Rect.fromLTRB(a.left * k, a.top * k, a.right * k, a.bottom * k);
             }
-            return new Rect.fromLTRB(
+            return Rect.fromLTRB(
               lerpDouble(a.left, b.left, t),
               lerpDouble(a.top, b.top, t),
               lerpDouble(a.right, b.right, t),
-              lerpDouble(a.bottom, b.bottom, t),
-
-
-
-
-            );
+              lerpDouble(a.bottom, b.bottom, t));
         }
 
-        public bool operator ==(dynamic other)
+        public static bool operator ==(Rect rect, dynamic other)
         {
-            if (identical(this, other))
+            if (identical(rect, other))
                 return true;
-            if (runtimeType != other.runtimeType)
+            if (rect.GetType() != other.GetType())
                 return false;
-            final Rect typedOther = other;
+            Rect typedOther = other;
             for (int i = 0; i < _kDataSize; i += 1)
             {
-                if (_value[i] != typedOther._value[i])
+                if (rect._value[i] != typedOther._value[i])
                     return false;
             }
             return true;
         }
 
+        public static bool operator !=(Rect rect, dynamic other) => !(rect == other);
+
         public int hashCode => hashList(_value);
 
-        String toString() => 'Rect.fromLTRB(${left.toStringAsFixed(1)}, ${top.toStringAsFixed(1)}, ${right.toStringAsFixed(1)}, ${bottom.toStringAsFixed(1)})';
+        public String toString() => $"Rect.fromLTRB({left.toStringAsFixed(1)}, {top.toStringAsFixed(1)}, {right.toStringAsFixed(1)}, {bottom.toStringAsFixed(1)})";
     }
 
     /// A radius for either circular or elliptical shapes.
@@ -1019,15 +1021,17 @@ namespace FlutterBinding.UI
               lerpDouble(a.y, b.y, t));
         }
 
-        public bool operator ==(dynamic other)
+        public static bool operator ==(Radius radius, dynamic other)
         {
-            if (identical(this, other))
+            if (identical(radius, other))
                 return true;
-            if (runtimeType != other.runtimeType)
+            if (radius.GetType() != other.GetType())
                 return false;
             Radius typedOther = other;
-            return typedOther.x == x && typedOther.y == y;
+            return typedOther.x == radius.x && typedOther.y == radius.y;
         }
+
+        public static bool operator !=(Radius radius, dynamic other) => !(radius == other);
 
         public int hashCode => hashValues(x, y);
 
@@ -1147,11 +1151,24 @@ namespace FlutterBinding.UI
           double top,
           double right,
           double bottom,
-          Radius topLeft = Radius.zero,
-          Radius topRight = Radius.zero,
-          Radius bottomRight = Radius.zero,
-          Radius bottomLeft = Radius.zero)
+          Radius topLeft = null,
+          Radius topRight = null,
+          Radius bottomRight = null,
+          Radius bottomLeft = null)
         {
+            if (topLeft == null)
+                topLeft = Radius.zero;
+
+            if (topRight == null)
+                topRight = Radius.zero;
+
+            if (bottomRight == null)
+                bottomRight = Radius.zero;
+
+            if (bottomLeft == null)
+                bottomLeft = Radius.zero;
+
+
             var list = new List<double>(_kDataSize)
             {
                left,
@@ -1176,12 +1193,22 @@ namespace FlutterBinding.UI
         /// The corner radii default to [Radius.zero], i.e. right-angled corners
         public static RRect fromRectAndCorners(
           Rect rect,
-            Radius topLeft = Radius.zero,
-            Radius topRight = Radius.zero,
-            Radius bottomRight = Radius.zero,
-            Radius bottomLeft = Radius.zero
-        )
+            Radius topLeft = null,
+          Radius topRight = null,
+          Radius bottomRight = null,
+          Radius bottomLeft = null)
         {
+            if (topLeft == null)
+                topLeft = Radius.zero;
+
+            if (topRight == null)
+                topRight = Radius.zero;
+
+            if (bottomRight == null)
+                bottomRight = Radius.zero;
+
+            if (bottomLeft == null)
+                bottomLeft = Radius.zero;
             var list = new List<double>(_kDataSize)
             {
                 rect.left,
@@ -1262,7 +1289,7 @@ namespace FlutterBinding.UI
         public Radius blRadius => Radius.elliptical(_value[10], _value[11]);
 
         /// A rounded rectangle with all the values set to zero.
-        public static readonly RRect zero = new RRect._();
+        public static readonly RRect zero = new RRect(new List<double>(_kDataSize));
 
         /// Returns a new [RRect] translated by the given offset.
         public RRect shift(Offset offset)
@@ -1365,6 +1392,7 @@ namespace FlutterBinding.UI
             get
             {
                 double leftRadius = Math.Max(blRadiusX, tlRadiusX);
+                double rightRadius = Math.Max(brRadiusX, trRadiusX);
                 double topRadius = Math.Max(tlRadiusY, trRadiusY);
                 double bottomRadius = Math.Max(brRadiusY, blRadiusY);
                 return Rect.fromLTRB(
@@ -1479,7 +1507,7 @@ namespace FlutterBinding.UI
             if (_scaled == null)
             {
                 double scale = 1.0;
-                List<double> scaled = new List<double>.from(_value);
+                List<double> scaled = new List<double>(_value);
 
                 scale = _getMin(scale, scaled[11], scaled[5], height);
                 scale = _getMin(scale, scaled[4], scaled[6], width);
@@ -1492,7 +1520,7 @@ namespace FlutterBinding.UI
                         scaled[i] *= scale;
                 }
 
-                _scaled = new RRect._fromList(scaled);
+                _scaled = RRect._fromList(scaled);
             }
         }
 
@@ -1629,20 +1657,22 @@ namespace FlutterBinding.UI
           lerpDouble(a.blRadiusY, b.blRadiusY, t)});
         }
 
-        public static bool operator ==(dynamic other)
+        public static bool operator ==(RRect rrect, dynamic other)
         {
-            if (identical(this, other))
+            if (identical(rrect, other))
                 return true;
-            if (runtimeType != other.runtimeType)
+            if (rrect.GetType() != other.GetType())
                 return false;
             RRect typedOther = other;
             for (int i = 0; i < _kDataSize; i += 1)
             {
-                if (_value[i] != typedOther._value[i])
+                if (rrect._value[i] != typedOther._value[i])
                     return false;
             }
             return true;
         }
+
+        public static bool operator !=(RRect rrect, dynamic other) => !(rrect == other);
 
         public int hashCode => hashList(_value);
 
