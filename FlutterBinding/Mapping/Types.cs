@@ -5,7 +5,12 @@ namespace FlutterBinding.Mapping
 {
     public static class Types
     {
-
+        public enum Endian
+        {
+            big,
+            little
+        }
+        
         public class Duration
         {
             public Duration(long milliseconds = 0)

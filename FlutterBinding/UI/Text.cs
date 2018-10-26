@@ -637,57 +637,43 @@ namespace FlutterBinding.UI
         ///   considered equivalent and turn off this behavior.
         ///
         /// * `locale`: The locale used to select region-specific glyphs.
-        ParagraphStyle({
+        public ParagraphStyle(
             TextAlign textAlign,
             TextDirection textDirection,
-    FontWeight fontWeight,
-    FontStyle fontStyle,
-    int maxLines,
-    String fontFamily,
-    double fontSize,
-              double lineHeight,
-    String ellipsis,
-    Locale locale,
-            }) : _encoded = _encodeParagraphStyle(
-textAlign,
-textDirection,
-fontWeight,
-fontStyle,
-maxLines,
-fontFamily,
-fontSize,
-lineHeight,
-ellipsis,
-locale,
+            FontWeight fontWeight,
+            FontStyle fontStyle,
+            int maxLines,
+            String fontFamily,
+            double fontSize,
+            double lineHeight,
+            String ellipsis,
+            Locale locale)
+        {
+            _encoded = _encodeParagraphStyle(
+          textAlign,
+          textDirection,
+          fontWeight,
+          fontStyle,
+          maxLines,
+          fontFamily,
+          fontSize,
+          lineHeight,
+          ellipsis,
+          locale);
+            _fontFamily = fontFamily;
+            _fontSize = fontSize;
+            _lineHeight = lineHeight;
+            _ellipsis = ellipsis;
+            _locale = locale;
+        }
+        readonly List<int> _encoded;
+        readonly String _fontFamily;
+        readonly double _fontSize;
+        readonly double _lineHeight;
+        readonly String _ellipsis;
+        readonly Locale _locale;
 
-
-
-
-
-
-
-
-
-
-
-
-
-),
-       _fontFamily = fontFamily,
-       _fontSize = fontSize,
-       _lineHeight = lineHeight,
-       _ellipsis = ellipsis,
-       _locale = locale;
-
-  final Int32List _encoded;
-  final String _fontFamily;
-  final double _fontSize;
-        final double _lineHeight;
-        final String _ellipsis;
-  final Locale _locale;
-
-  @override
-      bool operator ==(dynamic other)
+        public static bool operator ==(dynamic other)
         {
             if (identical(this, other))
                 return true;
@@ -939,47 +925,46 @@ public class TextPosition
     /// Creates an object representing a particular position in a string.
     ///
     /// The arguments must not be null (so the [offset] argument is required).
-    const TextPosition({
-    this.offset,
-      this.affinity: TextAffinity.downstream,
-      }) : assert(offset != null),
-       assert(affinity != null);
+    public TextPosition(int offset = 0,
+      TextAffinity affinity = TextAffinity.downstream)
+    {
+        //: assert(offset != null),
+        //assert(affinity != null);
+        this.offset = offset;
+        this.affinity = affinity;
+    }
+    /// The index of the character that immediately follows the position.
+    ///
+    /// For example, given the string `'Hello'`, offset 0 represents the cursor
+    /// being before the `H`, while offset 5 represents the cursor being just
+    /// after the `o`.
+    public int offset;
 
-/// The index of the character that immediately follows the position.
-///
-/// For example, given the string `'Hello'`, offset 0 represents the cursor
-/// being before the `H`, while offset 5 represents the cursor being just
-/// after the `o`.
-final int offset;
+    /// If the offset has more than one visual location (e.g., occurs at a line
+    /// break), which of the two locations is represented by this position.
+    ///
+    /// For example, if the text `'AB'` had a forced line break between the `A`
+    /// and the `B`, then the downstream affinity at offset 1 represents the
+    /// cursor being just after the `A` on the first line, while the upstream
+    /// affinity at offset 1 represents the cursor being just before the `B` on
+    /// the first line.
+    public TextAffinity affinity;
 
-/// If the offset has more than one visual location (e.g., occurs at a line
-/// break), which of the two locations is represented by this position.
-///
-/// For example, if the text `'AB'` had a forced line break between the `A`
-/// and the `B`, then the downstream affinity at offset 1 represents the
-/// cursor being just after the `A` on the first line, while the upstream
-/// affinity at offset 1 represents the cursor being just before the `B` on
-/// the first line.
-final TextAffinity affinity;
+    public bool operator ==(dynamic other)
+    {
+        if (other.runtimeType != runtimeType)
+            return false;
+        TextPosition typedOther = other;
+        return typedOther.offset == offset
+            && typedOther.affinity == affinity;
+    }
 
-  @override
-  bool operator ==(dynamic other)
-{
-    if (other.runtimeType != runtimeType)
-        return false;
-    final TextPosition typedOther = other;
-    return typedOther.offset == offset
-        && typedOther.affinity == affinity;
-}
+    public int hashCode => hashValues(offset, affinity);
 
-@override
-  int get hashCode => hashValues(offset, affinity);
-
-@override
-String toString()
-{
-    return '$runtimeType(offset: $offset, affinity: $affinity)';
-}
+    public String toString()
+    {
+        return $"runtimeType(offset: {offset}, affinity: {affinity})";
+    }
 }
 
 /// Layout constraints for [Paragraph] objects.
@@ -993,9 +978,10 @@ public class ParagraphConstraints
     /// Creates constraints for laying out a pargraph.
     ///
     /// The [width] argument must not be null.
-    ParagraphConstraints({
-        this.width,
-  }) : assert(width != null);
+    public ParagraphConstraints(double width = 0.0) //: assert(width != null);
+    {
+        this.width = width;
+    }
 
     /// The width the paragraph should use whey computing the positions of glyphs.
     ///
@@ -1020,15 +1006,13 @@ public class ParagraphConstraints
     {
         if (other.runtimeType != runtimeType)
             return false;
-        final ParagraphConstraints typedOther = other;
+        ParagraphConstraints typedOther = other;
         return typedOther.width == width;
     }
 
-    @override
-  int get hashCode => width.hashCode;
+    public int hashCode => width.hashCode;
 
-  @override
-  String toString() => '$runtimeType(width: $width)';
+    public String toString() => $"runtimeType(width: {width})";
 }
 
 /// A paragraph of text.
@@ -1122,12 +1106,13 @@ public class Paragraph : NativeFieldWrapperClass2
     public List<int> getWordBoundary(int offset)
     {
         // native 'Paragraph_getWordBoundary';
+        return null; // Tmp to resolve build
     }
 
     // Redirecting the paint function in this way solves some dependency problems
     // in the C++ code. If we straighten out the C++ dependencies, we can remove
     // this indirection.
-    void _paint(Canvas canvas, double x, double y)
+    public void _paint(Canvas canvas, double x, double y)
     {
         // native 'Paragraph_paint';
     }
@@ -1153,16 +1138,22 @@ public class ParagraphBuilder : NativeFieldWrapperClass2
     /// Creates a [ParagraphBuilder] object, which is used to create a
     /// [Paragraph].
     //@pragma('vm:entry-point')
-    ParagraphBuilder(ParagraphStyle style) { _constructor(style._encoded, style._fontFamily, style._fontSize, style._lineHeight, style._ellipsis, _encodeLocale(style._locale)); }
-    void _constructor(Int32List encoded, String fontFamily, double fontSize, double lineHeight, String ellipsis, String locale) native 'ParagraphBuilder_constructor';
+    public ParagraphBuilder(ParagraphStyle style) { _constructor(style._encoded, style._fontFamily, style._fontSize, style._lineHeight, style._ellipsis, _encodeLocale(style._locale)); }
+    void _constructor(List<int> encoded, String fontFamily, double fontSize, double lineHeight, String ellipsis, String locale)
+    {
+        // native 'ParagraphBuilder_constructor';
+    }
 
-  /// Applies the given style to the added text until [pop] is called.
-  ///
-  /// See [pop] for details.
-  void pushStyle(TextStyle style) => _pushStyle(style._encoded, style._fontFamily, style._fontSize, style._letterSpacing, style._wordSpacing, style._height, _encodeLocale(style._locale), style._background?._objects, style._background?._data, style._foreground?._objects, style._foreground?._data, Shadow._encodeShadows(style._shadows));
-    void _pushStyle(Int32List encoded, String fontFamily, double fontSize, double letterSpacing, double wordSpacing, double height, String locale, List<dynamic> backgroundObjects, ByteData backgroundData, List<dynamic> foregroundObjects, ByteData foregroundData, ByteData shadowsData) native 'ParagraphBuilder_pushStyle';
+    /// Applies the given style to the added text until [pop] is called.
+    ///
+    /// See [pop] for details.
+    void pushStyle(TextStyle style) => _pushStyle(style._encoded, style._fontFamily, style._fontSize, style._letterSpacing, style._wordSpacing, style._height, _encodeLocale(style._locale), style._background?._objects, style._background?._data, style._foreground?._objects, style._foreground?._data, Shadow._encodeShadows(style._shadows));
+    void _pushStyle(List<int> encoded, String fontFamily, double fontSize, double letterSpacing, double wordSpacing, double height, String locale, List<dynamic> backgroundObjects, ByteData backgroundData, List<dynamic> foregroundObjects, ByteData foregroundData, ByteData shadowsData)
+    {
+        // native 'ParagraphBuilder_pushStyle';
+    }
 
-  static String _encodeLocale(Locale locale) => locale?.toString() ?? '';
+    static String _encodeLocale(Locale locale) => locale?.toString() ?? "";
 
     /// Ends the effect of the most recent call to [pushStyle].
     ///
@@ -1202,21 +1193,27 @@ public class ParagraphBuilder : NativeFieldWrapperClass2
     }
 }
 
-/// Loads a font from a buffer and makes it available for rendering text.
-///
-/// * `list`: A list of bytes containing the font file.
-/// * `fontFamily`: The family name used to identify the font in text styles.
-///  If this is not provided, then the family name will be extracted from the font file.
-Task<void> loadFontFromList(Uint8List list, String fontFamily = "")
+public static class Text
 {
-    return _futurize(
-      (_Callback<void> callback) => _loadFontFromList(list, callback, fontFamily)
-    );
+    /// Loads a font from a buffer and makes it available for rendering text.
+    ///
+    /// * `list`: A list of bytes containing the font file.
+    /// * `fontFamily`: The family name used to identify the font in text styles.
+    ///  If this is not provided, then the family name will be extracted from the font file.
+    Task<void> loadFontFromList(Uint8List list, String fontFamily = "")
+    {
+        return _futurize(
+          (_Callback<void> callback) => _loadFontFromList(list, callback, fontFamily)
+        );
+    }
+
+    String _loadFontFromList(Uint8List list, _Callback<void> callback, String fontFamily)
+    {
+        // native 'loadFontFromList';
+        return string.Empty; // Tmp to resolve build
+    }
 }
 
-String _loadFontFromList(Uint8List list, _Callback<void> callback, String fontFamily)
-{
-    // native 'loadFontFromList';
-    return string.Empty; // Tmp to resolve build
-}
+
+
 }
