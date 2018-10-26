@@ -96,7 +96,7 @@ namespace FlutterBinding.UI
     ///    applications.
     public class WindowPadding
     {
-        private WindowPadding(double left, double top, double right, double bottom)
+        public WindowPadding(double left, double top, double right, double bottom)
         {
             this.left = left;
             this.top = top;
@@ -348,8 +348,8 @@ namespace FlutterBinding.UI
     /// obtain from the [window] property.
     public class Window
     {
-        static Window _instance = new Window();
-        public static Window Instance => _instance;
+        static Window _instance;
+        public static Window Instance => _instance ?? (_instance = new Window());
 
 
         private Window() { }
@@ -377,7 +377,7 @@ namespace FlutterBinding.UI
         ///
         ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
         ///    observe when this value changes.
-        public double devicePixelRatio { get; } = 1.0;
+        public double devicePixelRatio { get; set; } = 1.0;
 
         /// The dimensions of the rectangle into which the application will be drawn,
         /// in physical pixels.
@@ -396,7 +396,7 @@ namespace FlutterBinding.UI
         ///
         ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
         ///    observe when this value changes.
-        public Size physicalSize { get; } = Size.zero;
+        public Size physicalSize { get; set; } = Size.zero;
 
         /// The number of physical pixels on each side of the display rectangle into
         /// which the application can render, but over which the operating system
@@ -412,7 +412,7 @@ namespace FlutterBinding.UI
         ///  * [MediaQuery.of], a simpler mechanism for the same.
         ///  * [Scaffold], which automatically applies the view insets in material
         ///    design applications.
-        public WindowPadding viewInsets { get; } = WindowPadding.zero;
+        public WindowPadding viewInsets { get; set; } = WindowPadding.zero;
 
         /// The number of physical pixels on each side of the display rectangle into
         /// which the application can render, but which may be partially obscured by
@@ -429,7 +429,7 @@ namespace FlutterBinding.UI
         ///  * [MediaQuery.of], a simpler mechanism for the same.
         ///  * [Scaffold], which automatically applies the padding in material design
         ///    applications.
-        public WindowPadding padding { get; } = WindowPadding.zero;
+        public WindowPadding padding { get; set; } = WindowPadding.zero;
 
         /// A callback that is invoked whenever the [devicePixelRatio],
         /// [physicalSize], [padding], or [viewInsets] values change, for example
@@ -457,7 +457,7 @@ namespace FlutterBinding.UI
             }
         }
         VoidCallback _onMetricsChanged;
-        Zone _onMetricsChangedZone;
+        public Zone _onMetricsChangedZone;
 
 
         /// The system-reported default locale of the device.
@@ -496,7 +496,7 @@ namespace FlutterBinding.UI
         ///
         ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
         ///    observe when this value changes.
-        public List<Locale> locales { get; }
+        public List<Locale> locales { get; set;  }
 
         /// A callback that is invoked whenever [locale] changes value.
         ///
@@ -517,7 +517,7 @@ namespace FlutterBinding.UI
             }
         }
         VoidCallback _onLocaleChanged;
-        Zone _onLocaleChangedZone;
+        public Zone _onLocaleChangedZone;
 
         /// The system-reported text scale.
         ///
@@ -531,13 +531,13 @@ namespace FlutterBinding.UI
         ///
         ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
         ///    observe when this value changes.
-        public double textScaleFactor { get; } = 1.0;
+        public double textScaleFactor { get; set; } = 1.0;
 
         /// The setting indicating whether time should always be shown in the 24-hour
         /// format.
         ///
         /// This option is used by [showTimePicker].
-        public bool alwaysUse24HourFormat { get; } = false;
+        public bool alwaysUse24HourFormat { get; set; } = false;
 
         /// A callback that is invoked whenever [textScaleFactor] changes value.
         ///
@@ -558,7 +558,7 @@ namespace FlutterBinding.UI
             }
         }
         VoidCallback _onTextScaleFactorChanged;
-        Zone _onTextScaleFactorChangedZone;
+        public Zone _onTextScaleFactorChangedZone;
 
         /// A callback that is invoked to notify the application that it is an
         /// appropriate time to provide a scene using the [SceneBuilder] API and the
@@ -589,7 +589,7 @@ namespace FlutterBinding.UI
             }
         }
         FrameCallback _onBeginFrame;
-        Zone _onBeginFrameZone;
+        public Zone _onBeginFrameZone;
 
         /// A callback that is invoked for each frame after [onBeginFrame] has
         /// completed and after the microtask queue has been drained. This can be
@@ -615,7 +615,7 @@ namespace FlutterBinding.UI
             }
         }
         VoidCallback _onDrawFrame;
-        Zone _onDrawFrameZone;
+        public Zone _onDrawFrameZone;
 
         /// A callback that is invoked when pointer data is available.
         ///
@@ -626,7 +626,7 @@ namespace FlutterBinding.UI
         ///
         ///  * [GestureBinding], the Flutter framework class which manages pointer
         ///    events.
-        PointerDataPacketCallback onPointerDataPacket
+        public PointerDataPacketCallback onPointerDataPacket
         {
             get { return _onPointerDataPacket; }
             set
@@ -636,7 +636,7 @@ namespace FlutterBinding.UI
             }
         }
         PointerDataPacketCallback _onPointerDataPacket;
-        Zone _onPointerDataPacketZone;
+        public Zone _onPointerDataPacketZone;
 
         /// The route or path that the embedder requested when the application was
         /// launched.
@@ -722,7 +722,7 @@ namespace FlutterBinding.UI
         ///
         /// The [onSemanticsEnabledChanged] callback is called whenever this value
         /// changes.
-        public bool semanticsEnabled { get; } = false;
+        public bool semanticsEnabled { get; set; } = false;
 
         /// A callback that is invoked when the value of [semanticsEnabled] changes.
         ///
@@ -738,7 +738,7 @@ namespace FlutterBinding.UI
             }
         }
         VoidCallback _onSemanticsEnabledChanged;
-        Zone _onSemanticsEnabledChangedZone;
+        public Zone _onSemanticsEnabledChangedZone;
 
         /// A callback that is invoked whenever the user requests an action to be
         /// performed.
@@ -758,10 +758,10 @@ namespace FlutterBinding.UI
             }
         }
         SemanticsActionCallback _onSemanticsAction;
-        Zone _onSemanticsActionZone;
+        public Zone _onSemanticsActionZone;
 
         /// Additional accessibility features that may be enabled by the platform.
-        public AccessibilityFeatures accessibilityFeatures { get; }
+        public AccessibilityFeatures accessibilityFeatures { get; set; }
 
         /// A callback that is invoked when the value of [accessibilityFlags] changes.
         ///
@@ -777,7 +777,7 @@ namespace FlutterBinding.UI
             }
         }
         VoidCallback _onAccessibilityFeaturesChanged;
-        Zone _onAccessibilityFlagsChangedZone;
+        public Zone _onAccessibilityFlagsChangedZone;
 
         /// Change the retained semantics data about this window.
         ///
@@ -853,10 +853,10 @@ namespace FlutterBinding.UI
             }
         }
         PlatformMessageCallback _onPlatformMessage;
-        Zone _onPlatformMessageZone;
+        public Zone _onPlatformMessageZone;
 
         /// Called by [_dispatchPlatformMessage].
-        void _respondToPlatformMessage(int responseId, ByteData data)
+        public void _respondToPlatformMessage(int responseId, ByteData data)
         {
             // native 'Window_respondToPlatformMessage';
         }
@@ -871,7 +871,7 @@ namespace FlutterBinding.UI
             Zone registrationZone = Zone.current;
 
             return (data) => registrationZone.runUnaryGuarded(callback, data);
-            
+
         }
     }
 
@@ -882,7 +882,7 @@ namespace FlutterBinding.UI
     /// enabled.
     public class AccessibilityFeatures
     {
-        private AccessibilityFeatures(int _index) { this._index = _index; }
+        public AccessibilityFeatures(int _index) { this._index = _index; }
 
         const int _kAccessibleNavigation = 1 << 0;
         const int _kInvertColorsIndex = 1 << 1;
