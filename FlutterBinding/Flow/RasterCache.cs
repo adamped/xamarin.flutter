@@ -43,9 +43,9 @@ namespace FlutterBinding.Flow
             //C++ TO C# CONVERTER TODO TASK: There is no equivalent in C# to 'static_assert':
             //  (...) static_assert(false, "missing name for " "SkAutoCanvasRestore") auto_restore(&canvas, true);
             var bounds = RasterCache.GetDeviceBounds(logical_rect_, canvas.TotalMatrix);
-            FML_DCHECK(bounds.size() == image_.Dereference().dimensions());
+            FML_DCHECK(bounds.Size == image_.Dereference().dimensions());
             canvas.ResetMatrix();
-            canvas.DrawImage(new sk_sp<SKImage>(image_), bounds.fLeft, bounds.fTop, paint);
+            canvas.DrawImage(image_, bounds.fLeft, bounds.fTop, paint);
         }
 
         private SKImage image_;
@@ -57,7 +57,7 @@ namespace FlutterBinding.Flow
 
     public class RasterCache : System.IDisposable
     {
-        public RasterCache(size_t threshold = 3)
+        public RasterCache(int threshold = 3)
         {
             //C++ TO C# CONVERTER TODO TASK: The following line was determined to be a copy assignment (rather than a reference assignment) - this should be verified and a 'CopyFrom' method should be created:
             //ORIGINAL LINE: this.threshold_ = threshold;
@@ -69,11 +69,11 @@ namespace FlutterBinding.Flow
         //C++ TO C# CONVERTER TODO TASK: The implementation of the following method could not be found:
         //  public void Dispose();
 
-        public static SKRect GetDeviceBounds(SKRect rect, SKMatrix ctm)
+        public static SKRectI GetDeviceBounds(SKRect rect, SKMatrix ctm)
         {
             SKRect device_rect = new SKRect();
             ctm.MapRect(device_rect, rect);
-            SKRect bounds = new SKRect();
+            SKRectI bounds = new SKRectI();
             device_rect.roundOut(bounds);
             return bounds;
         }
@@ -117,7 +117,7 @@ namespace FlutterBinding.Flow
             Entry entry = picture_cache_[cache_key];
             //C++ TO C# CONVERTER TODO TASK: The following line was determined to be a copy assignment (rather than a reference assignment) - this should be verified and a 'CopyFrom' method should be created:
             //ORIGINAL LINE: entry.access_count = ClampSize(entry.access_count + 1, 0, threshold_);
-            entry.access_count.CopyFrom(GlobalMembers.ClampSize(entry.access_count + 1, 0, new size_t(threshold_)));
+            entry.access_count.CopyFrom(GlobalMembers.ClampSize(entry.access_count + 1, 0, threshold_));
             entry.used_this_frame = true;
 
             if (entry.access_count < threshold_ || threshold_ == 0)
@@ -141,7 +141,7 @@ namespace FlutterBinding.Flow
             Entry entry = layer_cache_[cache_key];
             //C++ TO C# CONVERTER TODO TASK: The following line was determined to be a copy assignment (rather than a reference assignment) - this should be verified and a 'CopyFrom' method should be created:
             //ORIGINAL LINE: entry.access_count = ClampSize(entry.access_count + 1, 0, threshold_);
-            entry.access_count.CopyFrom(GlobalMembers.ClampSize(entry.access_count + 1, 0, new size_t(threshold_)));
+            entry.access_count.CopyFrom(GlobalMembers.ClampSize(entry.access_count + 1, 0, threshold_));
             entry.used_this_frame = true;
             if (!entry.image.is_valid())
             {
@@ -201,7 +201,7 @@ namespace FlutterBinding.Flow
         private class Entry
         {
             public bool used_this_frame = false;
-            public size_t access_count = 0;
+            public int access_count = 0;
             public RasterCacheResult image = new RasterCacheResult();
         }
 
@@ -227,7 +227,7 @@ namespace FlutterBinding.Flow
             }
         }
 
-        private readonly size_t threshold_ = new size_t();
+        private readonly int threshold_ = new int();
         private PictureRasterCacheKey.Map<Entry> picture_cache_ = new PictureRasterCacheKey.Map<Entry>();
         private LayerRasterCacheKey.Map<Entry> layer_cache_ = new LayerRasterCacheKey.Map<Entry>();
         private bool checkerboard_images_;

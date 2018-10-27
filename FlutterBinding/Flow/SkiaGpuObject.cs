@@ -49,13 +49,13 @@ namespace FlutterBinding.Flow
             }
         }
 
-        private readonly fml.RefPtr<fml.TaskRunner> task_runner_ = new fml.RefPtr<fml.TaskRunner>();
+        private readonly fml.TaskRunner task_runner_ = new fml.TaskRunner();
         private readonly fml.TimeDelta drain_delay_ = new fml.TimeDelta();
         private object mutex_ = new object();
         private LinkedList<SkRefCnt> objects_ = new LinkedList<SkRefCnt>();
         private bool drain_pending_;
 
-        private SkiaUnrefQueue(fml.RefPtr<fml.TaskRunner> task_runner, fml.TimeDelta delay)
+        private SkiaUnrefQueue(fml.TaskRunner task_runner, fml.TimeDelta delay)
         {
             this.task_runner_ = new fml.RefPtr<fml.TaskRunner>(std::move(task_runner));
             this.drain_delay_ = new fml.TimeDelta(delay);
@@ -109,7 +109,7 @@ namespace FlutterBinding.Flow
 
         //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
         //ORIGINAL LINE: sk_sp<T> get() const
-        public sk_sp<T> get()
+        public T get()
         {
             return object_;
         }
@@ -124,8 +124,8 @@ namespace FlutterBinding.Flow
             FML_DCHECK(object_ == null);
         }
 
-        private sk_sp<T> object_ = new sk_sp<T>();
-        private fml.RefPtr<SkiaUnrefQueue> queue_ = new fml.RefPtr<SkiaUnrefQueue>();
+        private T object_;
+        private SkiaUnrefQueue queue_;
 
         //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':
         //  SkiaGPUObject(const SkiaGPUObject&) = delete;

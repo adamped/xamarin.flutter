@@ -24,7 +24,7 @@ namespace FlutterBinding.Flow.Layers
 
         public override void Preroll(PrerollContext context, SKMatrix matrix)
         {
-            SKRect child_paint_bounds = SKRect.MakeEmpty();
+            SKRect child_paint_bounds = SKRect.Empty;
             PrerollChildren(context, matrix, child_paint_bounds);
 
             if (child_paint_bounds.intersect(clip_rrect_.getBounds()))
@@ -43,12 +43,12 @@ namespace FlutterBinding.Flow.Layers
             context.canvas.clipRRect(clip_rrect_, clip_behavior_ != Clip.hardEdge);
             if (clip_behavior_ == Clip.antiAliasWithSaveLayer)
             {
-                context.canvas.saveLayer(paint_bounds(), null);
+                context.canvas.SaveLayer(paint_bounds(), null);
             }
             PaintChildren(context);
             if (clip_behavior_ == Clip.antiAliasWithSaveLayer)
             {
-                context.canvas.restore();
+                context.canvas.Restore();
             }
         }
 

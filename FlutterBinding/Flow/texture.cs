@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using SkiaSharp;
+using System.Collections.Generic;
 using static FlutterBinding.Flow.Helper;
 
 // Copyright 2017 The Chromium Authors. All rights reserved.
@@ -10,7 +11,7 @@ namespace FlutterBinding.Flow
 
     public abstract class Texture : System.IDisposable
     {
-        protected Texture(int64_t id)
+        protected Texture(ulong id)
         {
             //C++ TO C# CONVERTER TODO TASK: The following line was determined to be a copy assignment (rather than a reference assignment) - this should be verified and a 'CopyFrom' method should be created:
             //ORIGINAL LINE: this.id_ = id;
@@ -33,12 +34,12 @@ namespace FlutterBinding.Flow
         // Called on GPU thread.
         public abstract void MarkNewFrameAvailable();
 
-        public int64_t Id()
+        public ulong Id()
         {
             return id_;
         }
 
-        private int64_t id_ = new int64_t();
+        private ulong id_ = new ulong();
 
         //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':
         //  Texture(const Texture&) = delete;
@@ -60,13 +61,13 @@ namespace FlutterBinding.Flow
         }
 
         // Called from GPU thread.
-        public void UnregisterTexture(int64_t id)
+        public void UnregisterTexture(ulong id)
         {
             mapping_.Remove(id);
         }
 
         // Called from GPU thread.
-        public Texture GetTexture(int64_t id)
+        public Texture GetTexture(ulong id)
         {
             var it = mapping_.find(id);
             //C++ TO C# CONVERTER TODO TASK: Iterators are only converted within the context of 'while' and 'for' loops:
@@ -91,7 +92,7 @@ namespace FlutterBinding.Flow
             }
         }
 
-        private SortedDictionary<int64_t, Texture> mapping_ = new SortedDictionary<int64_t, Texture>();
+        private SortedDictionary<ulong, Texture> mapping_ = new SortedDictionary<ulong, Texture>();
 
         //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':
         //  TextureRegistry(const TextureRegistry&) = delete;

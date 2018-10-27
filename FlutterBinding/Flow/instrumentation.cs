@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using static FlutterBinding.Flow.Helper;
+using SkiaSharp;
 
 // Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
@@ -9,7 +10,7 @@ using static FlutterBinding.Flow.Helper;
 namespace FlutterBinding.Flow
 {
 
-    public class Stopwatch : System.IDisposable
+    public class Stopwatch //: System.IDisposable
     {
         public Stopwatch()
         {
@@ -43,7 +44,7 @@ namespace FlutterBinding.Flow
         public fml.TimeDelta MaxDelta()
         {
             fml.TimeDelta max_delta = new fml.TimeDelta();
-            for (size_t i = 0; i < GlobalMembers.kMaxSamples; i++)
+            for (int i = 0; i < GlobalMembers.kMaxSamples; i++)
             {
                 if (laps_[i] > max_delta)
                 {
@@ -54,7 +55,7 @@ namespace FlutterBinding.Flow
         }
 
 
-        // Initialize the SkSurface for drawing into. Draws the base background and any
+        // Initialize the SKSurface for drawing into. Draws the base background and any
         // timing data from before the initial Visualize() call.
         //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
         //ORIGINAL LINE: void InitVisualizeSurface(const SKRect& rect) const
@@ -67,7 +68,7 @@ namespace FlutterBinding.Flow
             cache_dirty_ = false;
 
             // TODO(garyq): Use a GPU surface instead of a CPU surface.
-            visualize_cache_surface_.CopyFrom(SkSurface.MakeRasterN32Premul(rect.width(), rect.height()));
+            visualize_cache_surface_.CopyFrom(SKSurface.MakeRasterN32Premul(rect.width(), rect.height()));
 
             SKCanvas cache_canvas = visualize_cache_surface_.Dereference().getCanvas();
 
@@ -95,7 +96,7 @@ namespace FlutterBinding.Flow
             path.lineTo(x, y + height * (1.0 - GlobalMembers.UnitHeight(laps_[0].ToMillisecondsF(), max_unit_interval)));
             double unit_x;
             double unit_next_x = 0.0;
-            for (size_t i = 0; i < GlobalMembers.kMaxSamples; i += 1)
+            for (int i = 0; i < GlobalMembers.kMaxSamples; i += 1)
             {
                 unit_x = unit_next_x;
                 unit_next_x = ((double)(i + 1) / GlobalMembers.kMaxSamples);
@@ -138,14 +139,14 @@ namespace FlutterBinding.Flow
             // Draw vertical replacement bar to erase old/stale pixels.
             paint.setColor(0x99FFFFFF);
             paint.setStyle(SKPaint.Style.kFill_Style);
-            paint.setBlendMode(SkBlendMode.kSrc);
+            paint.setBlendMode(SKBlendMode.kSrc);
             double sample_x = x + width * ((double)prev_drawn_sample_index_ / GlobalMembers.kMaxSamples);
             var eraser_rect = SKRect.MakeLTRB(sample_x, y, sample_x + width * sample_unit_width, height);
             cache_canvas.drawRect(eraser_rect, paint);
 
             // Draws blue timing bar for new data.
             paint.setColor(0xAA0000FF);
-            paint.setBlendMode(SkBlendMode.kSrcOver);
+            paint.setBlendMode(SKBlendMode.kSrcOver);
             var bar_rect = SKRect.MakeLTRB(sample_x, y + height * (1.0 - GlobalMembers.UnitHeight(laps_[current_sample_ == 0 ? GlobalMembers.kMaxSamples - 1 : current_sample_ - 1].ToMillisecondsF(), max_unit_interval)), sample_x + width * sample_unit_width, height);
             cache_canvas.drawRect(bar_rect, paint);
 
@@ -157,7 +158,7 @@ namespace FlutterBinding.Flow
             if (max_interval > GlobalMembers.kOneFrameMS)
             {
                 // Paint the horizontal markers
-                size_t frame_marker_count = (size_t)(max_interval / GlobalMembers.kOneFrameMS);
+                int frame_marker_count = (int)(max_interval / GlobalMembers.kOneFrameMS);
 
                 // Limit the number of markers displayed. After a certain point, the graph
                 // becomes crowded
@@ -166,7 +167,7 @@ namespace FlutterBinding.Flow
                     frame_marker_count = 1;
                 }
 
-                for (size_t frame_index = 0; frame_index < frame_marker_count; frame_index++)
+                for (int frame_index = 0; frame_index < frame_marker_count; frame_index++)
                 {
                     double frame_height = height * (1.0 - (GlobalMembers.UnitFrameInterval((frame_index + 1) * GlobalMembers.kOneFrameMS) / max_unit_interval));
                     cache_canvas.drawLine(x, y + frame_height, width, y + frame_height, paint);
@@ -177,16 +178,16 @@ namespace FlutterBinding.Flow
             // We paint it over the current frame, not after it, because when we
             // paint this we don't yet have all the times for the current frame.
             paint.setStyle(SKPaint.Style.kFill_Style);
-            paint.setBlendMode(SkBlendMode.kSrcOver);
+            paint.setBlendMode(SKBlendMode.kSrcOver);
             if (GlobalMembers.UnitFrameInterval(LastLap().ToMillisecondsF()) > 1.0)
             {
                 // budget exceeded
-                paint.setColor(new uint32_t(GlobalMembers.SK_ColorRED));
+                paint.setColor(new uint(GlobalMembers.SK_ColorRED));
             }
             else
             {
                 // within budget
-                paint.setColor(new uint32_t(GlobalMembers.SK_ColorGREEN));
+                paint.setColor(new uint(GlobalMembers.SK_ColorGREEN));
             }
             sample_x = x + width * ((double)current_sample_ / GlobalMembers.kMaxSamples);
             var marker_rect = SKRect.MakeLTRB(sample_x, y, sample_x + width * sample_unit_width, height);
@@ -223,12 +224,12 @@ namespace FlutterBinding.Flow
 
         private fml.TimePoint start_ = new fml.TimePoint();
         private List<fml.TimeDelta> laps_ = new List<fml.TimeDelta>();
-        private size_t current_sample_ = new size_t();
+        private int current_sample_ = new int();
         // Mutable data cache for performance optimization of the graphs. Prevents
         // expensive redrawing of old data.
         private bool cache_dirty_;
-        private sk_sp<SkSurface> visualize_cache_surface_ = new sk_sp<SkSurface>();
-        private size_t prev_drawn_sample_index_ = new size_t();
+        private SKSurface visualize_cache_surface_;
+        private int prev_drawn_sample_index_ = new int();
 
         //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':
         //  Stopwatch(const Stopwatch&) = delete;
@@ -244,25 +245,25 @@ namespace FlutterBinding.Flow
         }
 
         //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
-        //ORIGINAL LINE: size_t count() const
-        public size_t count()
+        //ORIGINAL LINE: int count() const
+        public int count()
         {
             return count_;
         }
 
-        public void Reset(size_t count = 0)
+        public void Reset(int count = 0)
         {
             //C++ TO C# CONVERTER TODO TASK: The following line was determined to be a copy assignment (rather than a reference assignment) - this should be verified and a 'CopyFrom' method should be created:
             //ORIGINAL LINE: count_ = count;
             count_.CopyFrom(count);
         }
 
-        public void Increment(size_t count = 1)
+        public void Increment(int count = 1)
         {
             count_ += count;
         }
 
-        private size_t count_ = new size_t();
+        private int count_ = new int();
 
         //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':
         //  Counter(const Counter&) = delete;
@@ -284,13 +285,13 @@ namespace FlutterBinding.Flow
         //  public void Dispose();
 
         //C++ TO C# CONVERTER TODO TASK: The implementation of the following method could not be found:
-        //  void Add(int64_t value);
+        //  void Add(ulong value);
 
         //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
         //ORIGINAL LINE: void Visualize(SKCanvas& canvas, const SKRect& rect) const
         public void Visualize(SKCanvas canvas, SKRect rect)
         {
-            size_t max_bytes = GetMaxValue();
+            int max_bytes = GetMaxValue();
 
             if (max_bytes == 0)
             {
@@ -298,7 +299,7 @@ namespace FlutterBinding.Flow
                 return;
             }
 
-            size_t min_bytes = GetMinValue();
+            int min_bytes = GetMinValue();
 
             SKPaint paint = new SKPaint();
 
@@ -318,7 +319,7 @@ namespace FlutterBinding.Flow
             SKPath path = new SKPath();
             path.moveTo(x, bottom);
 
-            for (size_t i = 0; i < GlobalMembers.kMaxSamples; ++i)
+            for (int i = 0; i < GlobalMembers.kMaxSamples; ++i)
             {
                 long current_bytes = values_[i];
                 double ratio = (double)(current_bytes - min_bytes) / (max_bytes - min_bytes);
@@ -338,7 +339,7 @@ namespace FlutterBinding.Flow
             double sample_margin_unit_width = sample_unit_width / 6.0;
             double sample_margin_width = width * sample_margin_unit_width;
             paint.setStyle(SKPaint.Style.kFill_Style);
-            paint.setColor(new uint32_t(GlobalMembers.SK_ColorGRAY));
+            paint.setColor(new uint(GlobalMembers.SK_ColorGRAY));
             double sample_x = x + width * ((double)current_sample_ / GlobalMembers.kMaxSamples) - sample_margin_width;
             var marker_rect = SKRect.MakeLTRB(sample_x, y, sample_x + width * sample_unit_width + sample_margin_width * 2, bottom);
             canvas.drawRect(marker_rect, paint);
@@ -356,7 +357,7 @@ namespace FlutterBinding.Flow
         public long GetMaxValue()
         {
             var max = long.MinValue;
-            for (size_t i = 0; i < GlobalMembers.kMaxSamples; ++i)
+            for (int i = 0; i < GlobalMembers.kMaxSamples; ++i)
             {
                 max = Math.Max<long>(max, values_[i]);
             }
@@ -368,15 +369,15 @@ namespace FlutterBinding.Flow
         public long GetMinValue()
         {
             var min = long.MaxValue;
-            for (size_t i = 0; i < GlobalMembers.kMaxSamples; ++i)
+            for (int i = 0; i < GlobalMembers.kMaxSamples; ++i)
             {
                 min = Math.Min<long>(min, values_[i]);
             }
             return min;
         }
 
-        private List<int64_t> values_ = new List<int64_t>();
-        private size_t current_sample_ = new size_t();
+        private List<ulong> values_ = new List<ulong>();
+        private int current_sample_ = new int();
 
         //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':
         //  CounterValues(const CounterValues&) = delete;

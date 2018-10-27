@@ -1,4 +1,5 @@
 ﻿using static FlutterBinding.Flow.Helper;
+using SkiaSharp;
 
 // Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
@@ -19,7 +20,7 @@ namespace FlutterBinding.Flow.Layers
             color_ = color;
         }
 
-        public void set_blend_mode(SkBlendMode blend_mode)
+        public void set_blend_mode(SKBlendMode blend_mode)
         {
             blend_mode_ = blend_mode;
         }
@@ -33,14 +34,14 @@ namespace FlutterBinding.Flow.Layers
 
             var color_filter = SKColorFilter.CreateBlendMode(color_, blend_mode_);
             SKPaint paint = new SKPaint();
-            paint.setColorFilter(std::move(color_filter));
+            paint.ColorFilter = color_filter;
 
             Layer.AutoSaveLayer save = Layer.AutoSaveLayer.Create(context, paint_bounds(), paint);
             PaintChildren(context);
         }
 
         private uint color_;
-        private SkBlendMode blend_mode_;
+        private SKBlendMode blend_mode_;
 
         //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':
         //  ColorFilterLayer(const ColorFilterLayer&) = delete;

@@ -8,7 +8,7 @@ using static FlutterBinding.Flow.Helper;
 namespace FlutterBinding.Flow.Layers
 {
 
-    public class LayerTree : System.IDisposable
+    public class LayerTree //: System.IDisposable
     {
         public LayerTree()
         {
@@ -26,7 +26,7 @@ namespace FlutterBinding.Flow.Layers
             TRACE_EVENT0("flutter", "LayerTree::Preroll");
             SKColorSpace color_space = frame.canvas() != null ? frame.canvas().imageInfo().colorSpace() : null;
             frame.context().raster_cache().SetCheckboardCacheImages(checkerboard_raster_cache_images_);
-            PrerollContext context = new PrerollContext(ignore_raster_cache ? null : frame.context().raster_cache(), frame.gr_context(), color_space, SKRect.MakeEmpty(), frame.context().frame_time(), frame.context().engine_time(), frame.context().texture_registry(), checkerboard_offscreen_layers_);
+            PrerollContext context = new PrerollContext(ignore_raster_cache ? null : frame.context().raster_cache(), frame.gr_context(), color_space, SKRect.Empty, frame.context().frame_time(), frame.context().engine_time(), frame.context().texture_registry(), checkerboard_offscreen_layers_);
 
             root_layer_.Preroll(context, frame.root_surface_transformation());
         }
@@ -46,7 +46,7 @@ namespace FlutterBinding.Flow.Layers
             }
         }
 
-        public sk_sp<SKPicture> Flatten(SKRect bounds)
+        public SKPicture Flatten(SKRect bounds)
         {
             TRACE_EVENT0("flutter", "LayerTree::Flatten");
 
@@ -64,7 +64,7 @@ namespace FlutterBinding.Flow.Layers
             // No root surface transformation. So assume identity.
             root_surface_transformation.reset();
 
-            PrerollContext preroll_context = new PrerollContext(null, null, null, SKRect.MakeEmpty(), unused_stopwatch, unused_stopwatch, unused_texture_registry, false);
+            PrerollContext preroll_context = new PrerollContext(null, null, null, SKRect.Empty, unused_stopwatch, unused_stopwatch, unused_texture_registry, false);
 
             Layer.PaintContext paint_context = new Layer.PaintContext(*canvas, null, unused_stopwatch, unused_stopwatch, unused_texture_registry, null, false);
 
@@ -106,7 +106,7 @@ namespace FlutterBinding.Flow.Layers
         {
             //C++ TO C# CONVERTER TODO TASK: The following line was determined to be a copy assignment (rather than a reference assignment) - this should be verified and a 'CopyFrom' method should be created:
             //ORIGINAL LINE: frame_size_ = frame_size;
-            frame_size_.CopyFrom(frame_size);
+            frame_size_ = frame_size;
         }
 
         public void set_construction_time(fml.TimeDelta delta)

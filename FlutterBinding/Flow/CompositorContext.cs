@@ -1,4 +1,6 @@
-﻿using static FlutterBinding.Flow.Helper;
+﻿using FlutterBinding.Flow.Layers;
+using SkiaSharp;
+using static FlutterBinding.Flow.Helper;
 
 // Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
@@ -87,9 +89,9 @@ namespace FlutterBinding.Flow
         //C++ TO C# CONVERTER TODO TASK: The implementation of the following method could not be found:
         //  public void Dispose();
 
-        public virtual std::unique_ptr<CompositorContext.ScopedFrame> AcquireFrame(GRContext gr_context, SKCanvas canvas, ExternalViewEmbedder view_embedder, SKMatrix root_surface_transformation, bool instrumentation_enabled)
+        public virtual ScopedFrame AcquireFrame(GRContext gr_context, SKCanvas canvas, ExternalViewEmbedder view_embedder, SKMatrix root_surface_transformation, bool instrumentation_enabled)
         {
-            return std::make_unique<ScopedFrame>(this, gr_context, canvas, view_embedder, root_surface_transformation, instrumentation_enabled);
+            return new ScopedFrame(this, gr_context, canvas, view_embedder, root_surface_transformation, instrumentation_enabled);
         }
 
         public void OnGRContextCreated()

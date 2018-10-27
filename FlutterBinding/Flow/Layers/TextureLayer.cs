@@ -24,7 +24,7 @@ namespace FlutterBinding.Flow.Layers
         {
             size_.CopyFrom(size);
         }
-        public void set_texture_id(int64_t texture_id)
+        public void set_texture_id(ulong texture_id)
         {
             //C++ TO C# CONVERTER TODO TASK: The following line was determined to be a copy assignment (rather than a reference assignment) - this should be verified and a 'CopyFrom' method should be created:
             //ORIGINAL LINE: texture_id_ = texture_id;
@@ -43,7 +43,7 @@ namespace FlutterBinding.Flow.Layers
         //ORIGINAL LINE: void Paint(PaintContext& context) const override
         public override void Paint(PaintContext context)
         {
-            Texture texture = context.texture_registry.GetTexture(new int64_t(texture_id_));
+            Texture texture = context.texture_registry.GetTexture(new ulong(texture_id_));
             if (texture == null)
             {
                 return;
@@ -53,7 +53,7 @@ namespace FlutterBinding.Flow.Layers
 
         private SKPoint offset_ = new SKPoint();
         private SKSize size_ = new SKSize();
-        private int64_t texture_id_ = new int64_t();
+        private ulong texture_id_ = new ulong();
         private bool freeze_;
 
         //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':

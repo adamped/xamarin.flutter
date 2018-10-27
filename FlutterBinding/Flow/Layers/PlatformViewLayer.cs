@@ -25,7 +25,7 @@ namespace FlutterBinding.Flow.Layers
         {
             size_.CopyFrom(size);
         }
-        public void set_view_id(int64_t view_id)
+        public void set_view_id(ulong view_id)
         {
             //C++ TO C# CONVERTER TODO TASK: The following line was determined to be a copy assignment (rather than a reference assignment) - this should be verified and a 'CopyFrom' method should be created:
             //ORIGINAL LINE: view_id_ = view_id;
@@ -51,12 +51,12 @@ namespace FlutterBinding.Flow.Layers
             @params.offsetPixels = SKPoint.Make(transform.getTranslateX(), transform.getTranslateY());
             @params.sizePoints.CopyFrom(size_);
 
-            context.view_embedder.CompositeEmbeddedView(new int64_t(view_id_), @params);
+            context.view_embedder.CompositeEmbeddedView(new ulong(view_id_), @params);
         }
 
         private SKPoint offset_ = new SKPoint();
         private SKSize size_ = new SKSize();
-        private int64_t view_id_ = new int64_t();
+        private ulong view_id_ = new ulong();
 
         //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':
         //  PlatformViewLayer(const PlatformViewLayer&) = delete;

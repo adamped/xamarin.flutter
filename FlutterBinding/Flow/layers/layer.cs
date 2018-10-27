@@ -42,7 +42,7 @@ namespace FlutterBinding.Flow.Layers
         {
             this.parent_ = null;
             this.needs_system_composite_ = false;
-            this.paint_bounds_ = new SKRect(SKRect.MakeEmpty());
+            this.paint_bounds_ = new SKRect(SKRect.Empty);
         }
         //C++ TO C# CONVERTER TODO TASK: The implementation of the following method could not be found:
         //  public void Dispose();
@@ -96,9 +96,9 @@ namespace FlutterBinding.Flow.Layers
 
             private AutoSaveLayer(PaintContext paint_context, SKCanvas.SaveLayerRec layer_rec)
             {
-                this.paint_context_ = new Layer.PaintContext(paint_context);
-                this.bounds_ = new SKRect(layer_rec.fBounds);
-                paint_context_.canvas.saveLayer(layer_rec);
+                this.paint_context_ = paint_context;
+                this.bounds_ = layer_rec.fBounds;
+                paint_context_.canvas.SaveLayer(layer_rec);
             }
 
             private readonly PaintContext paint_context_;
@@ -109,14 +109,7 @@ namespace FlutterBinding.Flow.Layers
         //ORIGINAL LINE: virtual void Paint(PaintContext& context) const = 0;
         public abstract void Paint(PaintContext context);
 
-#if OS_FUCHSIA
-  // Updates the system composited scene.
-#if OS_FUCHSIA
-  public virtual void UpdateScene(SceneUpdateContext context)
-  {
-  }
-#endif
-#endif
+
 
         //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
         //ORIGINAL LINE: ContainerLayer* parent() const

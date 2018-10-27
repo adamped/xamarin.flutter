@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SkiaSharp;
+using System;
 using static FlutterBinding.Flow.Helper;
 
 namespace FlutterBinding.Flow
@@ -13,10 +14,10 @@ namespace FlutterBinding.Flow
         public static void DrawStatisticsText(SKCanvas canvas, string @string, int x, int y)
         {
             SKPaint paint = new SKPaint();
-            paint.setTextSize(15F);
-            paint.setLinearText(false);
-            paint.setColor(new uint32_t(GlobalMembers.SK_ColorGRAY));
-            canvas.drawText(@string, @string.Length, x, y, paint);
+            paint.SetTextSize(15F);
+            paint.SetLinearText(false);
+            paint.SetColor(GlobalMembers.SK_ColorGRAY);
+            canvas.DrawText(@string, @string.Length, x, y, paint);
         }
 
         public static void VisualizeStopWatch(SKCanvas canvas, Stopwatch stopwatch, float x, float y, float width, float height, bool show_graph, bool show_labels, string label_prefix)
@@ -51,10 +52,10 @@ namespace FlutterBinding.Flow
             }
         }
 
-        internal double kOneFrameMS = 1e3 / 60.0;
+        internal const double kOneFrameMS = 1e3 / 60.0;
 
-        internal const size_t kMaxSamples = 120;
-        internal const size_t kMaxFrameMarkers = 8;
+        internal const int kMaxSamples = 120;
+        internal const int kMaxFrameMarkers = 8;
 
         //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = default':
         //Stopwatch::~Stopwatch() = default;
@@ -77,40 +78,40 @@ namespace FlutterBinding.Flow
         //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = default':
         //CounterValues::~CounterValues() = default;
 
-        public static void DrawCheckerboard(SKCanvas canvas, uint32_t c1, uint32_t c2, int size)
+        public static void DrawCheckerboard(SKCanvas canvas, uint c1, uint c2, int size)
         {
             SKPaint paint = new SKPaint();
-            paint.setShader(GlobalMembers.CreateCheckerboardShader(new uint32_t(c1), new uint32_t(c2), size));
-            canvas.drawPaint(paint);
+            paint.setShader(GlobalMembers.CreateCheckerboardShader(c1, c2, size));
+            canvas.DrawPaint(paint);
         }
 
         public static void DrawCheckerboard(SKCanvas canvas, SKRect rect)
         {
             // Draw a checkerboard
-            canvas.save();
-            canvas.clipRect(rect);
+            canvas.Save();
+            canvas.ClipRect(rect);
 
             var checkerboard_color = GlobalMembers.SkColorSetARGB(64, RandomNumbers.NextNumber() % 256, RandomNumbers.NextNumber() % 256, RandomNumbers.NextNumber() % 256);
 
             DrawCheckerboard(canvas, checkerboard_color, 0x00000000, 12);
-            canvas.restore();
+            canvas.Restore();
 
             // Stroke the drawn area
             SKPaint debugPaint = new SKPaint();
             debugPaint.setStrokeWidth(8F);
             debugPaint.setColor(GlobalMembers.SkColorSetA(checkerboard_color, 255));
             debugPaint.setStyle(SKPaint.Style.kStroke_Style);
-            canvas.drawRect(rect, debugPaint);
+            canvas.DrawRect(rect, debugPaint);
         }
 
-        public static sk_sp<SkShader> CreateCheckerboardShader(uint32_t c1, uint32_t c2, int size)
+        public static SKShader CreateCheckerboardShader(uint c1, uint c2, int size)
         {
-            SkBitmap bm = new SkBitmap();
+            SKBitmap bm = new SKBitmap();
             bm.allocN32Pixels(2 * size, 2 * size);
-            bm.eraseColor(new uint32_t(c1));
-            bm.eraseArea(SkIRect.MakeLTRB(0, 0, size, size), new uint32_t(c2));
-            bm.eraseArea(SkIRect.MakeLTRB(size, size, 2 * size, 2 * size), new uint32_t(c2));
-            return SkShader.MakeBitmapShader(bm, SkShader.TileMode.kRepeat_TileMode, SkShader.TileMode.kRepeat_TileMode);
+            bm.eraseColor(c1);
+            bm.eraseArea(SKRectI.MakeLTRB(0, 0, size, size), c2);
+            bm.eraseArea(SKRectI.MakeLTRB(size, size, 2 * size, 2 * size), c2);
+            return SKShader.MakeBitmapShader(bm, SKShader.TileMode.kRepeat_TileMode, SKShader.TileMode.kRepeat_TileMode);
         }
 
         internal static bool CanRasterizePicture(SKPicture picture)
@@ -167,11 +168,11 @@ namespace FlutterBinding.Flow
 
         internal static RasterCacheResult Rasterize(GRContext context, SKMatrix ctm, SKColorSpace dst_color_space, bool checkerboard, SKRect logical_rect, Action<SKCanvas> draw_function)
         {
-            SkIRect cache_rect = RasterCache.GetDeviceBounds(logical_rect, ctm);
+            SKRectI cache_rect = RasterCache.GetDeviceBounds(logical_rect, ctm);
 
             SKImageInfo image_info = SKImageInfo.MakeN32Premul(cache_rect.width(), cache_rect.height());
 
-            sk_sp<SkSurface> surface = context != null ? SkSurface.MakeRenderTarget(context, SkBudgeted.kYes, image_info) : SkSurface.MakeRaster(image_info);
+            SKSurface surface = context != null ? SKSurface.MakeRenderTarget(context, SkBudgeted.kYes, image_info) : SKSurface.MakeRaster(image_info);
 
             if (surface == null)
             {
@@ -179,7 +180,7 @@ namespace FlutterBinding.Flow
             }
 
             SKCanvas canvas = surface.Dereference().getCanvas();
-            std::unique_ptr<SKCanvas> xformCanvas = new std::unique_ptr<SKCanvas>();
+            SKCanvas xformCanvas = new SKCanvas();
             if (dst_color_space != null)
             {
                 xformCanvas = SkCreateColorSpaceXformCanvas(surface.Dereference().getCanvas(), GlobalMembers.sk_ref_sp(dst_color_space));
@@ -189,9 +190,9 @@ namespace FlutterBinding.Flow
                 }
             }
 
-            canvas.clear(new uint32_t(GlobalMembers.SK_ColorTRANSPARENT));
-            canvas.translate(-cache_rect.left(), -cache_rect.top());
-            canvas.concat(ctm);
+            canvas.Clear(GlobalMembers.SK_ColorTRANSPARENT);
+            canvas.Translate(-cache_rect.left(), -cache_rect.top());
+            canvas.Concat(ctm);
             draw_function(canvas);
 
             if (checkerboard)
@@ -214,7 +215,7 @@ namespace FlutterBinding.Flow
             });
         }
 
-        internal static size_t ClampSize(size_t value, size_t min, size_t max)
+        internal static int ClampSize(int value, int min, int max)
         {
             if (value > max)
             {
@@ -234,309 +235,309 @@ namespace FlutterBinding.Flow
 public static class GlobalMembers
 {
     
-    public static std::ostream operator <<(std::ostream os, MatrixDecomposition m)
-    {
-        if (!m.IsValid())
-        {
-            os << "Invalid Matrix!" << std::endl;
-            return os;
-        }
+    //public static std::ostream operator <<(std::ostream os, MatrixDecomposition m)
+    //{
+    //    if (!m.IsValid())
+    //    {
+    //        os << "Invalid Matrix!" << std::endl;
+    //        return os;
+    //    }
 
-        os << "Translation (x, y, z): " << m.translation() << std::endl;
-        os << "Scale (z, y, z): " << m.scale() << std::endl;
-        os << "Shear (zy, yz, zx): " << m.shear() << std::endl;
-        os << "Perspective (x, y, z, w): " << m.perspective() << std::endl;
-        os << "Rotation (x, y, z, w): " << m.rotation() << std::endl;
+    //    os << "Translation (x, y, z): " << m.translation() << std::endl;
+    //    os << "Scale (z, y, z): " << m.scale() << std::endl;
+    //    os << "Shear (zy, yz, zx): " << m.shear() << std::endl;
+    //    os << "Perspective (x, y, z, w): " << m.perspective() << std::endl;
+    //    os << "Rotation (x, y, z, w): " << m.rotation() << std::endl;
 
-        return os;
-    }
-    public static std::ostream operator <<(std::ostream os, RasterCacheKey<uint> k)
-    {
-        os << "Picture: " << k.id() << " matrix: " << k.matrix();
-        return os;
-    }
-    public static std::ostream operator <<(std::ostream os, SKSizeI size)
-    {
-        os << size.width() << ", " << size.height();
-        return os;
-    }
-    public static std::ostream operator <<(std::ostream os, SKMatrix m)
-    {
-        SkString string = new SkString();
-        string.printf("[%8.4f %8.4f %8.4f][%8.4f %8.4f %8.4f][%8.4f %8.4f %8.4f]", m[0], m[1], m[2], m[3], m[4], m[5], m[6], m[7], m[8]);
-        os << string.c_str();
-        return os;
-    }
-    public static std::ostream operator <<(std::ostream os, SKMatrix44 m)
-    {
-        os << m.get(0, 0) << ", " << m.get(0, 1) << ", " << m.get(0, 2) << ", " << m.get(0, 3) << std::endl;
-        os << m.get(1, 0) << ", " << m.get(1, 1) << ", " << m.get(1, 2) << ", " << m.get(1, 3) << std::endl;
-        os << m.get(2, 0) << ", " << m.get(2, 1) << ", " << m.get(2, 2) << ", " << m.get(2, 3) << std::endl;
-        os << m.get(3, 0) << ", " << m.get(3, 1) << ", " << m.get(3, 2) << ", " << m.get(3, 3);
-        return os;
-    }
-    public static std::ostream operator <<(std::ostream os, SKPoint r)
-    {
-        os << "XY: " << r.fX << ", " << r.fY;
-        return os;
-    }
-    public static std::ostream operator <<(std::ostream os, SKRect r)
-    {
-        os << "LTRB: " << r.fLeft << ", " << r.fTop << ", " << r.fRight << ", " << r.fBottom;
-        return os;
-    }
-    public static std::ostream operator <<(std::ostream os, SKRRect r)
-    {
-        os << "LTRB: " << r.rect().fLeft << ", " << r.rect().fTop << ", " << r.rect().fRight << ", " << r.rect().fBottom;
-        return os;
-    }
-    public static std::ostream operator <<(std::ostream os, SKPoint3 v)
-    {
-        os << v.x() << ", " << v.y() << ", " << v.z();
-        return os;
-    }
-    public static std::ostream operator <<(std::ostream os, SkVector4 v)
-    {
-        os << v.fData[0] << ", " << v.fData[1] << ", " << v.fData[2] << ", " << v.fData[3];
-        return os;
-    }
+    //    return os;
+    //}
+    //public static std::ostream operator <<(std::ostream os, RasterCacheKey<uint> k)
+    //{
+    //    os << "Picture: " << k.id() << " matrix: " << k.matrix();
+    //    return os;
+    //}
+    //public static std::ostream operator <<(std::ostream os, SKSizeI size)
+    //{
+    //    os << size.width() << ", " << size.height();
+    //    return os;
+    //}
+    //public static std::ostream operator <<(std::ostream os, SKMatrix m)
+    //{
+    //    SkString string = new SkString();
+    //    string.printf("[%8.4f %8.4f %8.4f][%8.4f %8.4f %8.4f][%8.4f %8.4f %8.4f]", m[0], m[1], m[2], m[3], m[4], m[5], m[6], m[7], m[8]);
+    //    os << string.c_str();
+    //    return os;
+    //}
+    //public static std::ostream operator <<(std::ostream os, SKMatrix44 m)
+    //{
+    //    os << m.get(0, 0) << ", " << m.get(0, 1) << ", " << m.get(0, 2) << ", " << m.get(0, 3) << std::endl;
+    //    os << m.get(1, 0) << ", " << m.get(1, 1) << ", " << m.get(1, 2) << ", " << m.get(1, 3) << std::endl;
+    //    os << m.get(2, 0) << ", " << m.get(2, 1) << ", " << m.get(2, 2) << ", " << m.get(2, 3) << std::endl;
+    //    os << m.get(3, 0) << ", " << m.get(3, 1) << ", " << m.get(3, 2) << ", " << m.get(3, 3);
+    //    return os;
+    //}
+    //public static std::ostream operator <<(std::ostream os, SKPoint r)
+    //{
+    //    os << "XY: " << r.fX << ", " << r.fY;
+    //    return os;
+    //}
+    //public static std::ostream operator <<(std::ostream os, SKRect r)
+    //{
+    //    os << "LTRB: " << r.fLeft << ", " << r.fTop << ", " << r.fRight << ", " << r.fBottom;
+    //    return os;
+    //}
+    //public static std::ostream operator <<(std::ostream os, SKRRect r)
+    //{
+    //    os << "LTRB: " << r.rect().fLeft << ", " << r.rect().fTop << ", " << r.rect().fRight << ", " << r.rect().fBottom;
+    //    return os;
+    //}
+    //public static std::ostream operator <<(std::ostream os, SKPoint3 v)
+    //{
+    //    os << v.x() << ", " << v.y() << ", " << v.z();
+    //    return os;
+    //}
+    //public static std::ostream operator <<(std::ostream os, SkVector4 v)
+    //{
+    //    os << v.fData[0] << ", " << v.fData[1] << ", " << v.fData[2] << ", " << v.fData[3];
+    //    return os;
+    //}
 
-    //C++ TO C# CONVERTER WARNING: The following constructor is declared outside of its associated class:
-    public static TEST(MatrixDecomposition UnnamedParameter, Rotation UnnamedParameter2)
-    {
-        SKMatrix44 matrix = SKMatrix44.I();
+    ////C++ TO C# CONVERTER WARNING: The following constructor is declared outside of its associated class:
+    //public static TEST(MatrixDecomposition UnnamedParameter, Rotation UnnamedParameter2)
+    //{
+    //    SKMatrix44 matrix = SKMatrix44.I();
 
-        var angle = M_PI_4;
-        matrix.setRotateAbout(0.0, 0.0, 1.0, angle);
+    //    var angle = M_PI_4;
+    //    matrix.setRotateAbout(0.0, 0.0, 1.0, angle);
 
-        MatrixDecomposition decomposition = new MatrixDecomposition(matrix);
-        ASSERT_TRUE(decomposition.IsValid());
+    //    MatrixDecomposition decomposition = new MatrixDecomposition(matrix);
+    //    ASSERT_TRUE(decomposition.IsValid());
 
-        var sine = Math.Sin(angle * 0.5);
+    //    var sine = Math.Sin(angle * 0.5);
 
-        ASSERT_FLOAT_EQ(0, decomposition.rotation().fData[0]);
-        ASSERT_FLOAT_EQ(0, decomposition.rotation().fData[1]);
-        ASSERT_FLOAT_EQ(sine, decomposition.rotation().fData[2]);
-        ASSERT_FLOAT_EQ(Math.Cos(angle * 0.5), decomposition.rotation().fData[3]);
-    }
+    //    ASSERT_FLOAT_EQ(0, decomposition.rotation().fData[0]);
+    //    ASSERT_FLOAT_EQ(0, decomposition.rotation().fData[1]);
+    //    ASSERT_FLOAT_EQ(sine, decomposition.rotation().fData[2]);
+    //    ASSERT_FLOAT_EQ(Math.Cos(angle * 0.5), decomposition.rotation().fData[3]);
+    //}
 
-    //C++ TO C# CONVERTER WARNING: The following constructor is declared outside of its associated class:
-    public static TEST(MatrixDecomposition UnnamedParameter, Scale UnnamedParameter2)
-    {
-        SKMatrix44 matrix = SKMatrix44.I();
+    ////C++ TO C# CONVERTER WARNING: The following constructor is declared outside of its associated class:
+    //public static TEST(MatrixDecomposition UnnamedParameter, Scale UnnamedParameter2)
+    //{
+    //    SKMatrix44 matrix = SKMatrix44.I();
 
-        const var scale = 5.0;
-        matrix.setScale(scale + 0, scale + 1, scale + 2);
+    //    const var scale = 5.0;
+    //    matrix.setScale(scale + 0, scale + 1, scale + 2);
 
-        MatrixDecomposition decomposition = new MatrixDecomposition(matrix);
-        ASSERT_TRUE(decomposition.IsValid());
+    //    MatrixDecomposition decomposition = new MatrixDecomposition(matrix);
+    //    ASSERT_TRUE(decomposition.IsValid());
 
-        ASSERT_FLOAT_EQ(scale + 0, decomposition.scale().fX);
-        ASSERT_FLOAT_EQ(scale + 1, decomposition.scale().fY);
-        ASSERT_FLOAT_EQ(scale + 2, decomposition.scale().fZ);
-    }
+    //    ASSERT_FLOAT_EQ(scale + 0, decomposition.scale().fX);
+    //    ASSERT_FLOAT_EQ(scale + 1, decomposition.scale().fY);
+    //    ASSERT_FLOAT_EQ(scale + 2, decomposition.scale().fZ);
+    //}
 
-    //C++ TO C# CONVERTER WARNING: The following constructor is declared outside of its associated class:
-    public static TEST(MatrixDecomposition UnnamedParameter, Translate UnnamedParameter2)
-    {
-        SKMatrix44 matrix = SKMatrix44.I();
+    ////C++ TO C# CONVERTER WARNING: The following constructor is declared outside of its associated class:
+    //public static TEST(MatrixDecomposition UnnamedParameter, Translate UnnamedParameter2)
+    //{
+    //    SKMatrix44 matrix = SKMatrix44.I();
 
-        const var translate = 125.0;
-        matrix.setTranslate(translate + 0, translate + 1, translate + 2);
+    //    const var translate = 125.0;
+    //    matrix.setTranslate(translate + 0, translate + 1, translate + 2);
 
-        MatrixDecomposition decomposition = new MatrixDecomposition(matrix);
-        ASSERT_TRUE(decomposition.IsValid());
+    //    MatrixDecomposition decomposition = new MatrixDecomposition(matrix);
+    //    ASSERT_TRUE(decomposition.IsValid());
 
-        ASSERT_FLOAT_EQ(translate + 0, decomposition.translation().fX);
-        ASSERT_FLOAT_EQ(translate + 1, decomposition.translation().fY);
-        ASSERT_FLOAT_EQ(translate + 2, decomposition.translation().fZ);
-    }
+    //    ASSERT_FLOAT_EQ(translate + 0, decomposition.translation().fX);
+    //    ASSERT_FLOAT_EQ(translate + 1, decomposition.translation().fY);
+    //    ASSERT_FLOAT_EQ(translate + 2, decomposition.translation().fZ);
+    //}
 
-    //C++ TO C# CONVERTER WARNING: The following constructor is declared outside of its associated class:
-    public static TEST(MatrixDecomposition UnnamedParameter, Combination UnnamedParameter2)
-    {
-        SKMatrix44 matrix = SKMatrix44.I();
+    ////C++ TO C# CONVERTER WARNING: The following constructor is declared outside of its associated class:
+    //public static TEST(MatrixDecomposition UnnamedParameter, Combination UnnamedParameter2)
+    //{
+    //    SKMatrix44 matrix = SKMatrix44.I();
 
-        var rotation = M_PI_4;
-        const var scale = 5;
-        const var translate = 125.0;
+    //    var rotation = M_PI_4;
+    //    const var scale = 5;
+    //    const var translate = 125.0;
 
-        SKMatrix44 m1 = SKMatrix44.I();
-        m1.setRotateAbout(0, 0, 1, rotation);
+    //    SKMatrix44 m1 = SKMatrix44.I();
+    //    m1.setRotateAbout(0, 0, 1, rotation);
 
-        SKMatrix44 m2 = SKMatrix44.I();
-        m2.setScale(scale);
+    //    SKMatrix44 m2 = SKMatrix44.I();
+    //    m2.setScale(scale);
 
-        SKMatrix44 m3 = SKMatrix44.I();
-        m3.setTranslate(translate, translate, translate);
+    //    SKMatrix44 m3 = SKMatrix44.I();
+    //    m3.setTranslate(translate, translate, translate);
 
-        SKMatrix44 combined = m3 * m2 * m1;
+    //    SKMatrix44 combined = m3 * m2 * m1;
 
-        MatrixDecomposition decomposition = new MatrixDecomposition(combined);
-        ASSERT_TRUE(decomposition.IsValid());
+    //    MatrixDecomposition decomposition = new MatrixDecomposition(combined);
+    //    ASSERT_TRUE(decomposition.IsValid());
 
-        ASSERT_FLOAT_EQ(translate, decomposition.translation().fX);
-        ASSERT_FLOAT_EQ(translate, decomposition.translation().fY);
-        ASSERT_FLOAT_EQ(translate, decomposition.translation().fZ);
+    //    ASSERT_FLOAT_EQ(translate, decomposition.translation().fX);
+    //    ASSERT_FLOAT_EQ(translate, decomposition.translation().fY);
+    //    ASSERT_FLOAT_EQ(translate, decomposition.translation().fZ);
 
-        ASSERT_FLOAT_EQ(scale, decomposition.scale().fX);
-        ASSERT_FLOAT_EQ(scale, decomposition.scale().fY);
-        ASSERT_FLOAT_EQ(scale, decomposition.scale().fZ);
+    //    ASSERT_FLOAT_EQ(scale, decomposition.scale().fX);
+    //    ASSERT_FLOAT_EQ(scale, decomposition.scale().fY);
+    //    ASSERT_FLOAT_EQ(scale, decomposition.scale().fZ);
 
-        var sine = Math.Sin(rotation * 0.5);
+    //    var sine = Math.Sin(rotation * 0.5);
 
-        ASSERT_FLOAT_EQ(0, decomposition.rotation().fData[0]);
-        ASSERT_FLOAT_EQ(0, decomposition.rotation().fData[1]);
-        ASSERT_FLOAT_EQ(sine, decomposition.rotation().fData[2]);
-        ASSERT_FLOAT_EQ(Math.Cos(rotation * 0.5), decomposition.rotation().fData[3]);
-    }
+    //    ASSERT_FLOAT_EQ(0, decomposition.rotation().fData[0]);
+    //    ASSERT_FLOAT_EQ(0, decomposition.rotation().fData[1]);
+    //    ASSERT_FLOAT_EQ(sine, decomposition.rotation().fData[2]);
+    //    ASSERT_FLOAT_EQ(Math.Cos(rotation * 0.5), decomposition.rotation().fData[3]);
+    //}
 
-    //C++ TO C# CONVERTER WARNING: The following constructor is declared outside of its associated class:
-    public static TEST(MatrixDecomposition UnnamedParameter, ScaleFloatError UnnamedParameter2)
-    {
-        for (float scale = 0.0001f; scale < 2.0f; scale += 0.000001f)
-        {
-            SKMatrix44 matrix = SKMatrix44.I();
-            matrix.setScale(scale, scale, 1.0f);
+    ////C++ TO C# CONVERTER WARNING: The following constructor is declared outside of its associated class:
+    //public static TEST(MatrixDecomposition UnnamedParameter, ScaleFloatError UnnamedParameter2)
+    //{
+    //    for (float scale = 0.0001f; scale < 2.0f; scale += 0.000001f)
+    //    {
+    //        SKMatrix44 matrix = SKMatrix44.I();
+    //        matrix.setScale(scale, scale, 1.0f);
 
-            MatrixDecomposition decomposition3 = new MatrixDecomposition(matrix);
-            ASSERT_TRUE(decomposition3.IsValid());
+    //        MatrixDecomposition decomposition3 = new MatrixDecomposition(matrix);
+    //        ASSERT_TRUE(decomposition3.IsValid());
 
-            ASSERT_FLOAT_EQ(scale, decomposition3.scale().fX);
-            ASSERT_FLOAT_EQ(scale, decomposition3.scale().fY);
-            ASSERT_FLOAT_EQ(1.0f, decomposition3.scale().fZ);
-            ASSERT_FLOAT_EQ(0, decomposition3.rotation().fData[0]);
-            ASSERT_FLOAT_EQ(0, decomposition3.rotation().fData[1]);
-            ASSERT_FLOAT_EQ(0, decomposition3.rotation().fData[2]);
-        }
+    //        ASSERT_FLOAT_EQ(scale, decomposition3.scale().fX);
+    //        ASSERT_FLOAT_EQ(scale, decomposition3.scale().fY);
+    //        ASSERT_FLOAT_EQ(1.0f, decomposition3.scale().fZ);
+    //        ASSERT_FLOAT_EQ(0, decomposition3.rotation().fData[0]);
+    //        ASSERT_FLOAT_EQ(0, decomposition3.rotation().fData[1]);
+    //        ASSERT_FLOAT_EQ(0, decomposition3.rotation().fData[2]);
+    //    }
 
-        SKMatrix44 matrix = SKMatrix44.I();
-        const var scale = 1.7734375f;
-        matrix.setScale(scale, scale, 1.0f);
+    //    SKMatrix44 matrix = SKMatrix44.I();
+    //    const var scale = 1.7734375f;
+    //    matrix.setScale(scale, scale, 1.0f);
 
-        // Bug upper bound (empirical)
-        const var scale2 = 1.773437559603f;
-        SKMatrix44 matrix2 = SKMatrix44.I();
-        matrix2.setScale(scale2, scale2, 1.0f);
+    //    // Bug upper bound (empirical)
+    //    const var scale2 = 1.773437559603f;
+    //    SKMatrix44 matrix2 = SKMatrix44.I();
+    //    matrix2.setScale(scale2, scale2, 1.0f);
 
-        // Bug lower bound (empirical)
-        const var scale3 = 1.7734374403954f;
-        SKMatrix44 matrix3 = SKMatrix44.I();
-        matrix3.setScale(scale3, scale3, 1.0f);
+    //    // Bug lower bound (empirical)
+    //    const var scale3 = 1.7734374403954f;
+    //    SKMatrix44 matrix3 = SKMatrix44.I();
+    //    matrix3.setScale(scale3, scale3, 1.0f);
 
-        MatrixDecomposition decomposition = new MatrixDecomposition(matrix);
-        ASSERT_TRUE(decomposition.IsValid());
+    //    MatrixDecomposition decomposition = new MatrixDecomposition(matrix);
+    //    ASSERT_TRUE(decomposition.IsValid());
 
-        MatrixDecomposition decomposition2 = new MatrixDecomposition(matrix2);
-        ASSERT_TRUE(decomposition2.IsValid());
+    //    MatrixDecomposition decomposition2 = new MatrixDecomposition(matrix2);
+    //    ASSERT_TRUE(decomposition2.IsValid());
 
-        MatrixDecomposition decomposition3 = new MatrixDecomposition(matrix3);
-        ASSERT_TRUE(decomposition3.IsValid());
+    //    MatrixDecomposition decomposition3 = new MatrixDecomposition(matrix3);
+    //    ASSERT_TRUE(decomposition3.IsValid());
 
-        ASSERT_FLOAT_EQ(scale, decomposition.scale().fX);
-        ASSERT_FLOAT_EQ(scale, decomposition.scale().fY);
-        ASSERT_FLOAT_EQ(1.0f, decomposition.scale().fZ);
-        ASSERT_FLOAT_EQ(0, decomposition.rotation().fData[0]);
-        ASSERT_FLOAT_EQ(0, decomposition.rotation().fData[1]);
-        ASSERT_FLOAT_EQ(0, decomposition.rotation().fData[2]);
+    //    ASSERT_FLOAT_EQ(scale, decomposition.scale().fX);
+    //    ASSERT_FLOAT_EQ(scale, decomposition.scale().fY);
+    //    ASSERT_FLOAT_EQ(1.0f, decomposition.scale().fZ);
+    //    ASSERT_FLOAT_EQ(0, decomposition.rotation().fData[0]);
+    //    ASSERT_FLOAT_EQ(0, decomposition.rotation().fData[1]);
+    //    ASSERT_FLOAT_EQ(0, decomposition.rotation().fData[2]);
 
-        ASSERT_FLOAT_EQ(scale2, decomposition2.scale().fX);
-        ASSERT_FLOAT_EQ(scale2, decomposition2.scale().fY);
-        ASSERT_FLOAT_EQ(1.0f, decomposition2.scale().fZ);
-        ASSERT_FLOAT_EQ(0, decomposition2.rotation().fData[0]);
-        ASSERT_FLOAT_EQ(0, decomposition2.rotation().fData[1]);
-        ASSERT_FLOAT_EQ(0, decomposition2.rotation().fData[2]);
+    //    ASSERT_FLOAT_EQ(scale2, decomposition2.scale().fX);
+    //    ASSERT_FLOAT_EQ(scale2, decomposition2.scale().fY);
+    //    ASSERT_FLOAT_EQ(1.0f, decomposition2.scale().fZ);
+    //    ASSERT_FLOAT_EQ(0, decomposition2.rotation().fData[0]);
+    //    ASSERT_FLOAT_EQ(0, decomposition2.rotation().fData[1]);
+    //    ASSERT_FLOAT_EQ(0, decomposition2.rotation().fData[2]);
 
-        ASSERT_FLOAT_EQ(scale3, decomposition3.scale().fX);
-        ASSERT_FLOAT_EQ(scale3, decomposition3.scale().fY);
-        ASSERT_FLOAT_EQ(1.0f, decomposition3.scale().fZ);
-        ASSERT_FLOAT_EQ(0, decomposition3.rotation().fData[0]);
-        ASSERT_FLOAT_EQ(0, decomposition3.rotation().fData[1]);
-        ASSERT_FLOAT_EQ(0, decomposition3.rotation().fData[2]);
-    }
+    //    ASSERT_FLOAT_EQ(scale3, decomposition3.scale().fX);
+    //    ASSERT_FLOAT_EQ(scale3, decomposition3.scale().fY);
+    //    ASSERT_FLOAT_EQ(1.0f, decomposition3.scale().fZ);
+    //    ASSERT_FLOAT_EQ(0, decomposition3.rotation().fData[0]);
+    //    ASSERT_FLOAT_EQ(0, decomposition3.rotation().fData[1]);
+    //    ASSERT_FLOAT_EQ(0, decomposition3.rotation().fData[2]);
+    //}
 
-    public static sk_sp<SKPicture> GetSamplePicture()
-    {
-        SKPictureRecorder recorder = new SKPictureRecorder();
-        recorder.beginRecording(SKRect.MakeWH(150, 100));
-        SKPaint paint = new SKPaint();
-        paint.setColor(new uint32_t(SK_ColorRED));
-        recorder.getRecordingCanvas().drawRect(SKRect.MakeXYWH(10, 10, 80, 80), paint);
-        return recorder.finishRecordingAsPicture();
-    }
+    //public static SKPicture GetSamplePicture()
+    //{
+    //    SKPictureRecorder recorder = new SKPictureRecorder();
+    //    recorder.beginRecording(SKRect.MakeWH(150, 100));
+    //    SKPaint paint = new SKPaint();
+    //    paint.SetColor(SK_ColorRED);
+    //    recorder.getRecordingCanvas().drawRect(SKRect.MakeXYWH(10, 10, 80, 80), paint);
+    //    return recorder.finishRecordingAsPicture();
+    //}
 
-    //C++ TO C# CONVERTER WARNING: The following constructor is declared outside of its associated class:
-    public static TEST(RasterCache UnnamedParameter, SimpleInitialization UnnamedParameter2)
-    {
-        RasterCache cache = new RasterCache();
-        ASSERT_TRUE(true);
-    }
+    ////C++ TO C# CONVERTER WARNING: The following constructor is declared outside of its associated class:
+    //public static TEST(RasterCache UnnamedParameter, SimpleInitialization UnnamedParameter2)
+    //{
+    //    RasterCache cache = new RasterCache();
+    //    ASSERT_TRUE(true);
+    //}
 
-    //C++ TO C# CONVERTER WARNING: The following constructor is declared outside of its associated class:
-    public static TEST(RasterCache UnnamedParameter, ThresholdIsRespected UnnamedParameter2)
-    {
-        size_t threshold = 3;
-        RasterCache cache = new RasterCache(new size_t(threshold));
+    ////C++ TO C# CONVERTER WARNING: The following constructor is declared outside of its associated class:
+    //public static TEST(RasterCache UnnamedParameter, ThresholdIsRespected UnnamedParameter2)
+    //{
+    //    int threshold = 3;
+    //    RasterCache cache = new RasterCache(new int(threshold));
 
-        SKMatrix matrix = SKMatrix.I();
+    //    SKMatrix matrix = SKMatrix.I();
 
-        var picture = GetSamplePicture();
+    //    var picture = GetSamplePicture();
 
-        sk_sp<SKImage> image = new sk_sp<SKImage>();
+    //    sk_sp<SKImage> image = new sk_sp<SKImage>();
 
-        sk_sp<SKColorSpace> srgb = SKColorSpace.MakeSRGB();
-        ASSERT_FALSE(cache.Prepare(null, picture.get(), matrix, srgb.get(), true, false)); // 1
-        cache.SweepAfterFrame();
-        ASSERT_FALSE(cache.Prepare(null, picture.get(), matrix, srgb.get(), true, false)); // 2
-        cache.SweepAfterFrame();
-        ASSERT_TRUE(cache.Prepare(null, picture.get(), matrix, srgb.get(), true, false)); // 3
-        cache.SweepAfterFrame();
-    }
+    //    sk_sp<SKColorSpace> srgb = SKColorSpace.MakeSRGB();
+    //    ASSERT_FALSE(cache.Prepare(null, picture.get(), matrix, srgb.get(), true, false)); // 1
+    //    cache.SweepAfterFrame();
+    //    ASSERT_FALSE(cache.Prepare(null, picture.get(), matrix, srgb.get(), true, false)); // 2
+    //    cache.SweepAfterFrame();
+    //    ASSERT_TRUE(cache.Prepare(null, picture.get(), matrix, srgb.get(), true, false)); // 3
+    //    cache.SweepAfterFrame();
+    //}
 
-    //C++ TO C# CONVERTER WARNING: The following constructor is declared outside of its associated class:
-    public static TEST(RasterCache UnnamedParameter, ThresholdIsRespectedWhenZero UnnamedParameter2)
-    {
-        size_t threshold = 0;
-        RasterCache cache = new RasterCache(new size_t(threshold));
+    ////C++ TO C# CONVERTER WARNING: The following constructor is declared outside of its associated class:
+    //public static TEST(RasterCache UnnamedParameter, ThresholdIsRespectedWhenZero UnnamedParameter2)
+    //{
+    //    int threshold = 0;
+    //    RasterCache cache = new RasterCache(new int(threshold));
 
-        SKMatrix matrix = SKMatrix.I();
+    //    SKMatrix matrix = SKMatrix.I();
 
-        var picture = GetSamplePicture();
+    //    var picture = GetSamplePicture();
 
-        sk_sp<SKImage> image = new sk_sp<SKImage>();
+    //    sk_sp<SKImage> image = new sk_sp<SKImage>();
 
-        sk_sp<SKColorSpace> srgb = SKColorSpace.MakeSRGB();
-        ASSERT_FALSE(cache.Prepare(null, picture.get(), matrix, srgb.get(), true, false)); // 1
-        cache.SweepAfterFrame();
-        ASSERT_FALSE(cache.Prepare(null, picture.get(), matrix, srgb.get(), true, false)); // 2
-        cache.SweepAfterFrame();
-        ASSERT_FALSE(cache.Prepare(null, picture.get(), matrix, srgb.get(), true, false)); // 3
-        cache.SweepAfterFrame();
-    }
+    //    sk_sp<SKColorSpace> srgb = SKColorSpace.MakeSRGB();
+    //    ASSERT_FALSE(cache.Prepare(null, picture.get(), matrix, srgb.get(), true, false)); // 1
+    //    cache.SweepAfterFrame();
+    //    ASSERT_FALSE(cache.Prepare(null, picture.get(), matrix, srgb.get(), true, false)); // 2
+    //    cache.SweepAfterFrame();
+    //    ASSERT_FALSE(cache.Prepare(null, picture.get(), matrix, srgb.get(), true, false)); // 3
+    //    cache.SweepAfterFrame();
+    //}
 
-    //C++ TO C# CONVERTER WARNING: The following constructor is declared outside of its associated class:
-    public static TEST(RasterCache UnnamedParameter, SweepsRemoveUnusedFrames UnnamedParameter2)
-    {
-        size_t threshold = 3;
-        RasterCache cache = new RasterCache(new size_t(threshold));
+    ////C++ TO C# CONVERTER WARNING: The following constructor is declared outside of its associated class:
+    //public static TEST(RasterCache UnnamedParameter, SweepsRemoveUnusedFrames UnnamedParameter2)
+    //{
+    //    int threshold = 3;
+    //    RasterCache cache = new RasterCache(new int(threshold));
 
-        SKMatrix matrix = SKMatrix.I();
+    //    SKMatrix matrix = SKMatrix.I();
 
-        var picture = GetSamplePicture();
+    //    var picture = GetSamplePicture();
 
-        sk_sp<SKImage> image = new sk_sp<SKImage>();
+    //    sk_sp<SKImage> image = new sk_sp<SKImage>();
 
-        sk_sp<SKColorSpace> srgb = SKColorSpace.MakeSRGB();
-        ASSERT_FALSE(cache.Prepare(null, picture.get(), matrix, srgb.get(), true, false)); // 1
-        cache.SweepAfterFrame();
-        ASSERT_FALSE(cache.Prepare(null, picture.get(), matrix, srgb.get(), true, false)); // 2
-        cache.SweepAfterFrame();
-        ASSERT_TRUE(cache.Prepare(null, picture.get(), matrix, srgb.get(), true, false)); // 3
-        cache.SweepAfterFrame();
-        ASSERT_TRUE(cache.Prepare(null, picture.get(), matrix, srgb.get(), true, false)); // 4
-        cache.SweepAfterFrame();
-        cache.SweepAfterFrame(); // Extra frame without a preroll image access.
-        ASSERT_FALSE(cache.Prepare(null, picture.get(), matrix, srgb.get(), true, false)); // 5
-    }
+    //    sk_sp<SKColorSpace> srgb = SKColorSpace.MakeSRGB();
+    //    ASSERT_FALSE(cache.Prepare(null, picture.get(), matrix, srgb.get(), true, false)); // 1
+    //    cache.SweepAfterFrame();
+    //    ASSERT_FALSE(cache.Prepare(null, picture.get(), matrix, srgb.get(), true, false)); // 2
+    //    cache.SweepAfterFrame();
+    //    ASSERT_TRUE(cache.Prepare(null, picture.get(), matrix, srgb.get(), true, false)); // 3
+    //    cache.SweepAfterFrame();
+    //    ASSERT_TRUE(cache.Prepare(null, picture.get(), matrix, srgb.get(), true, false)); // 4
+    //    cache.SweepAfterFrame();
+    //    cache.SweepAfterFrame(); // Extra frame without a preroll image access.
+    //    ASSERT_FALSE(cache.Prepare(null, picture.get(), matrix, srgb.get(), true, false)); // 5
+    //}
 
 }

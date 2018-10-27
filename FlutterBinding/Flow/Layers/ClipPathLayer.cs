@@ -12,22 +12,22 @@ namespace FlutterBinding.Flow.Layers
     {
         public ClipPathLayer(Clip clip_behavior = Clip.antiAlias)
         {
-            this.clip_behavior_ = new Clip(clip_behavior);
+            this.clip_behavior_ = clip_behavior;
         }
         //C++ TO C# CONVERTER TODO TASK: The implementation of the following method could not be found:
         //  public void Dispose();
 
         public void set_clip_path(SKPath clip_path)
         {
-            clip_path_.CopyFrom(clip_path);
+            clip_path_ = clip_path;
         }
 
         public override void Preroll(PrerollContext context, SKMatrix matrix)
         {
-            SKRect child_paint_bounds = SKRect.MakeEmpty();
+            SKRect child_paint_bounds = SKRect.Empty;
             PrerollChildren(context, matrix, child_paint_bounds);
 
-            if (child_paint_bounds.intersect(clip_path_.getBounds()))
+            if (child_paint_bounds.intersect(clip_path_.Bounds))
             {
                 set_paint_bounds(child_paint_bounds);
             }
@@ -42,15 +42,15 @@ namespace FlutterBinding.Flow.Layers
 
             //C++ TO C# CONVERTER TODO TASK: There is no equivalent in C# to 'static_assert':
             //  (...) static_assert(false, "missing name for " "SkAutoCanvasRestore") save(&context.canvas, true);
-            context.canvas.clipPath(clip_path_, clip_behavior_ != Clip.hardEdge);
+            context.canvas.ClipPath(clip_path_, clip_behavior_ != Clip.hardEdge);
             if (clip_behavior_ == Clip.antiAliasWithSaveLayer)
             {
-                context.canvas.saveLayer(paint_bounds(), null);
+                context.canvas.SaveLayer(paint_bounds(), null);
             }
             PaintChildren(context);
             if (clip_behavior_ == Clip.antiAliasWithSaveLayer)
             {
-                context.canvas.restore();
+                context.canvas.Restore();
             }
         }
 

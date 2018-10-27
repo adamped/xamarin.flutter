@@ -14,7 +14,7 @@ namespace FlutterBinding.Flow.Layers
         //C++ TO C# CONVERTER TODO TASK: The implementation of the following method could not be found:
         //  public void Dispose();
 
-        public void set_shader(sk_sp<SkShader> shader)
+        public void set_shader(sk_sp<SKShader> shader)
         {
             shader_.CopyFrom(shader);
         }
@@ -26,7 +26,7 @@ namespace FlutterBinding.Flow.Layers
             mask_rect_.CopyFrom(mask_rect);
         }
 
-        public void set_blend_mode(SkBlendMode blend_mode)
+        public void set_blend_mode(SKBlendMode blend_mode)
         {
             blend_mode_ = blend_mode;
         }
@@ -43,14 +43,14 @@ namespace FlutterBinding.Flow.Layers
 
             SKPaint paint = new SKPaint();
             paint.setBlendMode(blend_mode_);
-            paint.setShader(new sk_sp<SkShader>(shader_));
+            paint.setShader(new sk_sp<SKShader>(shader_));
             context.canvas.translate(mask_rect_.left(), mask_rect_.top());
             context.canvas.drawRect(SKRect.MakeWH(mask_rect_.width(), mask_rect_.height()), paint);
         }
 
-        private sk_sp<SkShader> shader_ = new sk_sp<SkShader>();
+        private sk_sp<SKShader> shader_ = new sk_sp<SKShader>();
         private SKRect mask_rect_ = new SKRect();
-        private SkBlendMode blend_mode_;
+        private SKBlendMode blend_mode_;
 
         //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':
         //  ShaderMaskLayer(const ShaderMaskLayer&) = delete;

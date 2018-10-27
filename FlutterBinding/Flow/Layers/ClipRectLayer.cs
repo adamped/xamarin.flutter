@@ -21,15 +21,15 @@ namespace FlutterBinding.Flow.Layers
         {
             //C++ TO C# CONVERTER TODO TASK: The following line was determined to be a copy assignment (rather than a reference assignment) - this should be verified and a 'CopyFrom' method should be created:
             //ORIGINAL LINE: clip_rect_ = clip_rect;
-            clip_rect_.CopyFrom(clip_rect);
+            clip_rect_=clip_rect;
         }
 
         public override void Preroll(PrerollContext context, SKMatrix matrix)
         {
-            SKRect child_paint_bounds = SKRect.MakeEmpty();
+            SKRect child_paint_bounds = SKRect.Empty;
             PrerollChildren(context, matrix, child_paint_bounds);
 
-            if (child_paint_bounds.intersect(clip_rect_))
+            if (child_paint_bounds.Intersect(clip_rect_))
             {
                 set_paint_bounds(child_paint_bounds);
             }
@@ -43,15 +43,15 @@ namespace FlutterBinding.Flow.Layers
 
             //C++ TO C# CONVERTER TODO TASK: There is no equivalent in C# to 'static_assert':
             //  (...) static_assert(false, "missing name for " "SkAutoCanvasRestore") save(&context.canvas, true);
-            context.canvas.clipRect(paint_bounds(), clip_behavior_ != Clip.hardEdge);
+            context.canvas.ClipRect(paint_bounds(), clip_behavior_ != Clip.hardEdge);
             if (clip_behavior_ == Clip.antiAliasWithSaveLayer)
             {
-                context.canvas.saveLayer(paint_bounds(), null);
+                context.canvas.SaveLayer(paint_bounds(), null);
             }
             PaintChildren(context);
             if (clip_behavior_ == Clip.antiAliasWithSaveLayer)
             {
-                context.canvas.restore();
+                context.canvas.Restore();
             }
         }
 
