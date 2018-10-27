@@ -88,10 +88,10 @@ namespace FlutterBinding.Flow.Layers
             private AutoSaveLayer(PaintContext paint_context, SKRect bounds, SKPaint paint)
             {
                 this.paint_context_ = new Layer.PaintContext(paint_context);
-                this.bounds_ = new SKRect(bounds);
+                this.bounds_ = bounds;
                 //C++ TO C# CONVERTER TODO TASK: The following line was determined to contain a copy constructor call - this should be verified and a copy constructor should be created:
                 //ORIGINAL LINE: paint_context_.canvas.saveLayer(bounds_, paint);
-                paint_context_.canvas.saveLayer(new SKRect(bounds_), paint);
+                paint_context_.canvas.saveLayer(bounds_, paint);
             }
 
             private AutoSaveLayer(PaintContext paint_context, SKCanvas.SaveLayerRec layer_rec)
@@ -147,7 +147,7 @@ namespace FlutterBinding.Flow.Layers
         {
             //C++ TO C# CONVERTER TODO TASK: The following line was determined to be a copy assignment (rather than a reference assignment) - this should be verified and a 'CopyFrom' method should be created:
             //ORIGINAL LINE: paint_bounds_ = paint_bounds;
-            paint_bounds_.CopyFrom(paint_bounds);
+            paint_bounds_ = paint_bounds;
         }
 
         //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:

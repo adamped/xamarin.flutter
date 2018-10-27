@@ -18,13 +18,13 @@ namespace FlutterBinding.Flow
     // This is only used on iOS when running in a non headless mode,
     // in this case ViewEmbedded is a reference to the
     // FlutterPlatformViewsController which is owned by FlutterViewController.
-    public class ExternalViewEmbedder : System.IDisposable
+    public class ExternalViewEmbedder //: System.IDisposable
     {
         //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = default':
         //  ExternalViewEmbedder() = default;
 
         // Must be called on the UI thread.
-        public virtual void CompositeEmbeddedView(int view_id, EmbeddedViewParams @params)
+        public virtual void CompositeEmbeddedView(ulong view_id, EmbeddedViewParams @params)
         {
         }
 

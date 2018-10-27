@@ -45,7 +45,7 @@ namespace FlutterBinding.Flow.Layers
             paint.setBlendMode(blend_mode_);
             paint.setShader(new sk_sp<SKShader>(shader_));
             context.canvas.translate(mask_rect_.left(), mask_rect_.top());
-            context.canvas.drawRect(SKRect.MakeWH(mask_rect_.width(), mask_rect_.height()), paint);
+            context.canvas.DrawRect(SKRect.MakeWH(mask_rect_.width(), mask_rect_.height()), paint);
         }
 
         private sk_sp<SKShader> shader_ = new sk_sp<SKShader>();

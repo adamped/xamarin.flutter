@@ -47,14 +47,14 @@ namespace FlutterBinding.Flow.Layers
             {
                 //C++ TO C# CONVERTER TODO TASK: The following line was determined to contain a copy constructor call - this should be verified and a copy constructor should be created:
                 //ORIGINAL LINE: PrerollContext child_context = *context;
-                PrerollContext child_context = new PrerollContext(context);
+                PrerollContext child_context = context;
                 layer.Preroll(child_context, child_matrix);
 
                 if (layer.needs_system_composite())
                 {
                     set_needs_system_composite(true);
                 }
-                child_paint_bounds.join(layer.paint_bounds());
+                child_paint_bounds.Union(layer.paint_bounds());
             }
         }
         //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:

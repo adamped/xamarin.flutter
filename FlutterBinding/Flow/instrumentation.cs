@@ -80,7 +80,7 @@ namespace FlutterBinding.Flow
 
             SKPaint paint = new SKPaint();
             paint.setColor(0x99FFFFFF);
-            cache_canvas.drawRect(SKRect.MakeXYWH(x, y, width, height), paint);
+            cache_canvas.DrawRect(SKRect.MakeXYWH(x, y, width, height), paint);
 
             // Scale the graph to show frame times up to those that are 3 times the frame
             // time.
@@ -137,18 +137,18 @@ namespace FlutterBinding.Flow
             double sample_unit_width = (1.0 / GlobalMembers.kMaxSamples);
 
             // Draw vertical replacement bar to erase old/stale pixels.
-            paint.setColor(0x99FFFFFF);
-            paint.setStyle(SKPaint.Style.kFill_Style);
-            paint.setBlendMode(SKBlendMode.kSrc);
+            paint.Color = 0x99FFFFFF;
+            paint.Style = SKPaintStyle.Fill;
+            paint.BlendMode = SKBlendMode.Src;
             double sample_x = x + width * ((double)prev_drawn_sample_index_ / GlobalMembers.kMaxSamples);
             var eraser_rect = SKRect.MakeLTRB(sample_x, y, sample_x + width * sample_unit_width, height);
-            cache_canvas.drawRect(eraser_rect, paint);
+            cache_canvas.DrawRect(eraser_rect, paint);
 
             // Draws blue timing bar for new data.
-            paint.setColor(0xAA0000FF);
-            paint.setBlendMode(SKBlendMode.kSrcOver);
+            paint.Color = 0xAA0000FF;
+            paint.BlendMode = SKBlendMode.SrcOver;
             var bar_rect = SKRect.MakeLTRB(sample_x, y + height * (1.0 - GlobalMembers.UnitHeight(laps_[current_sample_ == 0 ? GlobalMembers.kMaxSamples - 1 : current_sample_ - 1].ToMillisecondsF(), max_unit_interval)), sample_x + width * sample_unit_width, height);
-            cache_canvas.drawRect(bar_rect, paint);
+            cache_canvas.DrawRect(bar_rect, paint);
 
             // Draw horizontal frame markers.
             paint.setStrokeWidth(0F); // hairline
@@ -170,7 +170,7 @@ namespace FlutterBinding.Flow
                 for (int frame_index = 0; frame_index < frame_marker_count; frame_index++)
                 {
                     double frame_height = height * (1.0 - (GlobalMembers.UnitFrameInterval((frame_index + 1) * GlobalMembers.kOneFrameMS) / max_unit_interval));
-                    cache_canvas.drawLine(x, y + frame_height, width, y + frame_height, paint);
+                    cache_canvas.DrawLine(x, y + frame_height, width, y + frame_height, paint);
                 }
             }
 
@@ -182,16 +182,16 @@ namespace FlutterBinding.Flow
             if (GlobalMembers.UnitFrameInterval(LastLap().ToMillisecondsF()) > 1.0)
             {
                 // budget exceeded
-                paint.setColor(new uint(GlobalMembers.SK_ColorRED));
+                paint.setColor(GlobalMembers.SK_ColorRED);
             }
             else
             {
                 // within budget
-                paint.setColor(new uint(GlobalMembers.SK_ColorGREEN));
+                paint.setColor(GlobalMembers.SK_ColorGREEN);
             }
             sample_x = x + width * ((double)current_sample_ / GlobalMembers.kMaxSamples);
             var marker_rect = SKRect.MakeLTRB(sample_x, y, sample_x + width * sample_unit_width, height);
-            cache_canvas.drawRect(marker_rect, paint);
+            cache_canvas.DrawRect(marker_rect, paint);
             //C++ TO C# CONVERTER TODO TASK: The following line was determined to be a copy assignment (rather than a reference assignment) - this should be verified and a 'CopyFrom' method should be created:
             //ORIGINAL LINE: prev_drawn_sample_index_ = current_sample_;
             prev_drawn_sample_index_.CopyFrom(current_sample_);
@@ -255,7 +255,7 @@ namespace FlutterBinding.Flow
         {
             //C++ TO C# CONVERTER TODO TASK: The following line was determined to be a copy assignment (rather than a reference assignment) - this should be verified and a 'CopyFrom' method should be created:
             //ORIGINAL LINE: count_ = count;
-            count_.CopyFrom(count);
+            count_ = count;
         }
 
         public void Increment(int count = 1)
@@ -271,14 +271,14 @@ namespace FlutterBinding.Flow
         //  Counter& operator =(const Counter&) = delete;
     }
 
-    public class CounterValues : System.IDisposable
+    public partial class CounterValues //: System.IDisposable
     {
         public CounterValues()
         {
             //C++ TO C# CONVERTER TODO TASK: The following line was determined to be a copy assignment (rather than a reference assignment) - this should be verified and a 'CopyFrom' method should be created:
             //ORIGINAL LINE: this.current_sample_ = kMaxSamples - 1;
-            this.current_sample_.CopyFrom(GlobalMembers.kMaxSamples - 1);
-            values_.Resize(GlobalMembers.kMaxSamples, 0);
+            this.current_sample_ = GlobalMembers.kMaxSamples - 1;
+            values_.Resize(GlobalMembers.kMaxSamples, (ulong)0);
         }
 
         //C++ TO C# CONVERTER TODO TASK: The implementation of the following method could not be found:
@@ -291,7 +291,7 @@ namespace FlutterBinding.Flow
         //ORIGINAL LINE: void Visualize(SKCanvas& canvas, const SKRect& rect) const
         public void Visualize(SKCanvas canvas, SKRect rect)
         {
-            int max_bytes = GetMaxValue();
+            var max_bytes = GetMaxValue();
 
             if (max_bytes == 0)
             {
@@ -299,25 +299,25 @@ namespace FlutterBinding.Flow
                 return;
             }
 
-            int min_bytes = GetMinValue();
+            var min_bytes = GetMinValue();
 
             SKPaint paint = new SKPaint();
 
             // Paint the background.
-            paint.setColor(0x99FFFFFF);
-            canvas.drawRect(rect, paint);
+            paint.Color = 0x99FFFFFF;
+            canvas.DrawRect(rect, paint);
 
             // Establish the graph position.
             float x = rect.x();
             float y = rect.y();
-            float width = rect.width();
-            float height = rect.height();
+            float width = rect.Width;
+            float height = rect.Height;
             float bottom = y + height;
             float right = x + width;
 
             // Prepare a path for the data.
             SKPath path = new SKPath();
-            path.moveTo(x, bottom);
+            path.MoveTo(x, bottom);
 
             for (int i = 0; i < GlobalMembers.kMaxSamples; ++i)
             {
@@ -326,52 +326,52 @@ namespace FlutterBinding.Flow
                 path.lineTo(x + (((double)(i) / (double)GlobalMembers.kMaxSamples) * width), y + ((1.0 - ratio) * height));
             }
 
-            path.rLineTo(100F, 0F);
-            path.lineTo(right, bottom);
-            path.close();
+            path.RLineTo(100F, 0F);
+            path.LineTo(right, bottom);
+            path.Close();
 
             // Draw the graph.
-            paint.setColor(0xAA0000FF);
-            canvas.drawPath(path, paint);
+            paint.Color = 0xAA0000FF;
+            canvas.DrawPath(path, paint);
 
             // Paint the vertical marker for the current frame.
             double sample_unit_width = (1.0 / GlobalMembers.kMaxSamples);
             double sample_margin_unit_width = sample_unit_width / 6.0;
             double sample_margin_width = width * sample_margin_unit_width;
             paint.setStyle(SKPaint.Style.kFill_Style);
-            paint.setColor(new uint(GlobalMembers.SK_ColorGRAY));
+            paint.setColor(GlobalMembers.SK_ColorGRAY);
             double sample_x = x + width * ((double)current_sample_ / GlobalMembers.kMaxSamples) - sample_margin_width;
             var marker_rect = SKRect.MakeLTRB(sample_x, y, sample_x + width * sample_unit_width + sample_margin_width * 2, bottom);
-            canvas.drawRect(marker_rect, paint);
+            canvas.DrawRect(marker_rect, paint);
         }
 
         //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
         //ORIGINAL LINE: long GetCurrentValue() const
-        public long GetCurrentValue()
+        public ulong GetCurrentValue()
         {
             return values_[current_sample_];
         }
 
         //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
         //ORIGINAL LINE: long GetMaxValue() const
-        public long GetMaxValue()
+        public ulong GetMaxValue()
         {
-            var max = long.MinValue;
+            var max = ulong.MinValue;
             for (int i = 0; i < GlobalMembers.kMaxSamples; ++i)
             {
-                max = Math.Max<long>(max, values_[i]);
+                max = Math.Max(max, values_[i]);
             }
             return max;
         }
 
         //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
         //ORIGINAL LINE: long GetMinValue() const
-        public long GetMinValue()
+        public ulong GetMinValue()
         {
-            var min = long.MaxValue;
+            var min = ulong.MaxValue;
             for (int i = 0; i < GlobalMembers.kMaxSamples; ++i)
             {
-                min = Math.Min<long>(min, values_[i]);
+                min = Math.Min(min, values_[i]);
             }
             return min;
         }

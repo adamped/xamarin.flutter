@@ -19,22 +19,22 @@ namespace FlutterBinding.Flow.Layers
         {
             //C++ TO C# CONVERTER TODO TASK: The following line was determined to be a copy assignment (rather than a reference assignment) - this should be verified and a 'CopyFrom' method should be created:
             //ORIGINAL LINE: offset_ = offset;
-            offset_.CopyFrom(offset);
+            offset_ = offset;
         }
         public void set_size(SKSize size)
         {
-            size_.CopyFrom(size);
+            size_ = size;
         }
         public void set_view_id(ulong view_id)
         {
             //C++ TO C# CONVERTER TODO TASK: The following line was determined to be a copy assignment (rather than a reference assignment) - this should be verified and a 'CopyFrom' method should be created:
             //ORIGINAL LINE: view_id_ = view_id;
-            view_id_.CopyFrom(view_id);
+            view_id_ = view_id;
         }
 
         public override void Preroll(PrerollContext context, SKMatrix matrix)
         {
-            set_paint_bounds(SKRect.MakeXYWH(offset_.x(), offset_.y(), size_.width(), size_.height()));
+            set_paint_bounds(SKRect.MakeXYWH(offset_.x(), offset_.y(), size_.Width, size_.Height));
         }
         //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
         //ORIGINAL LINE: void Paint(PaintContext& context) const override
@@ -51,7 +51,7 @@ namespace FlutterBinding.Flow.Layers
             @params.offsetPixels = SKPoint.Make(transform.getTranslateX(), transform.getTranslateY());
             @params.sizePoints.CopyFrom(size_);
 
-            context.view_embedder.CompositeEmbeddedView(new ulong(view_id_), @params);
+            context.view_embedder.CompositeEmbeddedView(view_id_, @params);
         }
 
         private SKPoint offset_ = new SKPoint();

@@ -27,7 +27,7 @@ namespace FlutterBinding.Flow.Layers
             TRACE_EVENT0("flutter", "BackdropFilterLayer::Paint");
             FML_DCHECK(needs_painting());
 
-            Layer.AutoSaveLayer save = Layer.AutoSaveLayer.Create(context, new SKCanvas().SaveLayerRec(paint_bounds(), null, filter_.get(), 0 ));
+            Layer.AutoSaveLayer save = Layer.AutoSaveLayer.Create(context, SKCanvas.SaveLayerRec(paint_bounds(), null, filter_.get(), 0 ));
             PaintChildren(context);
         }
 

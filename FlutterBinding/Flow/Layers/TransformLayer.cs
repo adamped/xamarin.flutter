@@ -1,4 +1,5 @@
-﻿using static FlutterBinding.Flow.Helper;
+﻿using SkiaSharp;
+using static FlutterBinding.Flow.Helper;
 
 // Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
@@ -18,18 +19,18 @@ namespace FlutterBinding.Flow.Layers
         {
             //C++ TO C# CONVERTER TODO TASK: The following line was determined to be a copy assignment (rather than a reference assignment) - this should be verified and a 'CopyFrom' method should be created:
             //ORIGINAL LINE: transform_ = transform;
-            transform_.CopyFrom(transform);
+            transform_ = transform;
         }
 
         public override void Preroll(PrerollContext context, SKMatrix matrix)
         {
             SKMatrix child_matrix = new SKMatrix();
-            child_matrix.setConcat(matrix, transform_);
+            child_matrix.SetConcat(matrix, transform_);
 
             SKRect child_paint_bounds = SKRect.Empty;
             PrerollChildren(context, child_matrix, child_paint_bounds);
 
-            transform_.mapRect(child_paint_bounds);
+            transform_.MapRect(child_paint_bounds);
             set_paint_bounds(child_paint_bounds);
         }
 
@@ -42,7 +43,7 @@ namespace FlutterBinding.Flow.Layers
 
             //C++ TO C# CONVERTER TODO TASK: There is no equivalent in C# to 'static_assert':
             //  (...) static_assert(false, "missing name for " "SkAutoCanvasRestore") save(&context.canvas, true);
-            context.canvas.concat(transform_);
+            context.canvas.Concat(ref transform_);
             PaintChildren(context);
         }
 

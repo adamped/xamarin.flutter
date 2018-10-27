@@ -28,8 +28,8 @@ namespace FlutterBinding.Flow.Layers
             TRACE_EVENT0("flutter", "PerformanceOverlayLayer::Paint");
             float x = paint_bounds().x() + padding;
             float y = paint_bounds().y() + padding;
-            float width = paint_bounds().width() - (padding * 2);
-            float height = paint_bounds().height() / 2;
+            float width = paint_bounds().Width - (padding * 2);
+            float height = paint_bounds().Height / 2;
             //C++ TO C# CONVERTER TODO TASK: There is no equivalent in C# to 'static_assert':
             //  (...) static_assert(false, "missing name for " "SkAutoCanvasRestore") save(&context.canvas, true);
 
@@ -38,7 +38,7 @@ namespace FlutterBinding.Flow.Layers
             GlobalMembers.VisualizeStopWatch(context.canvas, context.engine_time, x, y + height, width, height - padding, options_ & GlobalMembers.kVisualizeEngineStatistics, options_ & GlobalMembers.kDisplayEngineStatistics, "UI");
         }
 
-        private int options_;
+        private ulong options_;
 
         //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':
         //  PerformanceOverlayLayer(const PerformanceOverlayLayer&) = delete;

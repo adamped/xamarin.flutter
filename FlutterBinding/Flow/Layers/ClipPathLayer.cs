@@ -27,7 +27,7 @@ namespace FlutterBinding.Flow.Layers
             SKRect child_paint_bounds = SKRect.Empty;
             PrerollChildren(context, matrix, child_paint_bounds);
 
-            if (child_paint_bounds.intersect(clip_path_.Bounds))
+            if (child_paint_bounds.IntersectsWith(clip_path_.Bounds))
             {
                 set_paint_bounds(child_paint_bounds);
             }
@@ -42,7 +42,7 @@ namespace FlutterBinding.Flow.Layers
 
             //C++ TO C# CONVERTER TODO TASK: There is no equivalent in C# to 'static_assert':
             //  (...) static_assert(false, "missing name for " "SkAutoCanvasRestore") save(&context.canvas, true);
-            context.canvas.ClipPath(clip_path_, clip_behavior_ != Clip.hardEdge);
+            context.canvas.ClipPath(clip_path_, antialias: clip_behavior_ != Clip.hardEdge);
             if (clip_behavior_ == Clip.antiAliasWithSaveLayer)
             {
                 context.canvas.SaveLayer(paint_bounds(), null);

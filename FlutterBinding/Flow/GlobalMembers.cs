@@ -286,7 +286,7 @@ public static class GlobalMembers
     //    os << "LTRB: " << r.fLeft << ", " << r.fTop << ", " << r.fRight << ", " << r.fBottom;
     //    return os;
     //}
-    //public static std::ostream operator <<(std::ostream os, SKRRect r)
+    //public static std::ostream operator <<(std::ostream os, SKRoundRect r)
     //{
     //    os << "LTRB: " << r.rect().fLeft << ", " << r.rect().fTop << ", " << r.rect().fRight << ", " << r.rect().fBottom;
     //    return os;
@@ -462,7 +462,7 @@ public static class GlobalMembers
     //    recorder.beginRecording(SKRect.MakeWH(150, 100));
     //    SKPaint paint = new SKPaint();
     //    paint.SetColor(SK_ColorRED);
-    //    recorder.getRecordingCanvas().drawRect(SKRect.MakeXYWH(10, 10, 80, 80), paint);
+    //    recorder.getRecordingCanvas().DrawRect(SKRect.MakeXYWH(10, 10, 80, 80), paint);
     //    return recorder.finishRecordingAsPicture();
     //}
 

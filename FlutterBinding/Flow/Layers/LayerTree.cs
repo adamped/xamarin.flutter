@@ -85,14 +85,11 @@ namespace FlutterBinding.Flow.Layers
 
         //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
         //ORIGINAL LINE: Layer* root_layer() const
-        public Layer root_layer()
-        {
-            return root_layer_.get();
-        }
+        public Layer root_layer;
 
         public void set_root_layer(Layer root_layer)
         {
-            root_layer_ = std::move(root_layer);
+            root_layer_ = root_layer;
         }
 
         //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:

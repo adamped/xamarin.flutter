@@ -25,7 +25,7 @@ namespace FlutterBinding.Flow.Layers
             if (path.isRect(rect))
             {
                 isRect_ = true;
-                frameRRect_.CopyFrom(SKRRect.MakeRect(rect));
+                frameRRect_.CopyFrom(SKRoundRect.MakeRect(rect));
             }
             else if (path.isRRect(frameRRect_))
             {
@@ -35,7 +35,7 @@ namespace FlutterBinding.Flow.Layers
             {
                 // isRRect returns false for ovals, so we need to explicitly check isOval
                 // as well.
-                frameRRect_.CopyFrom(SKRRect.MakeOval(rect));
+                frameRRect_.CopyFrom(SKRoundRect.MakeOval(rect));
             }
             else
             {
@@ -45,7 +45,7 @@ namespace FlutterBinding.Flow.Layers
                 // default to use the bounding rectangle.
                 // TODO(amirh): fix this once we have a way to create a Scenic shape from
                 // an SKPath.
-                frameRRect_.CopyFrom(SKRRect.MakeRect(path.getBounds()));
+                frameRRect_.CopyFrom(SKRoundRect.MakeRect(path.getBounds()));
             }
         }
 
@@ -169,7 +169,7 @@ namespace FlutterBinding.Flow.Layers
         private float device_pixel_ratio_;
         private SKPath path_ = new SKPath();
         private bool isRect_;
-        private SKRRect frameRRect_ = new SKRRect();
+        private SKRoundRect frameRRect_ = new SKRoundRect();
         private Clip clip_behavior_;
     }
 

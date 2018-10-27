@@ -152,9 +152,9 @@ namespace FlutterBinding.Flow
 
         public class Frame : Entity
         {
-            public Frame(SceneUpdateContext context, SKRRect rrect, uint color, float elevation) : base(context)
+            public Frame(SceneUpdateContext context, SKRoundRect rrect, uint color, float elevation) : base(context)
             {
-                this.rrect_ = new SKRRect(rrect);
+                this.rrect_ = new SKRoundRect(rrect);
                 this.color_ = color;
                 this.paint_bounds_ = new SKRect(SKRect.Empty);
                 if (elevation != 0.0F)
@@ -175,7 +175,7 @@ namespace FlutterBinding.Flow
                 paint_bounds_.join(layer.paint_bounds());
             }
 
-            private readonly SKRRect rrect_;
+            private readonly SKRoundRect rrect_;
             private readonly uint color_;
 
             private List<Layer> paint_layers_ = new List<Layer>();
@@ -282,7 +282,7 @@ namespace FlutterBinding.Flow
             public List<Layer> layers = new List<Layer>();
         }
 
-        //private void CreateFrame(scenic.EntityNode entity_node, SKRRect rrect, uint color, SKRect paint_bounds, List<Layer> paint_layers)
+        //private void CreateFrame(scenic.EntityNode entity_node, SKRoundRect rrect, uint color, SKRect paint_bounds, List<Layer> paint_layers)
         //{
         //    // Frames always clip their children.
         //    entity_node.SetClip(0u, true);
@@ -297,7 +297,7 @@ namespace FlutterBinding.Flow
         //    // and possibly for its texture.
         //    // TODO(MZ-137): Need to be able to express the radii as vectors.
         //    SKRect shape_bounds = rrect.getBounds();
-        //    scenic.RoundedRectangle shape = new scenic.RoundedRectangle(session_, rrect.width(), rrect.height(), rrect.radii(SKRRect.Corner.kUpperLeft_Corner).x(), rrect.radii(SKRRect.Corner.kUpperRight_Corner).x(), rrect.radii(SKRRect.Corner.kLowerRight_Corner).x(), rrect.radii(SKRRect.Corner.kLowerLeft_Corner).x());
+        //    scenic.RoundedRectangle shape = new scenic.RoundedRectangle(session_, rrect.width(), rrect.height(), rrect.radii(SKRoundRect.Corner.kUpperLeft_Corner).x(), rrect.radii(SKRoundRect.Corner.kUpperRight_Corner).x(), rrect.radii(SKRoundRect.Corner.kLowerRight_Corner).x(), rrect.radii(SKRoundRect.Corner.kLowerLeft_Corner).x());
         //    scenic.ShapeNode shape_node = new scenic.ShapeNode(session_);
         //    shape_node.SetShape(shape);
         //    shape_node.SetTranslation(shape_bounds.width() * 0.5f + shape_bounds.left(), shape_bounds.height() * 0.5f + shape_bounds.top(), 0.0f);

@@ -59,41 +59,41 @@ namespace FlutterBinding.Flow
     // must be created and destroyed by the rasterizer thread.
     public class ExportNode : System.IDisposable
     {
-        public ExportNode(fml.RefPtr<zircon.dart.Handle> export_token_handle)
-        {
-            this.export_token_ = export_token_handle.Dereference().ReleaseHandle();
-        }
+        //public ExportNode(fml.RefPtr<zircon.dart.Handle> export_token_handle)
+        //{
+        //    this.export_token_ = export_token_handle.Dereference().ReleaseHandle();
+        //}
 
         public void Dispose()
         {
             // Ensure that we properly released the node.
-            FML_DCHECK(node_ == null);
-            FML_DCHECK(scene_update_context_ == null);
+            //FML_DCHECK(node_ == null);
+            //FML_DCHECK(scene_update_context_ == null);
         }
 
         // Binds the export token to the entity node and adds it as a child of
         // the specified container. Must be called on the Rasterizer thread.
-        public void Bind(SceneUpdateContext context, scenic.ContainerNode container, SKPoint offset, bool hit_testable)
-        {
-            if (export_token_ != null)
-            {
-                // Happens first time we bind.
-                node_.reset(new scenic.EntityNode(container.session()));
-                node_.Export(std::move(export_token_));
+        //public void Bind(SceneUpdateContext context, scenic.ContainerNode container, SKPoint offset, bool hit_testable)
+        //{
+        //    if (export_token_ != null)
+        //    {
+        //        // Happens first time we bind.
+        //        node_.reset(new scenic.EntityNode(container.session()));
+        //        node_.Export(std::move(export_token_));
 
-                // Add ourselves to the context so it can call Dispose() on us if the Scenic
-                // session is closed.
-                context.AddExportNode(this);
-                scene_update_context_ = context;
-            }
+        //        // Add ourselves to the context so it can call Dispose() on us if the Scenic
+        //        // session is closed.
+        //        context.AddExportNode(this);
+        //        scene_update_context_ = context;
+        //    }
 
-            if (node_ != null)
-            {
-                container.AddChild(*node_);
-                node_.SetTranslation(offset.x(), offset.y(), 0.0f);
-                node_.SetHitTestBehavior(hit_testable ? fuchsia.ui.gfx.HitTestBehavior.kDefault : fuchsia.ui.gfx.HitTestBehavior.kSuppress);
-            }
-        }
+        //    if (node_ != null)
+        //    {
+        //        container.AddChild(*node_);
+        //        node_.SetTranslation(offset.X, offset.Y, 0.0f);
+        //        //node_.SetHitTestBehavior(hit_testable ? fuchsia.ui.gfx.HitTestBehavior.kDefault : fuchsia.ui.gfx.HitTestBehavior.kSuppress);
+        //    }
+        //}
 
         //C++ TO C# CONVERTER TODO TASK: C# has no concept of a 'friend' class:
         //  friend class SceneUpdateContext;
@@ -110,22 +110,22 @@ namespace FlutterBinding.Flow
             // 1. A node was never created, or
             // 2. A node was created but was already dereferenced (i.e. Dispose has
             // already been called).
-            FML_DCHECK(scene_update_context_ != null || node_ == null);
+            //FML_DCHECK(scene_update_context_ != null || node_ == null);
 
-            if (remove_from_scene_update_context && scene_update_context_ != null)
-            {
-                scene_update_context_.RemoveExportNode(this);
-            }
+            //if (remove_from_scene_update_context && scene_update_context_ != null)
+            //{
+            //    scene_update_context_.RemoveExportNode(this);
+            //}
 
-            scene_update_context_ = null;
-            export_token_.reset();
-            node_ = null;
+            //scene_update_context_ = null;
+            //export_token_.reset();
+            //node_ = null;
         }
 
         // Member variables can only be read or modified on Rasterizer thread.
         private SceneUpdateContext scene_update_context_ = null;
-        private zx.eventpair export_token_ = new zx.eventpair();
-        private std::unique_ptr<scenic.EntityNode> node_ = new std::unique_ptr<scenic.EntityNode>();
+        //private zx.eventpair export_token_ = new zx.eventpair();
+        //private std::unique_ptr<scenic.EntityNode> node_ = new std::unique_ptr<scenic.EntityNode>();
 
         //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':
         //  ExportNode(const ExportNode&) = delete;

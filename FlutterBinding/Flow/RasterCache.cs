@@ -55,13 +55,11 @@ namespace FlutterBinding.Flow
     //C++ TO C# CONVERTER NOTE: C# has no need of forward class declarations:
     //struct PrerollContext;
 
-    public class RasterCache : System.IDisposable
+    public class RasterCache //: System.IDisposable
     {
         public RasterCache(int threshold = 3)
         {
-            //C++ TO C# CONVERTER TODO TASK: The following line was determined to be a copy assignment (rather than a reference assignment) - this should be verified and a 'CopyFrom' method should be created:
-            //ORIGINAL LINE: this.threshold_ = threshold;
-            this.threshold_.CopyFrom(threshold);
+            this.threshold_ = threshold;
             this.checkerboard_images_ = false;
             this.weak_factory_ = new fml.WeakPtrFactory<RasterCache>(this);
         }
