@@ -6,6 +6,8 @@ using static FlutterBinding.UI.Lerp;
 using static FlutterBinding.Mapping.Helper;
 using static FlutterBinding.UI.Painting;
 using System.Linq;
+using FlutterBinding.Mapping;
+using System.Text;
 
 namespace FlutterBinding.UI
 {
@@ -119,6 +121,85 @@ namespace FlutterBinding.UI
         // constant and can't propagate into the set/get calls.
         public const Endian _kFakeHostEndian = Endian.little;
 
+        /// Instantiates an image codec [Codec] object.
+        ///
+        /// [list] is the binary image data (e.g a PNG or GIF binary data).
+        /// The data can be for either static or animated images. The following image
+        /// formats are supported: {@macro flutter.dart:ui.imageFormats}
+        ///
+        /// The [decodedCacheRatioCap] is the default maximum multiple of the compressed
+        /// image size to cache when decoding animated image frames. For example,
+        /// setting this to `2.0` means that a 400KB GIF would be allowed at most to use
+        /// 800KB of memory caching unessential decoded frames. Caching decoded frames
+        /// saves CPU but can result in out-of-memory crashes when decoding large (or
+        /// multiple) animated images. Note that GIFs are highly compressed, and it's
+        /// unlikely that a factor that low will be sufficient to cache all decoded
+        /// frames. The default value is `25.0`.
+        ///
+        /// The returned future can complete with an error if the image decoding has
+        /// failed.
+        public Task<Codec> instantiateImageCodec(List<int> list,
+            double decodedCacheRatioCap = double.PositiveInfinity)
+        {
+            return _futurize(
+              (_Callback<Codec> callback) => _instantiateImageCodec(list, callback, null, decodedCacheRatioCap));
+        }
+
+        /// Instantiates a [Codec] object for an image binary data.
+        ///
+        /// Returns an error message if the instantiation has failed, null otherwise.
+        String _instantiateImageCodec(List<int> list, _Callback<Codec> callback, _ImageInfo imageInfo, double decodedCacheRatioCap)
+            => string.Empty; // native 'instantiateImageCodec';
+
+        /// Loads a single image frame from a byte array into an [Image] object.
+        ///
+        /// This is a convenience wrapper around [instantiateImageCodec].
+        /// Prefer using [instantiateImageCodec] which also supports multi frame images.
+        void decodeImageFromList(List<int> list, ImageDecoderCallback callback)
+        {
+            _decodeImageFromListAsync(list, callback);
+        }
+
+        async Task _decodeImageFromListAsync(List<int> list,
+                                           ImageDecoderCallback callback)
+        {
+            Codec codec = await instantiateImageCodec(list);
+            FrameInfo frameInfo = await codec.getNextFrame();
+            callback(frameInfo.image);
+        }
+
+        /// Convert an array of pixel values into an [Image] object.
+        ///
+        /// [pixels] is the pixel data in the encoding described by [format].
+        ///
+        /// [rowBytes] is the number of bytes consumed by each row of pixels in the
+        /// data buffer.  If unspecified, it defaults to [width] multipled by the
+        /// number of bytes per pixel in the provided [format].
+        ///
+        /// The [decodedCacheRatioCap] is the default maximum multiple of the compressed
+        /// image size to cache when decoding animated image frames. For example,
+        /// setting this to `2.0` means that a 400KB GIF would be allowed at most to use
+        /// 800KB of memory caching unessential decoded frames. Caching decoded frames
+        /// saves CPU but can result in out-of-memory crashes when decoding large (or
+        /// multiple) animated images. Note that GIFs are highly compressed, and it's
+        /// unlikely that a factor that low will be sufficient to cache all decoded
+        /// frames. The default value is `25.0`.
+        public void decodeImageFromPixels(
+          List<int> pixels,
+          int width,
+          int height,
+          PixelFormat format,
+          ImageDecoderCallback callback,
+          int rowBytes = 0, double decodedCacheRatioCap = double.PositiveInfinity)
+        {
+            _ImageInfo imageInfo = new _ImageInfo(width, height, (int)format, rowBytes);
+            Future<Codec> codecFuture = _futurize(
+              (_Callback<Codec> cb) => _instantiateImageCodec(pixels, cb, imageInfo, decodedCacheRatioCap)
+            );
+            codecFuture.ContinueWith(async (Task<Codec> codec) => await codec.Result.getNextFrame())
+                    .ContinueWith((Task<Task<FrameInfo>> frameInfo) => callback(frameInfo.Result.Result.image));
+        }
+
     }
 
     /// An immutable 32 bit color value in ARGB format.
@@ -207,12 +288,14 @@ namespace FlutterBinding.UI
         /// Out of range values are brought into range using modulo 255.
         ///
         /// See also [fromARGB], which takes the opacity as an integer value.
-        public Color fromRGBO(int r, int g, int b, double opacity)
+        public static Color fromRGBO(int r, int g, int b, double opacity)
         {
-            value = (((Math.Truncate(opacity * 0xff / 1.0) & 0xff) << 24) |
+            var value = (uint)((((int)Math.Truncate(opacity * 0xff / 1.0) & 0xff) << 24) |
                       ((r & 0xff) << 16) |
                       ((g & 0xff) << 8) |
                       ((b & 0xff) << 0)) & 0xFFFFFFFF;
+
+            return new Color(value);
         }
         /// A 32 bit value representing this color.
         ///
@@ -373,36 +456,38 @@ namespace FlutterBinding.UI
             { // Opaque background case
                 return Color.fromARGB(
                   0xff,
-                  (alpha * foreground.red + invAlpha * background.red) ~/ 0xff,
-                  (alpha * foreground.green + invAlpha * background.green) ~/ 0xff,
-                  (alpha * foreground.blue + invAlpha * background.blue) ~/ 0xff);
+                  (uint)((alpha * foreground.red + invAlpha * background.red) / 0xff),
+                  (uint)((alpha * foreground.green + invAlpha * background.green) / 0xff),
+                  (uint)((alpha * foreground.blue + invAlpha * background.blue) / 0xff));
             }
             else
             { // General case
-                backAlpha = (backAlpha * invAlpha) ~/ 0xff;
+                backAlpha = (backAlpha * invAlpha) / 0xff;
                 int outAlpha = alpha + backAlpha;
                 //assert(outAlpha != 0x00);
                 return Color.fromARGB(
                   (uint)outAlpha,
-                  (uint)(foreground.red * alpha + background.red * backAlpha) ~/ outAlpha,
-                  (uint)(foreground.green * alpha + background.green * backAlpha) ~/ outAlpha,
-                  (uint)(foreground.blue * alpha + background.blue * backAlpha) ~/ outAlpha);
+                  (uint)((foreground.red * alpha + background.red * backAlpha) / outAlpha),
+                  (uint)((foreground.green * alpha + background.green * backAlpha) / outAlpha),
+                  (uint)((foreground.blue * alpha + background.blue * backAlpha) / outAlpha));
             }
         }
 
-        public static bool operator ==(dynamic other)
+        public static bool operator ==(Color color, dynamic other)
         {
-            if (identical(this, other))
+            if (identical(color, other))
                 return true;
-            if (other.runtimeType != runtimeType)
+            if (other.runtimeType != color.GetType())
                 return false;
             Color typedOther = other;
-            return value == typedOther.value;
+            return color.value == typedOther.value;
         }
+
+        public static bool operator !=(Color color, dynamic other) => !(color == other);
 
         public int hashCode => value.GetHashCode();
 
-        public String toString() => $"Color(0x{value.toRadixString(16).padLeft(8, '0')})";
+        public String toString() => $"Color(0x{value.toRadixString(16).PadLeft(8, '0')})";
     }
 
     /// Algorithms to use when painting on the canvas.
@@ -1180,14 +1265,14 @@ namespace FlutterBinding.UI
         {
             get
             {
-                return _data.getInt32(_kIsAntiAliasOffset, _kFakeHostEndian) == 0;
+                return _data.getInt32(_kIsAntiAliasOffset, (int)_kFakeHostEndian) == 0;
             }
             set
             {
                 // We encode true as zero and false as one because the default value, which
                 // we always encode as zero, is true.
                 int encoded = value ? 0 : 1;
-                _data.setInt32(_kIsAntiAliasOffset, encoded, _kFakeHostEndian);
+                _data.setInt32(_kIsAntiAliasOffset, encoded, (int)_kFakeHostEndian);
             }
 
         }
@@ -1211,14 +1296,14 @@ namespace FlutterBinding.UI
         {
             get
             {
-                int encoded = _data.getInt32(_kColorOffset, _kFakeHostEndian);
+                uint encoded = (uint)_data.getInt32(_kColorOffset, (int)_kFakeHostEndian);
                 return new Color(encoded ^ _kColorDefault);
             }
             set
             {
                 //assert(value != null);
-                int encoded = value.value ^ _kColorDefault;
-                _data.setInt32(_kColorOffset, encoded, _kFakeHostEndian);
+                int encoded = (int)(value.value ^ _kColorDefault);
+                _data.setInt32(_kColorOffset, encoded, (int)_kFakeHostEndian);
             }
         }
 
@@ -1247,14 +1332,14 @@ namespace FlutterBinding.UI
         {
             get
             {
-                int encoded = _data.getInt32(_kBlendModeOffset, _kFakeHostEndian);
-                return BlendMode.values[encoded ^ _kBlendModeDefault];
+                int encoded = _data.getInt32(_kBlendModeOffset, (int)_kFakeHostEndian);
+                return (BlendMode)(encoded ^ _kBlendModeDefault);
             }
             set
             {
                 //assert(value != null);
                 int encoded = (int)value ^ _kBlendModeDefault;
-                _data.setInt32(_kBlendModeOffset, encoded, _kFakeHostEndian);
+                _data.setInt32(_kBlendModeOffset, encoded, (int)_kFakeHostEndian);
             }
         }
 
@@ -1265,13 +1350,13 @@ namespace FlutterBinding.UI
         {
             get
             {
-                return (PaintingStyle)_data.getInt32(_kStyleOffset, _kFakeHostEndian);
+                return (PaintingStyle)_data.getInt32(_kStyleOffset, (int)_kFakeHostEndian);
             }
             set
             {
                 //assert(value != null);
                 int encoded = (int)value;
-                _data.setInt32(_kStyleOffset, encoded, _kFakeHostEndian);
+                _data.setInt32(_kStyleOffset, encoded, (int)_kFakeHostEndian);
             }
         }
 
@@ -1284,13 +1369,13 @@ namespace FlutterBinding.UI
         {
             get
             {
-                return _data.getFloat32(_kStrokeWidthOffset, _kFakeHostEndian);
+                return _data.getFloat32(_kStrokeWidthOffset, (int)_kFakeHostEndian);
             }
             set
             {
                 //assert(value != null);
                 double encoded = value;
-                _data.setFloat32(_kStrokeWidthOffset, encoded, _kFakeHostEndian);
+                _data.setFloat32(_kStrokeWidthOffset, encoded, (int)_kFakeHostEndian);
             }
         }
 
@@ -1427,8 +1512,8 @@ namespace FlutterBinding.UI
                     // For now we only support one kind of MaskFilter, so we don't need to
                     // check what the type is if it's not null.
                     _data.setInt32(_kMaskFilterOffset, MaskFilter._TypeBlur, (int)_kFakeHostEndian);
-                    _data.setInt32(_kMaskFilterBlurStyleOffset, (int)value._style, _kFakeHostEndian);
-                    _data.setFloat32(_kMaskFilterSigmaOffset, value._sigma, _kFakeHostEndian);
+                    _data.setInt32(_kMaskFilterBlurStyleOffset, (int)value._style, (int)_kFakeHostEndian);
+                    _data.setFloat32(_kMaskFilterSigmaOffset, value._sigma, (int)_kFakeHostEndian);
                 }
             }
         }
@@ -1443,13 +1528,13 @@ namespace FlutterBinding.UI
         {
             get
             {
-                return FilterQuality.values[_data.getInt32(_kFilterQualityOffset, _kFakeHostEndian)];
+                return (FilterQuality)(_data.getInt32(_kFilterQualityOffset, (int)_kFakeHostEndian));
             }
             set
             {
                 //assert(value != null);
-                const int encoded = value.index;
-                _data.setInt32(_kFilterQualityOffset, encoded, _kFakeHostEndian);
+                int encoded = (int)value;
+                _data.setInt32(_kFilterQualityOffset, encoded, (int)_kFakeHostEndian);
             }
         }
 
@@ -1473,7 +1558,8 @@ namespace FlutterBinding.UI
             }
             set
             {
-                _objects ??= new List<dynamic>(_kObjectCount);
+                if (_objects == null)
+                    _objects = new List<dynamic>(_kObjectCount);
                 _objects[_kShaderIndex] = value;
             }
         }
@@ -1488,29 +1574,29 @@ namespace FlutterBinding.UI
         {
             get
             {
-                bool isNull = _data.getInt32(_kColorFilterOffset, _kFakeHostEndian) == 0;
+                bool isNull = _data.getInt32(_kColorFilterOffset, (int)_kFakeHostEndian) == 0;
                 if (isNull)
                     return null;
-                return new ColorFilter.mode(
-                  new Color(_data.getInt32(_kColorFilterColorOffset, _kFakeHostEndian)),
-                  BlendMode.values[_data.getInt32(_kColorFilterBlendModeOffset, _kFakeHostEndian)]
+                return ColorFilter.mode(
+                  new Color((uint)_data.getInt32(_kColorFilterColorOffset, (int)_kFakeHostEndian)),
+                  (BlendMode)(_data.getInt32(_kColorFilterBlendModeOffset, (int)_kFakeHostEndian))
                 );
             }
             set
             {
                 if (value == null)
                 {
-                    _data.setInt32(_kColorFilterOffset, 0, _kFakeHostEndian);
-                    _data.setInt32(_kColorFilterColorOffset, 0, _kFakeHostEndian);
-                    _data.setInt32(_kColorFilterBlendModeOffset, 0, _kFakeHostEndian);
+                    _data.setInt32(_kColorFilterOffset, 0, (int)_kFakeHostEndian);
+                    _data.setInt32(_kColorFilterColorOffset, 0, (int)_kFakeHostEndian);
+                    _data.setInt32(_kColorFilterBlendModeOffset, 0, (int)_kFakeHostEndian);
                 }
                 else
                 {
                     //assert(value._color != null);
                     //assert(value._blendMode != null);
-                    _data.setInt32(_kColorFilterOffset, 1, _kFakeHostEndian);
-                    _data.setInt32(_kColorFilterColorOffset, value._color.value, _kFakeHostEndian);
-                    _data.setInt32(_kColorFilterBlendModeOffset, value._blendMode.index, _kFakeHostEndian);
+                    _data.setInt32(_kColorFilterOffset, 1, (int)_kFakeHostEndian);
+                    _data.setInt32(_kColorFilterColorOffset, (int)value._color.value, (int)_kFakeHostEndian);
+                    _data.setInt32(_kColorFilterBlendModeOffset, (int)value._blendMode, (int)_kFakeHostEndian);
                 }
             }
         }
@@ -1524,81 +1610,81 @@ namespace FlutterBinding.UI
         {
             get
             {
-                return _data.getInt32(_kInvertColorOffset, _kFakeHostEndian) == 1;
+                return _data.getInt32(_kInvertColorOffset, (int)_kFakeHostEndian) == 1;
             }
             set
             {
-                _data.setInt32(_kInvertColorOffset, value ? 1 : 0, _kFakeHostEndian);
+                _data.setInt32(_kInvertColorOffset, value ? 1 : 0, (int)_kFakeHostEndian);
             }
         }
 
         public String toString()
         {
-            StringBuffer result = new StringBuffer();
-            String semicolon = '';
-            result.write('Paint(');
+            StringBuilder result = new StringBuilder();
+            String semicolon = "";
+            result.Append("Paint(");
             if (style == PaintingStyle.stroke)
             {
-                result.write('$style');
+                result.Append($"{style}");
                 if (strokeWidth != 0.0)
-                    result.write(' ${strokeWidth.toStringAsFixed(1)}');
+                    result.Append($" {strokeWidth.toStringAsFixed(1)}");
                 else
-                    result.write(' hairline');
+                    result.Append(" hairline");
                 if (strokeCap != StrokeCap.butt)
-                    result.write(' $strokeCap');
+                    result.Append($" {strokeCap}");
                 if (strokeJoin == StrokeJoin.miter)
                 {
                     if (strokeMiterLimit != _kStrokeMiterLimitDefault)
-                        result.write(' $strokeJoin up to ${strokeMiterLimit.toStringAsFixed(1)}');
+                        result.Append($" {strokeJoin} up to ${strokeMiterLimit.toStringAsFixed(1)}");
                 }
                 else
                 {
-                    result.write(' $strokeJoin');
+                    result.Append($" {strokeJoin}");
                 }
-                semicolon = '; ';
+                semicolon = "; ";
             }
             if (isAntiAlias != true)
             {
-                result.write('${semicolon}antialias off');
-                semicolon = '; ';
+                result.Append($"{semicolon}antialias off");
+                semicolon = "; ";
             }
             if (color != new Color(_kColorDefault))
             {
                 if (color != null)
-                    result.write('$semicolon$color');
+                    result.Append($"{semicolon}{color}");
                 else
-                    result.write('${semicolon}no color');
-                semicolon = '; ';
+                    result.Append($"{semicolon}no color");
+                semicolon = "; ";
             }
             if ((int)blendMode != _kBlendModeDefault)
             {
-                result.write('$semicolon$blendMode');
-                semicolon = '; ';
+                result.Append($"{semicolon}{blendMode}");
+                semicolon = "; ";
             }
             if (colorFilter != null)
             {
-                result.write('${semicolon}colorFilter: $colorFilter');
-                semicolon = '; ';
+                result.Append($"{semicolon}colorFilter: {colorFilter}");
+                semicolon = "; ";
             }
             if (maskFilter != null)
             {
-                result.write('${semicolon}maskFilter: $maskFilter');
-                semicolon = '; ';
+                result.Append($"{semicolon}maskFilter: {maskFilter}");
+                semicolon = "; ";
             }
             if (filterQuality != FilterQuality.none)
             {
-                result.write('${semicolon}filterQuality: $filterQuality');
-                semicolon = '; ';
+                result.Append($"{semicolon}filterQuality: {filterQuality}");
+                semicolon = "; ";
             }
             if (shader != null)
             {
-                result.write('${semicolon}shader: $shader');
-                semicolon = '; ';
+                result.Append($"{semicolon}shader: {shader}");
+                semicolon = "; ";
             }
             if (invertColors)
-                result.write('${semicolon}invert: $invertColors');
-            result.write(')');
-            return result.toString();
+                result.Append($"{semicolon}invert: {invertColors}");
+            result.Append(")");
+            return result.ToString();
         }
     }
 
@@ -1651,7 +1737,7 @@ namespace FlutterBinding.UI
 
     public class _ImageInfo
     {
-        _ImageInfo(int width, int height, int format, int? rowBytes)
+        public _ImageInfo(int width, int height, int format, int? rowBytes)
         {
             this.width = width;
             this.height = height;
@@ -1705,15 +1791,15 @@ namespace FlutterBinding.UI
         {
             return _futurize((_Callback<ByteData> callback) =>
             {
-                return _toByteData((int)format, (Uint8List encoded) =>
+                _toByteData((int)format, (List<int> encoded) =>
                 {
-                    callback(encoded?.buffer?.asByteData());
+                    callback(ByteData.asByteData(encoded));
                 });
             });
         }
 
         /// Returns an error message on failure, null on success.
-        String _toByteData(int format, _Callback<Uint8List> callback)
+        String _toByteData(int format, _Callback<List<int>> callback)
         {
             // native 'Image_toByteData';
             return string.Empty; // Tmp to resolve build
@@ -1781,7 +1867,7 @@ namespace FlutterBinding.UI
         /// The returned future can complete with an error if the decoding has failed.
         public Task<FrameInfo> getNextFrame()
         {
-            return _futurize(_getNextFrame);
+            return _futurize<FrameInfo>((f) => _getNextFrame(f));
         }
 
         /// Returns an error message on failure, null on success.
@@ -1799,87 +1885,7 @@ namespace FlutterBinding.UI
         }
     }
 
-    /// Instantiates an image codec [Codec] object.
-    ///
-    /// [list] is the binary image data (e.g a PNG or GIF binary data).
-    /// The data can be for either static or animated images. The following image
-    /// formats are supported: {@macro flutter.dart:ui.imageFormats}
-    ///
-    /// The [decodedCacheRatioCap] is the default maximum multiple of the compressed
-    /// image size to cache when decoding animated image frames. For example,
-    /// setting this to `2.0` means that a 400KB GIF would be allowed at most to use
-    /// 800KB of memory caching unessential decoded frames. Caching decoded frames
-    /// saves CPU but can result in out-of-memory crashes when decoding large (or
-    /// multiple) animated images. Note that GIFs are highly compressed, and it's
-    /// unlikely that a factor that low will be sufficient to cache all decoded
-    /// frames. The default value is `25.0`.
-    ///
-    /// The returned future can complete with an error if the image decoding has
-    /// failed.
-    public Task<Codec> instantiateImageCodec(Uint8List list,
-        double decodedCacheRatioCap = double.PositiveInfinity)
-    {
-        return _futurize(
-          (_Callback<Codec> callback) => _instantiateImageCodec(list, callback, null, decodedCacheRatioCap),
 
-
-        );
-    }
-
-    /// Instantiates a [Codec] object for an image binary data.
-    ///
-    /// Returns an error message if the instantiation has failed, null otherwise.
-    String _instantiateImageCodec(Uint8List list, _Callback<Codec> callback, _ImageInfo imageInfo, double decodedCacheRatioCap)
-        => string.Empty; // native 'instantiateImageCodec';
-
-    /// Loads a single image frame from a byte array into an [Image] object.
-    ///
-    /// This is a convenience wrapper around [instantiateImageCodec].
-    /// Prefer using [instantiateImageCodec] which also supports multi frame images.
-    void decodeImageFromList(Uint8List list, ImageDecoderCallback callback)
-    {
-        _decodeImageFromListAsync(list, callback);
-    }
-
-    async Task<Null> _decodeImageFromListAsync(Uint8List list,
-                                       ImageDecoderCallback callback)
-    {
-        Codec codec = await instantiateImageCodec(list);
-        FrameInfo frameInfo = await codec.getNextFrame();
-        callback(frameInfo.image);
-    }
-
-    /// Convert an array of pixel values into an [Image] object.
-    ///
-    /// [pixels] is the pixel data in the encoding described by [format].
-    ///
-    /// [rowBytes] is the number of bytes consumed by each row of pixels in the
-    /// data buffer.  If unspecified, it defaults to [width] multipled by the
-    /// number of bytes per pixel in the provided [format].
-    ///
-    /// The [decodedCacheRatioCap] is the default maximum multiple of the compressed
-    /// image size to cache when decoding animated image frames. For example,
-    /// setting this to `2.0` means that a 400KB GIF would be allowed at most to use
-    /// 800KB of memory caching unessential decoded frames. Caching decoded frames
-    /// saves CPU but can result in out-of-memory crashes when decoding large (or
-    /// multiple) animated images. Note that GIFs are highly compressed, and it's
-    /// unlikely that a factor that low will be sufficient to cache all decoded
-    /// frames. The default value is `25.0`.
-    void decodeImageFromPixels(
-      Uint8List pixels,
-      int width,
-      int height,
-      PixelFormat format,
-      ImageDecoderCallback callback,
-      int rowBytes = 0, double decodedCacheRatioCap = double.PositiveInfinity)
-    {
-        _ImageInfo imageInfo = new _ImageInfo(width, height, (int)format, rowBytes);
-        Task<Codec> codecFuture = _futurize(
-          (_Callback<Codec> callback) => _instantiateImageCodec(pixels, callback, imageInfo, decodedCacheRatioCap)
-        );
-        codecFuture.then((Codec codec) => codec.getNextFrame())
-                .then((FrameInfo frameInfo) => callback(frameInfo.image));
-    }
 
     /// Determines the winding rule that decides how the interior of a [Path] is
     /// calculated.
@@ -2153,11 +2159,13 @@ namespace FlutterBinding.UI
         /// point if both are greater than zero but too small to describe an arc.
         ///
         public void arcToPoint(Offset arcEnd,
-            Radius radius = Radius.zero,
+            Radius radius = null,
         double rotation = 0.0,
         bool largeArc = false,
         bool clockwise = true)
         {
+            if (radius == null)
+                radius = Radius.zero;
             //assert(_offsetIsValid(arcEnd));
             //assert(_radiusIsValid(radius));
             _arcToPoint(arcEnd.dx, arcEnd.dy, radius.x, radius.y, rotation,
@@ -2186,11 +2194,13 @@ namespace FlutterBinding.UI
         /// fit the last path point if both are greater than zero but too small to
         /// describe an arc.
         public void relativeArcToPoint(Offset arcEndDelta,
-              Radius radius = Radius.zero,
+              Radius radius = null,
           double rotation = 0.0,
           bool largeArc = false,
           bool clockwise = true)
         {
+            if (radius == null)
+                radius = Radius.zero;
             //assert(_offsetIsValid(arcEndDelta));
             //assert(_radiusIsValid(radius));
             _relativeArcToPoint(arcEndDelta.dx, arcEndDelta.dy, radius.x, radius.y,
@@ -2261,7 +2271,7 @@ namespace FlutterBinding.UI
             //assert(points != null);
             _addPolygon(_encodePointList(points), close);
         }
-        void _addPolygon(List<float> points, bool close)
+        void _addPolygon(List<double> points, bool close)
         {
             // native 'Path_addPolygon';
         }
@@ -2274,7 +2284,7 @@ namespace FlutterBinding.UI
             //assert(_rrectIsValid(rrect));
             _addRRect(rrect._value);
         }
-        void _addRRect(List<float> rrect)
+        void _addRRect(List<double> rrect)
         {
             // native 'Path_addRRect';
         }
@@ -2477,7 +2487,7 @@ namespace FlutterBinding.UI
         ///
         /// The [vector] is computed to be the unit vector at the given angle, interpreted
         /// as clockwise radians from the x axis.
-        factory Tangent.fromAngle(Offset position, double angle)
+        public static Tangent fromAngle(Offset position, double angle)
         {
             return new Tangent(position, new Offset(Math.Cos(angle), Math.Sin(angle)));
         }
@@ -2641,7 +2651,7 @@ namespace FlutterBinding.UI
         // [Iterator.current]. In this case, the [PathMetric] is valid before
         // calling `_moveNext` - `_moveNext` should be called after the first
         // iteration is done instead of before.
-        bool _moveNext() => true; // native 'PathMeasure_nextContour';
+        public bool _moveNext() => true; // native 'PathMeasure_nextContour';
     }
 
     /// Styles to use for blurs in [MaskFilter] objects.
@@ -2759,8 +2769,8 @@ namespace FlutterBinding.UI
             _blendMode = blendMode;
         }
 
-        readonly Color _color;
-        readonly BlendMode _blendMode;
+        public readonly Color _color;
+        public readonly BlendMode _blendMode;
 
         public static bool operator ==(ColorFilter filter, Object other)
         {
@@ -2927,7 +2937,7 @@ namespace FlutterBinding.UI
         /// If `from`, `to`, `colors`, or `tileMode` are null, or if `colors` or
         /// `colorStops` contain null values, this constructor will throw a
         /// [NoSuchMethodError].
-        public Gradient linear(
+        public static Gradient linear(
         Offset from,
         Offset to,
         List<Color> colors,
@@ -2939,6 +2949,15 @@ namespace FlutterBinding.UI
             //assert(colors != null),
             //assert(tileMode != null),
 
+            return new Gradient(from, to, colors, colorStops, tileMode);
+        }
+
+        private Gradient(Offset from,
+                                Offset to,
+                                List<Color> colors,
+                                List<double> colorStops = null,
+                                TileMode tileMode = TileMode.clamp)
+        {
             _validateColorStops(colors, colorStops);
             List<double> endPointsBuffer = _encodeTwoPoints(from, to);
             List<uint> colorsBuffer = _encodeColorList(colors);
@@ -2946,6 +2965,8 @@ namespace FlutterBinding.UI
             _constructor();
             _initLinear(endPointsBuffer, colorsBuffer, colorStopsBuffer, (int)tileMode);
         }
+
+
         void _initLinear(List<double> endPoints, List<uint> colors, List<double> colorStops, int tileMode)
         {
             // native 'Gradient_initLinear';
@@ -2980,7 +3001,7 @@ namespace FlutterBinding.UI
         /// circle and `focalRadius` being the radius of that circle. If `focal` is
         /// provided and not equal to `center`, at least one of the two offsets must
         /// not be equal to [Offset.zero].
-        public Gradient radial(
+        public static Gradient radial(
         Offset center,
         double radius,
         List<Color> colors,
@@ -2994,7 +3015,19 @@ namespace FlutterBinding.UI
             //assert(colors != null),
             //assert(tileMode != null),
             //assert(matrix4 == null || _matrix4IsValid(matrix4)),
-            
+
+            return new Gradient(center, radius, colors, colorStops, tileMode, matrix4, focal, focalRadius);
+        }
+
+        private Gradient(Offset center,
+                        double radius,
+                        List<Color> colors,
+                        List<double> colorStops = null,
+                        TileMode tileMode = TileMode.clamp,
+                        List<float> matrix4 = null,
+                        Offset focal = null,
+                        double focalRadius = 0.0)
+        {
             _validateColorStops(colors, colorStops);
             List<uint> colorsBuffer = _encodeColorList(colors);
             List<double> colorStopsBuffer = colorStops == null ? null : new List<double>(colorStops);
@@ -3004,22 +3037,23 @@ namespace FlutterBinding.UI
             if (focal == null || (focal == center && focalRadius == 0.0))
             {
                 _constructor();
-                _initRadial(center.dx, center.dy, radius, colorsBuffer, colorStopsBuffer, tileMode.index, matrix4);
+                _initRadial(center.dx, center.dy, radius, colorsBuffer, colorStopsBuffer, (int)tileMode, matrix4);
             }
             else
             {
                 //assert(center != Offset.zero || focal != Offset.zero); // will result in exception(s) in Skia side
                 _constructor();
-                _initConical(focal.dx, focal.dy, focalRadius, center.dx, center.dy, radius, colorsBuffer, colorStopsBuffer, tileMode.index, matrix4);
+                _initConical(focal.dx, focal.dy, focalRadius, center.dx, center.dy, radius, colorsBuffer, colorStopsBuffer, (int)tileMode, matrix4);
             }
         }
 
-        void _initRadial(double centerX, double centerY, double radius, List<Int32> colors, List<float> colorStops, int tileMode, List<float> matrix4)
+
+        void _initRadial(double centerX, double centerY, double radius, List<uint> colors, List<double> colorStops, int tileMode, List<float> matrix4)
         {
             // native 'Gradient_initRadial';
         }
 
-        void _initConical(double startX, double startY, double startRadius, double endX, double endY, double endRadius, List<Int32> colors, List<float> colorStops, int tileMode, List<float> matrix4)
+        void _initConical(double startX, double startY, double startRadius, double endX, double endY, double endRadius, List<uint> colors, List<double> colorStops, int tileMode, List<float> matrix4)
         {
             // native 'Gradient_initTwoPointConical';
         }
@@ -3050,7 +3084,7 @@ namespace FlutterBinding.UI
         /// If `matrix4` is provided, the gradient fill will be transformed by the
         /// specified 4x4 matrix relative to the local coordinate system. `matrix4` must
         /// be a column-major matrix packed into a list of 16 values.
-        public Gradient sweep(
+        public static Gradient sweep(
         Offset center,
         List<Color> colors,
         List<double> colorStops = null,
@@ -3066,13 +3100,26 @@ namespace FlutterBinding.UI
             //assert(endAngle != null),
             //assert(startAngle<endAngle),
             //assert(matrix4 == null || _matrix4IsValid(matrix4)),
+            return new Gradient(center, colors, colorStops, tileMode, startAngle, endAngle, matrix4);
 
+        }
+
+        private Gradient(
+        Offset center,
+        List<Color> colors,
+        List<double> colorStops = null,
+        TileMode tileMode = TileMode.clamp,
+        double startAngle = 0.0,
+        double endAngle = Math.PI * 2,
+        List<float> matrix4 = null)
+        {
             _validateColorStops(colors, colorStops);
             List<uint> colorsBuffer = _encodeColorList(colors);
             List<double> colorStopsBuffer = colorStops == null ? null : new List<double>(colorStops);
             _constructor();
             _initSweep(center.dx, center.dy, colorsBuffer, colorStopsBuffer, (int)tileMode, startAngle, endAngle, matrix4);
         }
+
         void _initSweep(double centerX, double centerY, List<uint> colors, List<double> colorStops, int tileMode, double startAngle, double endAngle, List<float> matrix)
         {
             // native 'Gradient_initSweep';
@@ -3163,7 +3210,7 @@ namespace FlutterBinding.UI
             List<double> encodedTextureCoordinates = (textureCoordinates != null)
                   ? _encodePointList(textureCoordinates)
                   : null;
-            List<Int32> encodedColors = colors != null
+            List<uint> encodedColors = colors != null
               ? _encodeColorList(colors)
               : null;
             List<Int32> encodedIndices = indices != null
@@ -3178,7 +3225,7 @@ namespace FlutterBinding.UI
         VertexMode mode,
         List<double> positions,
         List<double> textureCoordinates = null,
-        List<Int32> colors = null,
+        List<uint> colors = null,
     List<Int32> indices = null)
         { //assert(mode != null),
           //assert(positions != null)
@@ -3197,7 +3244,7 @@ namespace FlutterBinding.UI
         VertexMode mode,
         List<double> positions,
         List<double> textureCoordinates,
-        List<Int32> colors,
+        List<uint> colors,
     List<Int32> indices)
         {
             _constructor();
@@ -3214,7 +3261,7 @@ namespace FlutterBinding.UI
         void _init(int mode,
                    List<double> positions,
                    List<double> textureCoordinates,
-                   List<Int32> colors,
+                   List<uint> colors,
                    List<Int32> indices)
         {
             // native 'Vertices_init';
@@ -4046,7 +4093,7 @@ namespace FlutterBinding.UI
                 rectBuffer[index3] = rect.bottom;
             }
 
-            List<Int32> colorBuffer = colors.Count == 0 ? null : _encodeColorList(colors);
+            List<uint> colorBuffer = colors.Count == 0 ? null : _encodeColorList(colors);
             List<double> cullRectBuffer = cullRect?._value;
 
             _drawAtlas(
@@ -4073,7 +4120,7 @@ namespace FlutterBinding.UI
         public void drawRawAtlas(Image atlas,
                           List<double> rstTransforms,
                           List<double> rects,
-                          List<Int32> colors,
+                          List<uint> colors,
                           BlendMode blendMode,
                           Rect cullRect,
                           Paint paint)
@@ -4104,7 +4151,7 @@ namespace FlutterBinding.UI
                         Image atlas,
                         List<double> rstTransforms,
                         List<double> rects,
-                        List<Int32> colors,
+                        List<uint> colors,
                         int blendMode,
                         List<double> cullRect)
         {

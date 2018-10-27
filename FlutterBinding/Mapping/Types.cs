@@ -1,5 +1,6 @@
 ﻿using FlutterBinding.UI;
 using System;
+using System.Collections.Generic;
 
 namespace FlutterBinding.Mapping
 {
@@ -35,6 +36,8 @@ namespace FlutterBinding.Mapping
             public void setFloat32(double first, double second, int third) { }
 
             public int lengthInBytes => 0; // TODO;
+
+            public static ByteData asByteData(List<int> list) => new ByteData(); // TODO:
         }
 
         public class Zone

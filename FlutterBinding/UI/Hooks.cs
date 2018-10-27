@@ -1,10 +1,9 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Text;
+using static FlutterBinding.Mapping.Helper;
 using static FlutterBinding.Mapping.Types;
 using static FlutterBinding.UI.Painting;
-using static FlutterBinding.Mapping.Helper;
 
 namespace FlutterBinding.UI
 {

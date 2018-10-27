@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FlutterBinding.UI;
+using System;
 using System.Collections.Generic;
 
 namespace FlutterBinding.Mapping
@@ -15,6 +16,8 @@ namespace FlutterBinding.Mapping
         {
             return value.ToString($"N{points}");
         }
+
+        public static string toRadixString(this uint value, int places) => value.ToString(); // TODO:
 
         public static double round(this double value) => Math.Round(value);
 
@@ -45,5 +48,18 @@ namespace FlutterBinding.Mapping
         public static bool isFinite(this double value) => !double.IsInfinity(value);
 
         public static double abs(this double value) => Math.Abs(value);
+        
+        public static Future<T> _futurize<T>(Action<_Callback<T>> callback)
+        {
+            // Question, why is this so complicated for running a new Task.
+            // Could be a Dart -> C# translation issue
+
+            var result = default(T);
+
+            var resolve = new _Callback<T>((t) => { result = t; });
+
+            return new Future<T>(() => { return result; });
+        }
+
     }
 }
