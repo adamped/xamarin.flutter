@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Engine\" />
+    <Folder Include="Flow\" />
   </ItemGroup>
 
 </Project>
