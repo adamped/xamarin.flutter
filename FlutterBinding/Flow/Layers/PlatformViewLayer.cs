@@ -34,7 +34,7 @@ namespace FlutterBinding.Flow.Layers
 
         public override void Preroll(PrerollContext context, SKMatrix matrix)
         {
-            set_paint_bounds(SKRect.MakeXYWH(offset_.x(), offset_.y(), size_.Width, size_.Height));
+            set_paint_bounds(new SKRect(offset_.X, offset_.Y, size_.Width, size_.Height));
         }
         //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
         //ORIGINAL LINE: void Paint(PaintContext& context) const override
@@ -43,13 +43,13 @@ namespace FlutterBinding.Flow.Layers
             if (context.view_embedder == null)
             {
                 //C++ TO C# CONVERTER TODO TASK: There is no direct equivalent in C# to the following C++ macro:
-                !((global::fml.ShouldCreateLogMessage(global::fml.LOG_ERROR))) ? ()0 : new global::fml.LogMessageVoidify() & (new global::fml.LogMessage(global::fml.LOG_ERROR, __FILE__, __LINE__, null).stream()) << "Trying to embed a platform view but the PaintContext " + "does not support embedding";
+                //!((global::fml.ShouldCreateLogMessage(global::fml.LOG_ERROR))) ? ()0 : new global::fml.LogMessageVoidify() & (new global::fml.LogMessage(global::fml.LOG_ERROR, __FILE__, __LINE__, null).stream()) << "Trying to embed a platform view but the PaintContext " + "does not support embedding";
                 return;
             }
             EmbeddedViewParams @params = new EmbeddedViewParams();
-            SKMatrix transform = context.canvas.getTotalMatrix();
-            @params.offsetPixels = SKPoint.Make(transform.getTranslateX(), transform.getTranslateY());
-            @params.sizePoints.CopyFrom(size_);
+            SKMatrix transform = context.canvas.TotalMatrix;
+            @params.offsetPixels = new SKPoint(transform.TransX, transform.TransY);
+            @params.sizePoints = size_;
 
             context.view_embedder.CompositeEmbeddedView(view_id_, @params);
         }

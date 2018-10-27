@@ -1,4 +1,5 @@
-﻿using static FlutterBinding.Flow.Helper;
+﻿using SkiaSharp;
+using static FlutterBinding.Flow.Helper;
 
 // Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
@@ -14,16 +15,16 @@ namespace FlutterBinding.Flow.Layers
         //C++ TO C# CONVERTER TODO TASK: The implementation of the following method could not be found:
         //  public void Dispose();
 
-        public void set_shader(sk_sp<SKShader> shader)
+        public void set_shader(SKShader shader)
         {
-            shader_.CopyFrom(shader);
+            shader_ = shader;
         }
 
         public void set_mask_rect(SKRect mask_rect)
         {
             //C++ TO C# CONVERTER TODO TASK: The following line was determined to be a copy assignment (rather than a reference assignment) - this should be verified and a 'CopyFrom' method should be created:
             //ORIGINAL LINE: mask_rect_ = mask_rect;
-            mask_rect_.CopyFrom(mask_rect);
+            mask_rect_ = mask_rect;
         }
 
         public void set_blend_mode(SKBlendMode blend_mode)
@@ -42,14 +43,14 @@ namespace FlutterBinding.Flow.Layers
             PaintChildren(context);
 
             SKPaint paint = new SKPaint();
-            paint.setBlendMode(blend_mode_);
-            paint.setShader(new sk_sp<SKShader>(shader_));
-            context.canvas.translate(mask_rect_.left(), mask_rect_.top());
-            context.canvas.DrawRect(SKRect.MakeWH(mask_rect_.width(), mask_rect_.height()), paint);
+            paint.BlendMode = blend_mode_;
+            paint.Shader = shader_;
+            context.canvas.Translate(mask_rect_.Left, mask_rect_.Top);
+            context.canvas.DrawRect(new SKRect(0, 0, mask_rect_.Width, mask_rect_.Height), paint);
         }
 
-        private sk_sp<SKShader> shader_ = new sk_sp<SKShader>();
-        private SKRect mask_rect_ = new SKRect();
+        private SKShader shader_;
+        private SKRect mask_rect_;
         private SKBlendMode blend_mode_;
 
         //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':

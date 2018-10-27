@@ -1,4 +1,5 @@
 ﻿using static FlutterBinding.Flow.Helper;
+using SkiaSharp;
 
 // Copyright 2017 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
@@ -18,17 +19,17 @@ namespace FlutterBinding.Flow.Layers
         {
             //C++ TO C# CONVERTER TODO TASK: The following line was determined to be a copy assignment (rather than a reference assignment) - this should be verified and a 'CopyFrom' method should be created:
             //ORIGINAL LINE: offset_ = offset;
-            offset_.CopyFrom(offset);
+            offset_ = offset;
         }
         public void set_size(SKSize size)
         {
-            size_.CopyFrom(size);
+            size_ = size;
         }
         public void set_texture_id(ulong texture_id)
         {
             //C++ TO C# CONVERTER TODO TASK: The following line was determined to be a copy assignment (rather than a reference assignment) - this should be verified and a 'CopyFrom' method should be created:
             //ORIGINAL LINE: texture_id_ = texture_id;
-            texture_id_.CopyFrom(texture_id);
+            texture_id_ = texture_id;
         }
         public void set_freeze(bool freeze)
         {
@@ -37,13 +38,13 @@ namespace FlutterBinding.Flow.Layers
 
         public override void Preroll(PrerollContext context, SKMatrix matrix)
         {
-            set_paint_bounds(SKRect.MakeXYWH(offset_.x(), offset_.y(), size_.width(), size_.height()));
+            set_paint_bounds(new SKRect(offset_.X, offset_.Y, size_.Width, size_.Height));
         }
         //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
         //ORIGINAL LINE: void Paint(PaintContext& context) const override
         public override void Paint(PaintContext context)
         {
-            Texture texture = context.texture_registry.GetTexture(new ulong(texture_id_));
+            Texture texture = context.texture_registry.GetTexture(texture_id_);
             if (texture == null)
             {
                 return;

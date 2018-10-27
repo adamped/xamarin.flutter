@@ -23,14 +23,14 @@ namespace FlutterBinding.Flow.Layers
         {
             //C++ TO C# CONVERTER TODO TASK: The following line was determined to be a copy assignment (rather than a reference assignment) - this should be verified and a 'CopyFrom' method should be created:
             //ORIGINAL LINE: offset_ = offset;
-            offset_.CopyFrom(offset);
+            offset_ = offset;
         }
 
         public override void Preroll(PrerollContext context, SKMatrix matrix)
         {
             //C++ TO C# CONVERTER TODO TASK: The following line was determined to contain a copy constructor call - this should be verified and a copy constructor should be created:
             //ORIGINAL LINE: SKMatrix child_matrix = matrix;
-            SKMatrix child_matrix = new SKMatrix(matrix);
+            SKMatrix child_matrix = matrix;
             child_matrix.postTranslate(offset_.fX, offset_.fY);
             base.Preroll(context, child_matrix);
             if (context.raster_cache != null && layers().Count == 1)
@@ -38,11 +38,11 @@ namespace FlutterBinding.Flow.Layers
                 Layer child = layers()[0].get();
                 //C++ TO C# CONVERTER TODO TASK: The following line was determined to contain a copy constructor call - this should be verified and a copy constructor should be created:
                 //ORIGINAL LINE: SKMatrix ctm = child_matrix;
-                SKMatrix ctm = new SKMatrix(child_matrix);
+                SKMatrix ctm = child_matrix;
 #if !SUPPORT_FRACTIONAL_TRANSLATION
                 //C++ TO C# CONVERTER TODO TASK: The following line was determined to be a copy assignment (rather than a reference assignment) - this should be verified and a 'CopyFrom' method should be created:
                 //ORIGINAL LINE: ctm = RasterCache::GetIntegralTransCTM(ctm);
-                ctm.CopyFrom(RasterCache.GetIntegralTransCTM(ctm));
+                ctm = RasterCache.GetIntegralTransCTM(ctm);
 #endif
                 context.raster_cache.Prepare(context, child, ctm);
             }
@@ -56,19 +56,19 @@ namespace FlutterBinding.Flow.Layers
             FML_DCHECK(needs_painting());
 
             SKPaint paint = new SKPaint();
-            paint.setAlpha(alpha_);
+            paint.Color = paint.Color.WithAlpha((byte)alpha_);
 
             //C++ TO C# CONVERTER TODO TASK: There is no equivalent in C# to 'static_assert':
             //  (...) static_assert(false, "missing name for " "SkAutoCanvasRestore") save(&context.canvas, true);
-            context.canvas.translate(offset_.fX, offset_.fY);
+            context.canvas.Translate(offset_.X, offset_.Y);
 
 #if !SUPPORT_FRACTIONAL_TRANSLATION
-            context.canvas.setMatrix(RasterCache.GetIntegralTransCTM(context.canvas.getTotalMatrix()));
+            context.canvas.SetMatrix(RasterCache.GetIntegralTransCTM(context.canvas.TotalMatrix));
 #endif
 
-            if (layers().Count == 1 && context.raster_cache)
+            if (layers().Count == 1)// && context.raster_cache)
             {
-                SKMatrix ctm = context.canvas.getTotalMatrix();
+                SKMatrix ctm = context.canvas.TotalMatrix;
                 RasterCacheResult child_cache = context.raster_cache.Get(layers()[0].get(), ctm);
                 if (child_cache.is_valid())
                 {

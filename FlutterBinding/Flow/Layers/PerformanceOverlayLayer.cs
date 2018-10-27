@@ -6,44 +6,45 @@
 
 namespace FlutterBinding.Flow.Layers
 {
+    // Just dropping this for now, as we don't need a performance overlay in the initial version
 
-    public class PerformanceOverlayLayer : Layer
-    {
-        public PerformanceOverlayLayer(ulong options)
-        {
-            this.options_ = options;
-        }
+    //public class PerformanceOverlayLayer : Layer
+    //{
+    //    public PerformanceOverlayLayer(ulong options)
+    //    {
+    //        this.options_ = options;
+    //    }
 
-        //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
-        //ORIGINAL LINE: void Paint(PaintContext& context) const override
-        public override void Paint(PaintContext context)
-        {
-            const int padding = 8;
+    //    //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
+    //    //ORIGINAL LINE: void Paint(PaintContext& context) const override
+    //    public override void Paint(PaintContext context)
+    //    {
+    //        const int padding = 8;
 
-            if (options_ == 0)
-            {
-                return;
-            }
+    //        if (options_ == 0)
+    //        {
+    //            return;
+    //        }
 
-            TRACE_EVENT0("flutter", "PerformanceOverlayLayer::Paint");
-            float x = paint_bounds().x() + padding;
-            float y = paint_bounds().y() + padding;
-            float width = paint_bounds().Width - (padding * 2);
-            float height = paint_bounds().Height / 2;
-            //C++ TO C# CONVERTER TODO TASK: There is no equivalent in C# to 'static_assert':
-            //  (...) static_assert(false, "missing name for " "SkAutoCanvasRestore") save(&context.canvas, true);
+    //        TRACE_EVENT0("flutter", "PerformanceOverlayLayer::Paint");
+    //        float x = paint_bounds().x() + padding;
+    //        float y = paint_bounds().y() + padding;
+    //        float width = paint_bounds().Width - (padding * 2);
+    //        float height = paint_bounds().Height / 2;
+    //        //C++ TO C# CONVERTER TODO TASK: There is no equivalent in C# to 'static_assert':
+    //        //  (...) static_assert(false, "missing name for " "SkAutoCanvasRestore") save(&context.canvas, true);
 
-            GlobalMembers.VisualizeStopWatch(context.canvas, context.frame_time, x, y, width, height - padding, options_ & GlobalMembers.kVisualizeRasterizerStatistics, options_ & GlobalMembers.kDisplayRasterizerStatistics, "GPU");
+    //        GlobalMembers.VisualizeStopWatch(context.canvas, context.frame_time, x, y, width, height - padding, options_ & GlobalMembers.kVisualizeRasterizerStatistics, options_ & GlobalMembers.kDisplayRasterizerStatistics, "GPU");
 
-            GlobalMembers.VisualizeStopWatch(context.canvas, context.engine_time, x, y + height, width, height - padding, options_ & GlobalMembers.kVisualizeEngineStatistics, options_ & GlobalMembers.kDisplayEngineStatistics, "UI");
-        }
+    //        GlobalMembers.VisualizeStopWatch(context.canvas, context.engine_time, x, y + height, width, height - padding, options_ & GlobalMembers.kVisualizeEngineStatistics, options_ & GlobalMembers.kDisplayEngineStatistics, "UI");
+    //    }
 
-        private ulong options_;
+    //    private ulong options_;
 
-        //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':
-        //  PerformanceOverlayLayer(const PerformanceOverlayLayer&) = delete;
-        //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':
-        //  PerformanceOverlayLayer& operator =(const PerformanceOverlayLayer&) = delete;
-    }
+    //    //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':
+    //    //  PerformanceOverlayLayer(const PerformanceOverlayLayer&) = delete;
+    //    //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':
+    //    //  PerformanceOverlayLayer& operator =(const PerformanceOverlayLayer&) = delete;
+    //}
 
 }

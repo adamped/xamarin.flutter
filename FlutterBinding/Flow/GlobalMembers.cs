@@ -11,46 +11,46 @@ namespace FlutterBinding.Flow
         public static readonly int kDisplayEngineStatistics = 1 << 2;
         public static readonly int kVisualizeEngineStatistics = 1 << 3;
 
-        public static void DrawStatisticsText(SKCanvas canvas, string @string, int x, int y)
-        {
-            SKPaint paint = new SKPaint();
-            paint.SetTextSize(15F);
-            paint.SetLinearText(false);
-            paint.SetColor(GlobalMembers.SK_ColorGRAY);
-            canvas.DrawText(@string, @string.Length, x, y, paint);
-        }
+        //public static void DrawStatisticsText(SKCanvas canvas, string @string, int x, int y)
+        //{
+        //    SKPaint paint = new SKPaint();
+        //    paint.SetTextSize(15F);
+        //    paint.SetLinearText(false);
+        //    paint.SetColor(GlobalMembers.SK_ColorGRAY);
+        //    canvas.DrawText(@string, @string.Length, x, y, paint);
+        //}
 
-        public static void VisualizeStopWatch(SKCanvas canvas, Stopwatch stopwatch, float x, float y, float width, float height, bool show_graph, bool show_labels, string label_prefix)
-        {
-            const int label_x = 8; // distance from x
-            const int label_y = -10; // distance from y+height
+        //public static void VisualizeStopWatch(SKCanvas canvas, Stopwatch stopwatch, float x, float y, float width, float height, bool show_graph, bool show_labels, string label_prefix)
+        //{
+        //    const int label_x = 8; // distance from x
+        //    const int label_y = -10; // distance from y+height
 
-            if (show_graph)
-            {
-                SKRect visualization_rect = SKRect.MakeXYWH(x, y, width, height);
-                stopwatch.Visualize(canvas, visualization_rect);
-            }
+        //    if (show_graph)
+        //    {
+        //        SKRect visualization_rect = SKRect.MakeXYWH(x, y, width, height);
+        //        stopwatch.Visualize(canvas, visualization_rect);
+        //    }
 
-            if (show_labels)
-            {
-                double ms_per_frame = stopwatch.MaxDelta().ToMillisecondsF();
-                double fps;
-                if (ms_per_frame < kOneFrameMS)
-                {
-                    fps = 1e3 / kOneFrameMS;
-                }
-                else
-                {
-                    fps = 1e3 / ms_per_frame;
-                }
+        //    if (show_labels)
+        //    {
+        //        double ms_per_frame = stopwatch.MaxDelta().ToMillisecondsF();
+        //        double fps;
+        //        if (ms_per_frame < kOneFrameMS)
+        //        {
+        //            fps = 1e3 / kOneFrameMS;
+        //        }
+        //        else
+        //        {
+        //            fps = 1e3 / ms_per_frame;
+        //        }
 
-                std::stringstream stream = new std::stringstream();
-                stream.setf(std::ios.@fixed | std::ios.showpoint);
-                stream << std::setprecision(1);
-                stream << label_prefix << "  " << fps << " fps  " << ms_per_frame << "ms/frame";
-                GlobalMembers.DrawStatisticsText(canvas, stream.str(), x + label_x, y + height + label_y);
-            }
-        }
+        //        std::stringstream stream = new std::stringstream();
+        //        stream.setf(std::ios.@fixed | std::ios.showpoint);
+        //        stream << std::setprecision(1);
+        //        stream << label_prefix << "  " << fps << " fps  " << ms_per_frame << "ms/frame";
+        //        GlobalMembers.DrawStatisticsText(canvas, stream.str(), x + label_x, y + height + label_y);
+        //    }
+        //}
 
         internal const double kOneFrameMS = 1e3 / 60.0;
 
@@ -78,41 +78,41 @@ namespace FlutterBinding.Flow
         //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = default':
         //CounterValues::~CounterValues() = default;
 
-        public static void DrawCheckerboard(SKCanvas canvas, uint c1, uint c2, int size)
-        {
-            SKPaint paint = new SKPaint();
-            paint.setShader(GlobalMembers.CreateCheckerboardShader(c1, c2, size));
-            canvas.DrawPaint(paint);
-        }
+        //public static void DrawCheckerboard(SKCanvas canvas, uint c1, uint c2, int size)
+        //{
+        //    SKPaint paint = new SKPaint();
+        //    paint.Shader = GlobalMembers.CreateCheckerboardShader(c1, c2, size);
+        //    canvas.DrawPaint(paint);
+        //}
 
-        public static void DrawCheckerboard(SKCanvas canvas, SKRect rect)
-        {
-            // Draw a checkerboard
-            canvas.Save();
-            canvas.ClipRect(rect);
+        //public static void DrawCheckerboard(SKCanvas canvas, SKRect rect)
+        //{
+        //    // Draw a checkerboard
+        //    canvas.Save();
+        //    canvas.ClipRect(rect);
 
-            var checkerboard_color = GlobalMembers.SkColorSetARGB(64, RandomNumbers.NextNumber() % 256, RandomNumbers.NextNumber() % 256, RandomNumbers.NextNumber() % 256);
+        //    var checkerboard_color = GlobalMembers.SkColorSetARGB(64, RandomNumbers.NextNumber() % 256, RandomNumbers.NextNumber() % 256, RandomNumbers.NextNumber() % 256);
 
-            DrawCheckerboard(canvas, checkerboard_color, 0x00000000, 12);
-            canvas.Restore();
+        //    DrawCheckerboard(canvas, checkerboard_color, 0x00000000, 12);
+        //    canvas.Restore();
 
-            // Stroke the drawn area
-            SKPaint debugPaint = new SKPaint();
-            debugPaint.setStrokeWidth(8F);
-            debugPaint.setColor(GlobalMembers.SkColorSetA(checkerboard_color, 255));
-            debugPaint.setStyle(SKPaint.Style.kStroke_Style);
-            canvas.DrawRect(rect, debugPaint);
-        }
+        //    // Stroke the drawn area
+        //    SKPaint debugPaint = new SKPaint();
+        //    debugPaint.setStrokeWidth(8F);
+        //    debugPaint.setColor(GlobalMembers.SkColorSetA(checkerboard_color, 255));
+        //    debugPaint.Style = SKPaintStyle.Stroke;
+        //    canvas.DrawRect(rect, debugPaint);
+        //}
 
-        public static SKShader CreateCheckerboardShader(uint c1, uint c2, int size)
-        {
-            SKBitmap bm = new SKBitmap();
-            bm.allocN32Pixels(2 * size, 2 * size);
-            bm.eraseColor(c1);
-            bm.eraseArea(SKRectI.MakeLTRB(0, 0, size, size), c2);
-            bm.eraseArea(SKRectI.MakeLTRB(size, size, 2 * size, 2 * size), c2);
-            return SKShader.MakeBitmapShader(bm, SKShader.TileMode.kRepeat_TileMode, SKShader.TileMode.kRepeat_TileMode);
-        }
+        //public static SKShader CreateCheckerboardShader(uint c1, uint c2, int size)
+        //{
+        //    SKBitmap bm = new SKBitmap();
+        //    bm.allocN32Pixels(2 * size, 2 * size);
+        //    bm.eraseColor(c1);
+        //    bm.eraseArea(SKRectI.MakeLTRB(0, 0, size, size), c2);
+        //    bm.eraseArea(SKRectI.MakeLTRB(size, size, 2 * size, 2 * size), c2);
+        //    return SKShader.MakeBitmapShader(bm, SKShader.TileMode.kRepeat_TileMode, SKShader.TileMode.kRepeat_TileMode);
+        //}
 
         internal static bool CanRasterizePicture(SKPicture picture)
         {
