@@ -1,4 +1,4 @@
-﻿namespace flow
+﻿namespace FlutterBinding.Flow
 {
 
 	public class CounterValues

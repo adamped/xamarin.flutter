@@ -1,44 +1,14 @@
-﻿// Copyright 2016 The Chromium Authors. All rights reserved.
+﻿#define OS_FUCHSIA
+
+// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 
-//C++ TO C# CONVERTER NOTE: The following #define macro was replaced in-line:
-//ORIGINAL LINE: #define SKC_TYPE_HELPER(t) skc_##t
-//C++ TO C# CONVERTER NOTE: The following #define macro was replaced in-line:
-//ORIGINAL LINE: #define SKC_TYPE(t) SKC_TYPE_HELPER(t)
-//C++ TO C# CONVERTER NOTE: The following #define macro was replaced in-line:
-//ORIGINAL LINE: #define SKC_TYPE(t) t
-//C++ TO C# CONVERTER NOTE: The following #define macro was replaced in-line:
-//ORIGINAL LINE: #define SKC_AS_HELPER(t) as_##t
-//C++ TO C# CONVERTER NOTE: The following #define macro was replaced in-line:
-//ORIGINAL LINE: #define SKC_AS(t) SKC_AS_HELPER(t)
-//C++ TO C# CONVERTER NOTE: The following #define macro was replaced in-line:
-//ORIGINAL LINE: #define SKC_CONVERT_HELPER(t) convert_##t
-//C++ TO C# CONVERTER NOTE: The following #define macro was replaced in-line:
-//ORIGINAL LINE: #define SKC_CONVERT(t) SKC_CONVERT_HELPER(t)
-//C++ TO C# CONVERTER NOTE: The following #define macro was replaced in-line:
-//ORIGINAL LINE: #define SKC_CONVERT_MODE_HELPER(t,m) convert_##t##_##m
-//C++ TO C# CONVERTER NOTE: The following #define macro was replaced in-line:
-//ORIGINAL LINE: #define SKC_CONVERT_MODE(t,m) SKC_CONVERT_HELPER(t)
-//C++ TO C# CONVERTER NOTE: The following #define macro was replaced in-line:
-//ORIGINAL LINE: #define SKC_SHORT_MIN (-SKC_SHORT_MAX - 1)
-//C++ TO C# CONVERTER NOTE: The following #define macro was replaced in-line:
-//ORIGINAL LINE: #define SKC_INT_MIN (-SKC_INT_MAX - 1)
-//C++ TO C# CONVERTER NOTE: The following #define macro was replaced in-line:
-//ORIGINAL LINE: #define SKC_TYPED_HANDLE_MASK_TYPE (SKC_TYPED_HANDLE_TYPE_IS_PATH | SKC_TYPED_HANDLE_TYPE_IS_RASTER)
-//C++ TO C# CONVERTER NOTE: The following #define macro was replaced in-line:
-//ORIGINAL LINE: #define SKC_TYPED_HANDLE_TO_HANDLE(h) ((h) & ~SKC_TYPED_HANDLE_MASK_TYPE)
-//C++ TO C# CONVERTER NOTE: The following #define macro was replaced in-line:
-//ORIGINAL LINE: #define SKC_TYPED_HANDLE_IS_TYPE(h,t) ((h) & (t))
-//C++ TO C# CONVERTER NOTE: The following #define macro was replaced in-line:
-//ORIGINAL LINE: #define SKC_TYPED_HANDLE_IS_PATH(h) ((h) & SKC_TYPED_HANDLE_TYPE_IS_PATH)
-//C++ TO C# CONVERTER NOTE: The following #define macro was replaced in-line:
-//ORIGINAL LINE: #define SKC_TYPED_HANDLE_IS_RASTER(h) ((h) & SKC_TYPED_HANDLE_TYPE_IS_RASTER)
 //C++ TO C# CONVERTER NOTE: The following #define macro was replaced in-line:
 //ORIGINAL LINE: #define FML_EMBEDDER_ONLY [[deprecated]]
 //C++ TO C# CONVERTER NOTE: The following #define macro was replaced in-line:
@@ -568,14 +538,6 @@
 //C++ TO C# CONVERTER NOTE: The following #define macro was replaced in-line:
 //ORIGINAL LINE: #define FML_PRINTF_FORMAT(format_param, dots_param)
 //C++ TO C# CONVERTER NOTE: The following #define macro was replaced in-line:
-//ORIGINAL LINE: #define SK_WHEN(condition, T) skstd::enable_if_t<!!(condition), T>
-//C++ TO C# CONVERTER NOTE: The following #define macro was replaced in-line:
-//ORIGINAL LINE: #define SkStrAppendS32_MaxSize (SkStrAppendU32_MaxSize + 1)
-//C++ TO C# CONVERTER NOTE: The following #define macro was replaced in-line:
-//ORIGINAL LINE: #define SkStrAppendS64_MaxSize (SkStrAppendU64_MaxSize + 1)
-//C++ TO C# CONVERTER NOTE: The following #define macro was replaced in-line:
-//ORIGINAL LINE: #define SkStrAppendScalar SkStrAppendFloat
-//C++ TO C# CONVERTER NOTE: The following #define macro was replaced in-line:
 //ORIGINAL LINE: #define FML_TRACE_COUNTER(category_group, name, count) TRACE_COUNTER(category_group, name, 0u, name, count)
 //C++ TO C# CONVERTER NOTE: The following #define macro was replaced in-line:
 //ORIGINAL LINE: #define TRACE_EVENT0(a, b) TRACE_DURATION(a, b)
@@ -627,91 +589,106 @@
 //ORIGINAL LINE: #define SkAutoMutexAcquire(...) SK_REQUIRE_LOCAL_VAR(SkAutoMutexAcquire)
 //C++ TO C# CONVERTER NOTE: The following #define macro was replaced in-line:
 //ORIGINAL LINE: #define SkAutoExclusive(...) SK_REQUIRE_LOCAL_VAR(SkAutoExclusive)
+//C++ TO C# CONVERTER NOTE: The following #define macro was replaced in-line:
+//ORIGINAL LINE: #define SK_WHEN(condition, T) skstd::enable_if_t<!!(condition), T>
+//C++ TO C# CONVERTER NOTE: The following #define macro was replaced in-line:
+//ORIGINAL LINE: #define SkStrAppendS32_MaxSize (SkStrAppendU32_MaxSize + 1)
+//C++ TO C# CONVERTER NOTE: The following #define macro was replaced in-line:
+//ORIGINAL LINE: #define SkStrAppendS64_MaxSize (SkStrAppendU64_MaxSize + 1)
+//C++ TO C# CONVERTER NOTE: The following #define macro was replaced in-line:
+//ORIGINAL LINE: #define SkStrAppendScalar SkStrAppendFloat
 
 namespace flow
 {
 
-// Layer that represents an embedded child.
-public class ChildSceneLayer : Layer
+public class ClipPathLayer : ContainerLayer
 {
-//C++ TO C# CONVERTER TODO TASK: The implementation of the following method could not be found:
-//  ChildSceneLayer();
+  public ClipPathLayer(Clip clip_behavior = Clip.antiAlias)
+  {
+	  this.clip_behavior_ = new flow.Clip(clip_behavior);
+  }
 //C++ TO C# CONVERTER TODO TASK: The implementation of the following method could not be found:
 //  public void Dispose();
 
-  public void set_offset(SkPoint offset)
+  public void set_clip_path(SkPath clip_path)
   {
-//C++ TO C# CONVERTER TODO TASK: The following line was determined to be a copy assignment (rather than a reference assignment) - this should be verified and a 'CopyFrom' method should be created:
-//ORIGINAL LINE: offset_ = offset;
-	  offset_.CopyFrom(offset);
-  }
-
-  public void set_size(SkSize size)
-  {
-	  size_.CopyFrom(size);
-  }
-
-  public void set_export_node_holder(fml.RefPtr<ExportNodeHolder> export_node_holder)
-  {
-	export_node_holder_ = std::move(export_node_holder);
-  }
-
-  public void set_hit_testable(bool hit_testable)
-  {
-	  hit_testable_ = hit_testable;
+	  clip_path_.CopyFrom(clip_path);
   }
 
   public override void Preroll(PrerollContext context, SkMatrix matrix)
   {
-	set_needs_system_composite(true);
+	SkiaSharp.SKRect child_paint_bounds = SkiaSharp.SKRect.MakeEmpty();
+	PrerollChildren(context, matrix, child_paint_bounds);
+
+	if (child_paint_bounds.intersect(clip_path_.getBounds()))
+	{
+	  set_paint_bounds(child_paint_bounds);
+	}
   }
 
 //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
 //ORIGINAL LINE: void Paint(PaintContext& context) const override
   public override void Paint(PaintContext context)
   {
-	FXL_NOTREACHED() << "This layer never needs painting.";
+	TRACE_EVENT0("flutter", "ClipPathLayer::Paint");
+	FML_DCHECK(needs_painting());
+
+  //C++ TO C# CONVERTER TODO TASK: There is no equivalent in C# to 'static_assert':
+  //  (...) static_assert(false, "missing name for " "SkAutoCanvasRestore") save(&context.canvas, true);
+	context.canvas.clipPath(clip_path_, clip_behavior_ != Clip.hardEdge);
+	if (clip_behavior_ == Clip.antiAliasWithSaveLayer)
+	{
+	  context.canvas.saveLayer(paint_bounds(), null);
+	}
+	PaintChildren(context);
+	if (clip_behavior_ == Clip.antiAliasWithSaveLayer)
+	{
+	  context.canvas.restore();
+	}
   }
 
+#if OS_FUCHSIA
+#if OS_FUCHSIA
   public override void UpdateScene(SceneUpdateContext context)
   {
 	FML_DCHECK(needs_system_composite());
 
-	// TODO(MZ-191): Set clip.
-	// It's worth asking whether all children should be clipped implicitly
-	// or whether we should leave this up to the Flutter application to decide.
-	// In some situations, it might be useful to allow children to draw
-	// outside of their layout bounds.
-	if (export_node_holder_ != null)
-	{
-//C++ TO C# CONVERTER TODO TASK: The following line was determined to contain a copy constructor call - this should be verified and a copy constructor should be created:
-//ORIGINAL LINE: context.AddChildScene(export_node_holder_->export_node(), offset_, hit_testable_);
-	  context.AddChildScene(export_node_holder_.Dereference().export_node(), new SkPoint(offset_), hit_testable_);
-	}
+	// TODO(MZ-140): Must be able to specify paths as shapes to nodes.
+	//               Treating the shape as a rectangle for now.
+	var bounds = clip_path_.getBounds();
+	scenic.Rectangle shape = new scenic.Rectangle(context.session(), bounds.width(), bounds.height());
+
+	// TODO(liyuqian): respect clip_behavior_
+	SceneUpdateContext.Clip clip = new SceneUpdateContext.Clip(context, shape, bounds);
+	UpdateSceneChildren(context);
   }
+#endif
+#endif
 
-  private SkPoint offset_ = new SkPoint();
-  private SkSize size_ = new SkSize();
-  private fml.RefPtr<ExportNodeHolder> export_node_holder_ = new fml.RefPtr<ExportNodeHolder>();
-  private bool hit_testable_ = true;
+  private SkPath clip_path_ = new SkPath();
+  private Clip clip_behavior_;
 
 //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':
-//  ChildSceneLayer(const ChildSceneLayer&) = delete;
+//  ClipPathLayer(const ClipPathLayer&) = delete;
 //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':
-//  ChildSceneLayer& operator =(const ChildSceneLayer&) = delete;
+//  ClipPathLayer& operator =(const ClipPathLayer&) = delete;
 }
 
 } // namespace flow
 
 
 
+#if OS_FUCHSIA
+
+
+#endif
+
 namespace flow
 {
 
 //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = default':
-//ChildSceneLayer::ChildSceneLayer() = default;
+//ClipPathLayer::~ClipPathLayer() = default;
 
-//C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = default':
-//ChildSceneLayer::~ChildSceneLayer() = default;
+
 
 } // namespace flow
