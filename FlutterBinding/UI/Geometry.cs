@@ -87,16 +87,16 @@ namespace FlutterBinding.UI
         /// left-hand-side operand are equal to the horizontal and vertical values of
         /// the right-hand-side operand respectively. Returns false otherwise.
 
-        public static bool operator ==(OffsetBase offset, dynamic other)
+        public static bool operator ==(OffsetBase offset, Object other)
         {
             if (!(other is OffsetBase))
                 return false;
-            OffsetBase typedOther = other;
+            OffsetBase typedOther = (OffsetBase)other;
             return offset._dx == typedOther._dx &&
                    offset._dy == typedOther._dy;
         }
 
-        public static bool operator !=(OffsetBase offset, dynamic other) => !(offset == other);
+        public static bool operator !=(OffsetBase offset, Object other) => !(offset == other);
 
         public int hashCode => hashValues(_dx, _dy);
 
@@ -326,16 +326,16 @@ namespace FlutterBinding.UI
         }
 
         /// Compares two Offsets for equality.
-        public static bool operator ==(Offset offset, dynamic other)
+        public static bool operator ==(Offset offset, Object other)
         {
             if (!(other is Offset))
                 return false;
-            Offset typedOther = other;
+            Offset typedOther = (Offset)other;
             return offset._dx == typedOther._dx &&
                    offset._dy == typedOther._dy;
         }
 
-        public static bool operator !=(Offset offset, dynamic other) => !(offset == other);
+        public static bool operator !=(Offset offset, Object other) => !(offset == other);
 
         public int hashCode => hashValues(_dx, _dy);
 
@@ -574,16 +574,16 @@ namespace FlutterBinding.UI
 
         /// Compares two Sizes for equality.
         // We don't compare the runtimeType because of _DebugSize in the framework.
-        public static bool operator ==(Size size, dynamic other)
+        public static bool operator ==(Size size, Object other)
         {
             if (!(other is Size))
                 return false;
-            Size typedOther = other;
+            Size typedOther = (Size)other;
             return size._dx == typedOther._dx &&
                    size._dy == typedOther._dy;
         }
 
-        public static bool operator !=(Size size, dynamic other) => !(size == other);
+        public static bool operator !=(Size size, Object other) => !(size == other);
 
         public int hashCode => hashValues(_dx, _dy);
 
@@ -883,13 +883,13 @@ namespace FlutterBinding.UI
               lerpDouble(a.bottom, b.bottom, t));
         }
 
-        public static bool operator ==(Rect rect, dynamic other)
+        public static bool operator ==(Rect rect, Object other)
         {
             if (identical(rect, other))
                 return true;
             if (rect.GetType() != other.GetType())
                 return false;
-            Rect typedOther = other;
+            Rect typedOther = (Rect)other;
             for (int i = 0; i < _kDataSize; i += 1)
             {
                 if (rect._value[i] != typedOther._value[i])
@@ -898,7 +898,7 @@ namespace FlutterBinding.UI
             return true;
         }
 
-        public static bool operator !=(Rect rect, dynamic other) => !(rect == other);
+        public static bool operator !=(Rect rect, Object other) => !(rect == other);
 
         public int hashCode => hashList(_value);
 
@@ -1021,17 +1021,17 @@ namespace FlutterBinding.UI
               lerpDouble(a.y, b.y, t));
         }
 
-        public static bool operator ==(Radius radius, dynamic other)
+        public static bool operator ==(Radius radius, Object other)
         {
             if (identical(radius, other))
                 return true;
             if (radius.GetType() != other.GetType())
                 return false;
-            Radius typedOther = other;
+            Radius typedOther = (Radius)other;
             return typedOther.x == radius.x && typedOther.y == radius.y;
         }
 
-        public static bool operator !=(Radius radius, dynamic other) => !(radius == other);
+        public static bool operator !=(Radius radius, Object other) => !(radius == other);
 
         public int hashCode => hashValues(x, y);
 
@@ -1657,13 +1657,13 @@ namespace FlutterBinding.UI
           lerpDouble(a.blRadiusY, b.blRadiusY, t)});
         }
 
-        public static bool operator ==(RRect rrect, dynamic other)
+        public static bool operator ==(RRect rrect, Object other)
         {
             if (identical(rrect, other))
                 return true;
             if (rrect.GetType() != other.GetType())
                 return false;
-            RRect typedOther = other;
+            RRect typedOther = (RRect)other;
             for (int i = 0; i < _kDataSize; i += 1)
             {
                 if (rrect._value[i] != typedOther._value[i])
@@ -1672,7 +1672,7 @@ namespace FlutterBinding.UI
             return true;
         }
 
-        public static bool operator !=(RRect rrect, dynamic other) => !(rrect == other);
+        public static bool operator !=(RRect rrect, Object other) => !(rrect == other);
 
         public int hashCode => hashList(_value);
 

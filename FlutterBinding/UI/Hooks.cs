@@ -73,9 +73,9 @@ namespace FlutterBinding.UI
         //@pragma('vm:entry-point')
         static void _updateUserSettingsData(String jsonData)
         {
-            Dictionary<String, dynamic> data = JsonConvert.DeserializeObject<Dictionary<String, dynamic>>(jsonData);
+            Dictionary<String, Object> data = JsonConvert.DeserializeObject<Dictionary<String, Object>>(jsonData);
             _updateTextScaleFactor(Convert.ToDouble(data["textScaleFactor"]));
-            _updateAlwaysUse24HourFormat(data["alwaysUse24HourFormat"]);
+            _updateAlwaysUse24HourFormat(Convert.ToBoolean(data["alwaysUse24HourFormat"]));
         }
 
         static void _updateTextScaleFactor(double textScaleFactor)

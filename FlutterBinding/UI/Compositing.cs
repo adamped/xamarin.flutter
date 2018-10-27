@@ -462,11 +462,11 @@ namespace FlutterBinding.UI
         /// //topaz/public/lib/ui/flutter/.
         ///
         /// The scene host takes ownership of the provided export token handle.
-        public SceneHost(dynamic exportTokenHandle)
+        public SceneHost(object exportTokenHandle)
         {
             _constructor(exportTokenHandle);
         }
-        void _constructor(dynamic exportTokenHandle)
+        void _constructor(object exportTokenHandle)
         {
             // native 'SceneHost_constructor';
         }

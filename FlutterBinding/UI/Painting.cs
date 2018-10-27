@@ -473,17 +473,17 @@ namespace FlutterBinding.UI
             }
         }
 
-        public static bool operator ==(Color color, dynamic other)
+        public static bool operator ==(Color color, Object other)
         {
             if (identical(color, other))
                 return true;
-            if (other.runtimeType != color.GetType())
+            if (other.GetType() != color.GetType())
                 return false;
-            Color typedOther = other;
+            Color typedOther = (Color)other;
             return color.value == typedOther.value;
         }
 
-        public static bool operator !=(Color color, dynamic other) => !(color == other);
+        public static bool operator !=(Color color, Object other) => !(color == other);
 
         public int hashCode => value.GetHashCode();
 
@@ -1253,7 +1253,7 @@ namespace FlutterBinding.UI
         const int _kDataByteCount = 75;
 
         // Binary format must match the deserialization code in paint.cc.
-        internal List<dynamic> _objects;
+        internal List<Object> _objects;
         const int _kShaderIndex = 0;
         const int _kObjectCount = 1; // Must be one larger than the largest index.
 
@@ -1554,12 +1554,12 @@ namespace FlutterBinding.UI
             {
                 if (_objects == null)
                     return null;
-                return _objects[_kShaderIndex];
+                return (Shader)_objects[_kShaderIndex];
             }
             set
             {
                 if (_objects == null)
-                    _objects = new List<dynamic>(_kObjectCount);
+                    _objects = new List<Object>(_kObjectCount);
                 _objects[_kShaderIndex] = value;
             }
         }
@@ -3499,7 +3499,7 @@ namespace FlutterBinding.UI
                            paint._objects, paint._data);
             }
         }
-        void _saveLayerWithoutBounds(List<dynamic> paintObjects, ByteData paintData)
+        void _saveLayerWithoutBounds(List<Object> paintObjects, ByteData paintData)
         {
             // native 'Canvas_saveLayerWithoutBounds';
         }
@@ -3508,7 +3508,7 @@ namespace FlutterBinding.UI
                         double top,
                         double right,
                         double bottom,
-                        List<dynamic> paintObjects,
+                        List<Object> paintObjects,
                         ByteData paintData)
         {
             // native 'Canvas_saveLayer';
@@ -3683,7 +3683,7 @@ namespace FlutterBinding.UI
                        double y1,
                        double x2,
                        double y2,
-                       List<dynamic> paintObjects,
+                       List<Object> paintObjects,
                        ByteData paintData)
         {
             // native 'Canvas_drawLine';
@@ -3698,7 +3698,7 @@ namespace FlutterBinding.UI
             //assert(paint != null);
             _drawPaint(paint._objects, paint._data);
         }
-        void _drawPaint(List<dynamic> paintObjects, ByteData paintData)
+        void _drawPaint(List<Object> paintObjects, ByteData paintData)
         {
             // native 'Canvas_drawPaint';
         }
@@ -3716,7 +3716,7 @@ namespace FlutterBinding.UI
                        double top,
                        double right,
                        double bottom,
-                       List<dynamic> paintObjects,
+                       List<Object> paintObjects,
                        ByteData paintData)
         {
             // native 'Canvas_drawRect';
@@ -3731,7 +3731,7 @@ namespace FlutterBinding.UI
             _drawRRect(rrect._value, paint._objects, paint._data);
         }
         void _drawRRect(List<double> rrect,
-                        List<dynamic> paintObjects,
+                        List<Object> paintObjects,
                         ByteData paintData)
         {
             // native 'Canvas_drawRRect';
@@ -3751,7 +3751,7 @@ namespace FlutterBinding.UI
         }
         void _drawDRRect(List<double> outer,
                          List<double> inner,
-                         List<dynamic> paintObjects,
+                         List<Object> paintObjects,
                          ByteData paintData)
         {
             // native 'Canvas_drawDRRect';
@@ -3771,7 +3771,7 @@ namespace FlutterBinding.UI
                        double top,
                        double right,
                        double bottom,
-                       List<dynamic> paintObjects,
+                       List<Object> paintObjects,
                        ByteData paintData)
         {
             // native 'Canvas_drawOval';
@@ -3790,7 +3790,7 @@ namespace FlutterBinding.UI
         void _drawCircle(double x,
                          double y,
                          double radius,
-                         List<dynamic> paintObjects,
+                         List<Object> paintObjects,
                          ByteData paintData)
         {
             // native 'Canvas_drawCircle';
@@ -3820,7 +3820,7 @@ namespace FlutterBinding.UI
                       double startAngle,
                       double sweepAngle,
                       bool useCenter,
-                      List<dynamic> paintObjects,
+                      List<Object> paintObjects,
                       ByteData paintData)
         {
             // native 'Canvas_drawArc';
@@ -3836,7 +3836,7 @@ namespace FlutterBinding.UI
             _drawPath(path, paint._objects, paint._data);
         }
         void _drawPath(Path path,
-                       List<dynamic> paintObjects,
+                       List<Object> paintObjects,
                        ByteData paintData)
         {
             // native 'Canvas_drawPath';
@@ -3854,7 +3854,7 @@ namespace FlutterBinding.UI
         void _drawImage(Image image,
                         double x,
                         double y,
-                        List<dynamic> paintObjects,
+                        List<Object> paintObjects,
                         ByteData paintData)
         {
             // native 'Canvas_drawImage';
@@ -3896,7 +3896,7 @@ namespace FlutterBinding.UI
                             double dstTop,
                             double dstRight,
                             double dstBottom,
-                            List<dynamic> paintObjects,
+                            List<Object> paintObjects,
                             ByteData paintData)
         {
             // native 'Canvas_drawImageRect';
@@ -3942,7 +3942,7 @@ namespace FlutterBinding.UI
                             double dstTop,
                             double dstRight,
                             double dstBottom,
-                            List<dynamic> paintObjects,
+                            List<Object> paintObjects,
                             ByteData paintData)
         {
             // native 'Canvas_drawImageNine';
@@ -4022,7 +4022,7 @@ namespace FlutterBinding.UI
             _drawPoints(paint._objects, paint._data, (int)pointMode, points);
         }
 
-        void _drawPoints(List<dynamic> paintObjects,
+        void _drawPoints(List<Object> paintObjects,
                          ByteData paintData,
                          int pointMode,
                          List<double> points)
@@ -4039,7 +4039,7 @@ namespace FlutterBinding.UI
         }
         void _drawVertices(Vertices vertices,
                            int blendMode,
-                           List<dynamic> paintObjects,
+                           List<Object> paintObjects,
                            ByteData paintData)
         {
             // native 'Canvas_drawVertices';
@@ -4146,7 +4146,7 @@ namespace FlutterBinding.UI
             );
         }
 
-        void _drawAtlas(List<dynamic> paintObjects,
+        void _drawAtlas(List<Object> paintObjects,
                         ByteData paintData,
                         Image atlas,
                         List<double> rstTransforms,
@@ -4452,7 +4452,7 @@ namespace FlutterBinding.UI
         /// Returns true if the lists are both null, or if they are both non-null, have
         /// the same length, and contain the same Shadows in the same order. Returns
         /// false otherwise.
-        static bool _shadowsListEquals(List<Shadow> a, List<Shadow> b)
+        public static bool _shadowsListEquals(List<Shadow> a, List<Shadow> b)
         {
             // Compare _shadows
             if (a == null)
@@ -4468,7 +4468,7 @@ namespace FlutterBinding.UI
         // Serialize [shadows] into ByteData. The format is a single uint_32_t at
         // the beginning indicating the number of shadows, followed by _kBytesPerShadow
         // bytes for each shadow.
-        static ByteData _encodeShadows(List<Shadow> shadows)
+        public static ByteData _encodeShadows(List<Shadow> shadows)
         {
             if (shadows == null)
                 return new ByteData(0);
@@ -4505,6 +4505,7 @@ namespace FlutterBinding.UI
 
     /// Generic callback signature, used by [_futurize].
     public delegate void _Callback<T>(T result);
+    public delegate void _Callback();
 
     /// Signature for a method that receives a [_Callback].
     ///
