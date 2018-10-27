@@ -1,4 +1,6 @@
-﻿namespace FlutterBinding.Flow
+﻿using static FlutterBinding.Flow.Helper;
+
+namespace FlutterBinding.Flow
 {
 
 	public class CounterValues
