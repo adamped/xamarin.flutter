@@ -12,4 +12,8 @@
     <PackageReference Include="SkiaSharp.Svg" Version="1.60.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Engine\" />
+  </ItemGroup>
+
 </Project>
