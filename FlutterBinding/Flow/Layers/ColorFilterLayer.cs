@@ -1,4 +1,6 @@
-﻿// Copyright 2015 The Chromium Authors. All rights reserved.
+﻿using static FlutterBinding.Flow.Helper;
+
+// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -29,8 +31,8 @@ namespace FlutterBinding.Flow.Layers
             //TRACE_EVENT0("flutter", "ColorFilterLayer::Paint");
             //FML_DCHECK(needs_painting());
 
-            var color_filter = SkiaSharp.SKColorFilter.CreateBlendMode(color_, blend_mode_);
-            SkiaSharp.SKPaint paint = new SkiaSharp.SKPaint();
+            var color_filter = SKColorFilter.CreateBlendMode(color_, blend_mode_);
+            SKPaint paint = new SKPaint();
             paint.setColorFilter(std::move(color_filter));
 
             Layer.AutoSaveLayer save = Layer.AutoSaveLayer.Create(context, paint_bounds(), paint);

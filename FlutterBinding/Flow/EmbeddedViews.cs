@@ -1,4 +1,6 @@
-﻿// Copyright 2017 The Chromium Authors. All rights reserved.
+﻿using static FlutterBinding.Flow.Helper;
+
+// Copyright 2017 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 //
@@ -8,8 +10,8 @@ namespace FlutterBinding.Flow
 
     public class EmbeddedViewParams
     {
-        public SkPoint offsetPixels = new SkPoint();
-        public SkSize sizePoints = new SkSize();
+        public SKPoint offsetPixels = new SKPoint();
+        public SKSize sizePoints = new SKSize();
     }
 
     // This is only used on iOS when running in a non headless mode,

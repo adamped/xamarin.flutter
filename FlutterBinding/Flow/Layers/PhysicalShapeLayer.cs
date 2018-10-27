@@ -1,4 +1,6 @@
-﻿// Copyright 2017 The Chromium Authors. All rights reserved.
+﻿using static FlutterBinding.Flow.Helper;
+
+// Copyright 2017 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -10,20 +12,20 @@ namespace FlutterBinding.Flow.Layers
         public PhysicalShapeLayer(Clip clip_behavior)
         {
             this.isRect_ = false;
-            this.clip_behavior_ = new flow.Clip(clip_behavior);
+            this.clip_behavior_ = clip_behavior;
         }
         //C++ TO C# CONVERTER TODO TASK: The implementation of the following method could not be found:
         //  public void Dispose();
 
-        public void set_path(SkPath path)
+        public void set_path(SKPath path)
         {
             path_.CopyFrom(path);
             isRect_ = false;
-            SkiaSharp.SKRect rect = new SkiaSharp.SKRect();
+            SKRect rect = new SKRect();
             if (path.isRect(rect))
             {
                 isRect_ = true;
-                frameRRect_.CopyFrom(SkRRect.MakeRect(rect));
+                frameRRect_.CopyFrom(SKRRect.MakeRect(rect));
             }
             else if (path.isRRect(frameRRect_))
             {
@@ -33,7 +35,7 @@ namespace FlutterBinding.Flow.Layers
             {
                 // isRRect returns false for ovals, so we need to explicitly check isOval
                 // as well.
-                frameRRect_.CopyFrom(SkRRect.MakeOval(rect));
+                frameRRect_.CopyFrom(SKRRect.MakeOval(rect));
             }
             else
             {
@@ -42,8 +44,8 @@ namespace FlutterBinding.Flow.Layers
                 // For shapes that cannot be represented as a rounded rectangle we
                 // default to use the bounding rectangle.
                 // TODO(amirh): fix this once we have a way to create a Scenic shape from
-                // an SkPath.
-                frameRRect_.CopyFrom(SkRRect.MakeRect(path.getBounds()));
+                // an SKPath.
+                frameRRect_.CopyFrom(SKRRect.MakeRect(path.getBounds()));
             }
         }
 
@@ -64,7 +66,7 @@ namespace FlutterBinding.Flow.Layers
             device_pixel_ratio_ = dpr;
         }
 
-        public static void DrawShadow(SkiaSharp.SKCanvas canvas, SkPath path, uint color, float elevation, bool transparentOccluder, float dpr)
+        public static void DrawShadow(SKCanvas canvas, SKPath path, uint color, float elevation, bool transparentOccluder, float dpr)
         {
             const float kAmbientAlpha = 0.039f;
             const float kSpotAlpha = 0.25f;
@@ -72,7 +74,7 @@ namespace FlutterBinding.Flow.Layers
             const float kLightRadius = 800F;
 
             SkShadowFlags flags = transparentOccluder ? SkShadowFlags.kTransparentOccluder_ShadowFlag : SkShadowFlags.kNone_ShadowFlag;
-            SkiaSharp.SKRect bounds = path.getBounds();
+            SKRect bounds = path.getBounds();
             float shadow_x = (bounds.left() + bounds.right()) / 2;
             float shadow_y = bounds.top() - 600.0f;
             uint inAmbient = GlobalMembers.SkColorSetA(color, kAmbientAlpha * (((color) >> 24) & 0xFF));
@@ -80,12 +82,12 @@ namespace FlutterBinding.Flow.Layers
             uint ambientColor;
             uint spotColor;
             SkShadowUtils.ComputeTonalColors(inAmbient, inSpot, ref ambientColor, ref spotColor);
-            SkShadowUtils.DrawShadow(canvas, path, SkPoint3.Make(0, 0, dpr * elevation), SkPoint3.Make(shadow_x, shadow_y, dpr * kLightHeight), dpr * kLightRadius, ambientColor, spotColor, flags);
+            SkShadowUtils.DrawShadow(canvas, path, SKPoint3.Make(0, 0, dpr * elevation), SKPoint3.Make(shadow_x, shadow_y, dpr * kLightHeight), dpr * kLightRadius, ambientColor, spotColor, flags);
         }
 
-        public override void Preroll(PrerollContext context, SkMatrix matrix)
+        public override void Preroll(PrerollContext context, SKMatrix matrix)
         {
-            SkiaSharp.SKRect child_paint_bounds = new SkiaSharp.SKRect();
+            SKRect child_paint_bounds = new SKRect();
             PrerollChildren(context, matrix, child_paint_bounds);
 
             if (elevation_ == 0F)
@@ -102,7 +104,7 @@ namespace FlutterBinding.Flow.Layers
                 // The margin is hardcoded to an arbitrary maximum for now because Skia
                 // doesn't provide a way to calculate it.  We fill this whole region
                 // and clip children to it so we don't need to join the child paint bounds.
-                SkiaSharp.SKRect bounds = new SkiaSharp.SKRect(path_.getBounds());
+                SKRect bounds = new SKRect(path_.getBounds());
                 bounds.outset(20.0, 20.0);
                 set_paint_bounds(bounds);
 #endif
@@ -122,7 +124,7 @@ namespace FlutterBinding.Flow.Layers
             }
 
             // Call drawPath without clip if possible for better performance.
-            SkiaSharp.SKPaint paint = new SkiaSharp.SKPaint();
+            SKPaint paint = new SKPaint();
             paint.setColor(color_);
             if (clip_behavior_ != Clip.antiAliasWithSaveLayer)
             {
@@ -165,9 +167,9 @@ namespace FlutterBinding.Flow.Layers
         private uint color_;
         private uint shadow_color_;
         private float device_pixel_ratio_;
-        private SkPath path_ = new SkPath();
+        private SKPath path_ = new SKPath();
         private bool isRect_;
-        private SkRRect frameRRect_ = new SkRRect();
+        private SKRRect frameRRect_ = new SKRRect();
         private Clip clip_behavior_;
     }
 

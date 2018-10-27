@@ -1,4 +1,6 @@
-﻿// Copyright 2015 The Chromium Authors. All rights reserved.
+﻿using static FlutterBinding.Flow.Helper;
+
+// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -12,19 +14,19 @@ namespace FlutterBinding.Flow.Layers
         //C++ TO C# CONVERTER TODO TASK: The implementation of the following method could not be found:
         //  public void Dispose();
 
-        public void set_transform(SkMatrix transform)
+        public void set_transform(SKMatrix transform)
         {
             //C++ TO C# CONVERTER TODO TASK: The following line was determined to be a copy assignment (rather than a reference assignment) - this should be verified and a 'CopyFrom' method should be created:
             //ORIGINAL LINE: transform_ = transform;
             transform_.CopyFrom(transform);
         }
 
-        public override void Preroll(PrerollContext context, SkMatrix matrix)
+        public override void Preroll(PrerollContext context, SKMatrix matrix)
         {
-            SkMatrix child_matrix = new SkMatrix();
+            SKMatrix child_matrix = new SKMatrix();
             child_matrix.setConcat(matrix, transform_);
 
-            SkiaSharp.SKRect child_paint_bounds = SkiaSharp.SKRect.MakeEmpty();
+            SKRect child_paint_bounds = SKRect.MakeEmpty();
             PrerollChildren(context, child_matrix, child_paint_bounds);
 
             transform_.mapRect(child_paint_bounds);
@@ -44,7 +46,7 @@ namespace FlutterBinding.Flow.Layers
             PaintChildren(context);
         }
 
-        private SkMatrix transform_ = new SkMatrix();
+        private SKMatrix transform_ = new SKMatrix();
 
         //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':
         //  TransformLayer(const TransformLayer&) = delete;

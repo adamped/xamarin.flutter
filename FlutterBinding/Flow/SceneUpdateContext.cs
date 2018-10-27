@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using static FlutterBinding.Flow.Helper;
 
 // Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
@@ -31,8 +32,8 @@ namespace FlutterBinding.Flow
             public abstract bool IsValid();
 
             //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
-            //ORIGINAL LINE: virtual SkISize GetSize() const = 0;
-            public abstract SkISize GetSize();
+            //ORIGINAL LINE: virtual SKSizeI GetSize() const = 0;
+            public abstract SKSizeI GetSize();
 
             public abstract void SignalWritesFinished(Action on_writes_committed);
 
@@ -48,7 +49,7 @@ namespace FlutterBinding.Flow
             //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = default':
             //	virtual ~SurfaceProducer() = default;
 
-            public abstract std::unique_ptr<SurfaceProducerSurface> ProduceSurface(SkISize size);
+            public abstract std::unique_ptr<SurfaceProducerSurface> ProduceSurface(SKSizeI size);
 
             public abstract void SubmitSurface(std::unique_ptr<SurfaceProducerSurface> surface);
         }
@@ -57,7 +58,7 @@ namespace FlutterBinding.Flow
         {
             public Entity(SceneUpdateContext context)
             {
-                this.context_ = new flow.SceneUpdateContext(context);
+                this.context_ = new SceneUpdateContext(context);
                 this.previous_entity_ = context.top_entity_;
                 this.entity_node_ = context.session();
                 if (previous_entity_ != null)
@@ -89,7 +90,7 @@ namespace FlutterBinding.Flow
 
         public class Clip : Entity
         {
-            public Clip(SceneUpdateContext context, scenic.Shape shape, SkiaSharp.SKRect shape_bounds) : base(context)
+            public Clip(SceneUpdateContext context, scenic.Shape shape, SKRect shape_bounds) : base(context)
             {
                 scenic.ShapeNode shape_node = new scenic.ShapeNode(context.session());
                 shape_node.SetShape(shape);
@@ -104,7 +105,7 @@ namespace FlutterBinding.Flow
 
         public class Transform : Entity
         {
-            public Transform(SceneUpdateContext context, SkMatrix transform) : base(context)
+            public Transform(SceneUpdateContext context, SKMatrix transform) : base(context)
             {
                 this.previous_scale_x_ = context.top_scale_x_;
                 this.previous_scale_y_ = context.top_scale_y_;
@@ -149,11 +150,11 @@ namespace FlutterBinding.Flow
 
         public class Frame : Entity
         {
-            public Frame(SceneUpdateContext context, SkRRect rrect, uint color, float elevation) : base(context)
+            public Frame(SceneUpdateContext context, SKRRect rrect, uint color, float elevation) : base(context)
             {
-                this.rrect_ = new SkRRect(rrect);
+                this.rrect_ = new SKRRect(rrect);
                 this.color_ = color;
-                this.paint_bounds_ = new SkiaSharp.SKRect(SkiaSharp.SKRect.MakeEmpty());
+                this.paint_bounds_ = new SKRect(SKRect.MakeEmpty());
                 if (elevation != 0.0F)
                 {
                     entity_node().SetTranslation(0.0f, 0.0f, elevation);
@@ -172,11 +173,11 @@ namespace FlutterBinding.Flow
                 paint_bounds_.join(layer.paint_bounds());
             }
 
-            private readonly SkRRect rrect_;
+            private readonly SKRRect rrect_;
             private readonly uint color_;
 
             private List<Layer> paint_layers_ = new List<Layer>();
-            private SkiaSharp.SKRect paint_bounds_ = new SkiaSharp.SKRect();
+            private SKRect paint_bounds_ = new SKRect();
         }
 
         public SceneUpdateContext(scenic.Session session, SurfaceProducer surface_producer)
@@ -217,7 +218,7 @@ namespace FlutterBinding.Flow
             return metrics_;
         }
 
-        public void AddChildScene(ExportNode export_node, SkPoint offset, bool hit_testable)
+        public void AddChildScene(ExportNode export_node, SKPoint offset, bool hit_testable)
         {
             FML_DCHECK(top_entity_);
 
@@ -244,15 +245,15 @@ namespace FlutterBinding.Flow
         // CPU wait. Once Vulkan semaphores are available, this method must return
         // void and the implementation must submit surfaces on its own as soon as the
         // specific canvas operations are done.
-        public List<std::unique_ptr<flow.SceneUpdateContext.SurfaceProducerSurface>> ExecutePaintTasks(CompositorContext.ScopedFrame frame)
+        public List<std::unique_ptr<SceneUpdateContext.SurfaceProducerSurface>> ExecutePaintTasks(CompositorContext.ScopedFrame frame)
         {
             TRACE_EVENT0("flutter", "SceneUpdateContext::ExecutePaintTasks");
             List<std::unique_ptr<SurfaceProducerSurface>> surfaces_to_submit = new List<std::unique_ptr<SurfaceProducerSurface>>();
             foreach (var task in paint_tasks_)
             {
                 FML_DCHECK(task.surface);
-                SkiaSharp.SKCanvas canvas = task.surface.GetSkiaSurface().getCanvas();
-                Layer.PaintContext context = new flow.Layer.PaintContext(canvas, frame.context().frame_time(), frame.context().engine_time(), frame.context().texture_registry(), frame.context().raster_cache(), false);
+                SKCanvas canvas = task.surface.GetSkiaSurface().getCanvas();
+                Layer.PaintContext context = new Layer.PaintContext(canvas, frame.context().frame_time(), frame.context().engine_time(), frame.context().texture_registry(), frame.context().raster_cache(), false);
                 canvas.restoreToCount(1);
                 canvas.save();
                 canvas.clear(task.background_color);
@@ -279,7 +280,7 @@ namespace FlutterBinding.Flow
             public List<Layer> layers = new List<Layer>();
         }
 
-        private void CreateFrame(scenic.EntityNode entity_node, SkRRect rrect, uint color, SkiaSharp.SKRect paint_bounds, List<Layer> paint_layers)
+        private void CreateFrame(scenic.EntityNode entity_node, SKRRect rrect, uint color, SKRect paint_bounds, List<Layer> paint_layers)
         {
             // Frames always clip their children.
             entity_node.SetClip(0u, true);
@@ -293,8 +294,8 @@ namespace FlutterBinding.Flow
             // Add a part which represents the frame's geometry for clipping purposes
             // and possibly for its texture.
             // TODO(MZ-137): Need to be able to express the radii as vectors.
-            SkiaSharp.SKRect shape_bounds = rrect.getBounds();
-            scenic.RoundedRectangle shape = new scenic.RoundedRectangle(session_, rrect.width(), rrect.height(), rrect.radii(SkRRect.Corner.kUpperLeft_Corner).x(), rrect.radii(SkRRect.Corner.kUpperRight_Corner).x(), rrect.radii(SkRRect.Corner.kLowerRight_Corner).x(), rrect.radii(SkRRect.Corner.kLowerLeft_Corner).x());
+            SKRect shape_bounds = rrect.getBounds();
+            scenic.RoundedRectangle shape = new scenic.RoundedRectangle(session_, rrect.width(), rrect.height(), rrect.radii(SKRRect.Corner.kUpperLeft_Corner).x(), rrect.radii(SKRRect.Corner.kUpperRight_Corner).x(), rrect.radii(SKRRect.Corner.kLowerRight_Corner).x(), rrect.radii(SKRRect.Corner.kLowerLeft_Corner).x());
             scenic.ShapeNode shape_node = new scenic.ShapeNode(session_);
             shape_node.SetShape(shape);
             shape_node.SetTranslation(shape_bounds.width() * 0.5f + shape_bounds.left(), shape_bounds.height() * 0.5f + shape_bounds.top(), 0.0f);
@@ -320,8 +321,8 @@ namespace FlutterBinding.Flow
             // If the painted area only covers a portion of the frame then we can
             // reduce the texture size by drawing just that smaller area.
             //C++ TO C# CONVERTER TODO TASK: The following line was determined to contain a copy constructor call - this should be verified and a copy constructor should be created:
-            //ORIGINAL LINE: SkiaSharp.SKRect inner_bounds = shape_bounds;
-            SkiaSharp.SKRect inner_bounds = new SkiaSharp.SKRect(shape_bounds);
+            //ORIGINAL LINE: SKRect inner_bounds = shape_bounds;
+            SKRect inner_bounds = new SKRect(shape_bounds);
             inner_bounds.intersect(paint_bounds);
             if (inner_bounds != shape_bounds && rrect.contains(inner_bounds))
             {
@@ -339,7 +340,7 @@ namespace FlutterBinding.Flow
             // Apply a texture to the whole shape.
             SetShapeTextureOrColor(shape_node, color, scale_x, scale_y, shape_bounds, std::move(paint_layers));
         }
-        private void SetShapeTextureOrColor(scenic.ShapeNode shape_node, uint color, float scale_x, float scale_y, SkiaSharp.SKRect paint_bounds, List<Layer> paint_layers)
+        private void SetShapeTextureOrColor(scenic.ShapeNode shape_node, uint color, float scale_x, float scale_y, SKRect paint_bounds, List<Layer> paint_layers)
         {
             scenic.Image image = GenerateImageIfNeeded(color, scale_x, scale_y, paint_bounds, std::move(paint_layers));
             if (image != null)
@@ -363,7 +364,7 @@ namespace FlutterBinding.Flow
             material.SetColor((((color) >> 16) & 0xFF), (((color) >> 8) & 0xFF), (((color) >> 0) & 0xFF), (((color) >> 24) & 0xFF));
             shape_node.SetMaterial(material);
         }
-        private scenic.Image GenerateImageIfNeeded(uint color, float scale_x, float scale_y, SkiaSharp.SKRect paint_bounds, List<Layer> paint_layers)
+        private scenic.Image GenerateImageIfNeeded(uint color, float scale_x, float scale_y, SKRect paint_bounds, List<Layer> paint_layers)
         {
             // Bail if there's nothing to paint.
             if (paint_layers.Count == 0)
@@ -372,7 +373,7 @@ namespace FlutterBinding.Flow
             }
 
             // Bail if the physical bounds are empty after rounding.
-            SkISize physical_size = SkISize.Make(paint_bounds.width() * scale_x, paint_bounds.height() * scale_y);
+            SKSizeI physical_size = SKSizeI.Make(paint_bounds.width() * scale_x, paint_bounds.height() * scale_y);
             if (physical_size.isEmpty())
             {
                 return null;

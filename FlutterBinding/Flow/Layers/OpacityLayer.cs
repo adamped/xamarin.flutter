@@ -1,4 +1,7 @@
-﻿// Copyright 2015 The Chromium Authors. All rights reserved.
+﻿using SkiaSharp;
+using static FlutterBinding.Flow.Helper;
+
+// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -16,26 +19,26 @@ namespace FlutterBinding.Flow.Layers
         {
             alpha_ = alpha;
         }
-        public void set_offset(SkPoint offset)
+        public void set_offset(SKPoint offset)
         {
             //C++ TO C# CONVERTER TODO TASK: The following line was determined to be a copy assignment (rather than a reference assignment) - this should be verified and a 'CopyFrom' method should be created:
             //ORIGINAL LINE: offset_ = offset;
             offset_.CopyFrom(offset);
         }
 
-        public override void Preroll(PrerollContext context, SkMatrix matrix)
+        public override void Preroll(PrerollContext context, SKMatrix matrix)
         {
             //C++ TO C# CONVERTER TODO TASK: The following line was determined to contain a copy constructor call - this should be verified and a copy constructor should be created:
-            //ORIGINAL LINE: SkMatrix child_matrix = matrix;
-            SkMatrix child_matrix = new SkMatrix(matrix);
+            //ORIGINAL LINE: SKMatrix child_matrix = matrix;
+            SKMatrix child_matrix = new SKMatrix(matrix);
             child_matrix.postTranslate(offset_.fX, offset_.fY);
             base.Preroll(context, child_matrix);
             if (context.raster_cache != null && layers().Count == 1)
             {
                 Layer child = layers()[0].get();
                 //C++ TO C# CONVERTER TODO TASK: The following line was determined to contain a copy constructor call - this should be verified and a copy constructor should be created:
-                //ORIGINAL LINE: SkMatrix ctm = child_matrix;
-                SkMatrix ctm = new SkMatrix(child_matrix);
+                //ORIGINAL LINE: SKMatrix ctm = child_matrix;
+                SKMatrix ctm = new SKMatrix(child_matrix);
 #if !SUPPORT_FRACTIONAL_TRANSLATION
                 //C++ TO C# CONVERTER TODO TASK: The following line was determined to be a copy assignment (rather than a reference assignment) - this should be verified and a 'CopyFrom' method should be created:
                 //ORIGINAL LINE: ctm = RasterCache::GetIntegralTransCTM(ctm);
@@ -52,7 +55,7 @@ namespace FlutterBinding.Flow.Layers
             TRACE_EVENT0("flutter", "OpacityLayer::Paint");
             FML_DCHECK(needs_painting());
 
-            SkiaSharp.SKPaint paint = new SkiaSharp.SKPaint();
+            SKPaint paint = new SKPaint();
             paint.setAlpha(alpha_);
 
             //C++ TO C# CONVERTER TODO TASK: There is no equivalent in C# to 'static_assert':
@@ -65,7 +68,7 @@ namespace FlutterBinding.Flow.Layers
 
             if (layers().Count == 1 && context.raster_cache)
             {
-                SkMatrix ctm = context.canvas.getTotalMatrix();
+                SKMatrix ctm = context.canvas.getTotalMatrix();
                 RasterCacheResult child_cache = context.raster_cache.Get(layers()[0].get(), ctm);
                 if (child_cache.is_valid())
                 {
@@ -82,7 +85,7 @@ namespace FlutterBinding.Flow.Layers
         // session scene hierarchy.
 
         private int alpha_;
-        private SkPoint offset_ = new SkPoint();
+        private SKPoint offset_ = new SKPoint();
 
         //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':
         //  OpacityLayer(const OpacityLayer&) = delete;

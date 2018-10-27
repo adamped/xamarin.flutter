@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using static FlutterBinding.Flow.Helper;
 
 // Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
@@ -21,11 +22,11 @@ namespace FlutterBinding.Flow.Layers
             layers_.Add(std::move(layer));
         }
 
-        public override void Preroll(PrerollContext context, SkMatrix matrix)
+        public override void Preroll(PrerollContext context, SKMatrix matrix)
         {
             TRACE_EVENT0("flutter", "ContainerLayer::Preroll");
 
-            SkiaSharp.SKRect child_paint_bounds = SkiaSharp.SKRect.MakeEmpty();
+            SKRect child_paint_bounds = SKRect.MakeEmpty();
             PrerollChildren(context, matrix, child_paint_bounds);
             set_paint_bounds(child_paint_bounds);
         }
@@ -39,7 +40,7 @@ namespace FlutterBinding.Flow.Layers
             return layers_;
         }
 
-        protected void PrerollChildren(PrerollContext context, SkMatrix child_matrix, SkiaSharp.SKRect child_paint_bounds)
+        protected void PrerollChildren(PrerollContext context, SKMatrix child_matrix, SKRect child_paint_bounds)
         {
             foreach (var layer in layers_)
             {

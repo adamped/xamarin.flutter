@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using static FlutterBinding.Flow.Helper;
 
 // Copyright 2017 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
@@ -21,13 +22,13 @@ namespace FlutterBinding.Flow
         //  public void Dispose();
 
         // Called from GPU thread.
-        public abstract void Paint(SkiaSharp.SKCanvas canvas, SkiaSharp.SKRect bounds, bool freeze);
+        public abstract void Paint(SKCanvas canvas, SKRect bounds, bool freeze);
 
         // Called from GPU thread.
-        public abstract void OnGrContextCreated();
+        public abstract void OnGRContextCreated();
 
         // Called from GPU thread.
-        public abstract void OnGrContextDestroyed();
+        public abstract void OnGRContextDestroyed();
 
         // Called on GPU thread.
         public abstract void MarkNewFrameAvailable();
@@ -73,20 +74,20 @@ namespace FlutterBinding.Flow
         }
 
         // Called from GPU thread.
-        public void OnGrContextCreated()
+        public void OnGRContextCreated()
         {
             foreach (var it in mapping_)
             {
-                it.second.OnGrContextCreated();
+                it.second.OnGRContextCreated();
             }
         }
 
         // Called from GPU thread.
-        public void OnGrContextDestroyed()
+        public void OnGRContextDestroyed()
         {
             foreach (var it in mapping_)
             {
-                it.second.OnGrContextDestroyed();
+                it.second.OnGRContextDestroyed();
             }
         }
 

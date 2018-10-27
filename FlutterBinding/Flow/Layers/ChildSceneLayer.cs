@@ -1,4 +1,7 @@
-﻿// Copyright 2016 The Chromium Authors. All rights reserved.
+﻿using SkiaSharp;
+using static FlutterBinding.Flow.Helper;
+
+// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -13,21 +16,21 @@ namespace FlutterBinding.Flow.Layers
         //C++ TO C# CONVERTER TODO TASK: The implementation of the following method could not be found:
         //  public void Dispose();
 
-        public void set_offset(SkPoint offset)
+        public void set_offset(SKPoint offset)
         {
             //C++ TO C# CONVERTER TODO TASK: The following line was determined to be a copy assignment (rather than a reference assignment) - this should be verified and a 'CopyFrom' method should be created:
             //ORIGINAL LINE: offset_ = offset;
             offset_.CopyFrom(offset);
         }
 
-        public void set_size(SkSize size)
+        public void set_size(SKSize size)
         {
             size_.CopyFrom(size);
         }
 
-        public void set_export_node_holder(fml.RefPtr<ExportNodeHolder> export_node_holder)
+        public void set_export_node_holder(ref ExportNodeHolder export_node_holder)
         {
-            export_node_holder_ = std::move(export_node_holder);
+            export_node_holder_ = export_node_holder;
         }
 
         public void set_hit_testable(bool hit_testable)
@@ -35,7 +38,7 @@ namespace FlutterBinding.Flow.Layers
             hit_testable_ = hit_testable;
         }
 
-        public override void Preroll(PrerollContext context, SkMatrix matrix)
+        public override void Preroll(PrerollContext context, SKMatrix matrix)
         {
             set_needs_system_composite(true);
         }
@@ -60,13 +63,13 @@ namespace FlutterBinding.Flow.Layers
             {
                 //C++ TO C# CONVERTER TODO TASK: The following line was determined to contain a copy constructor call - this should be verified and a copy constructor should be created:
                 //ORIGINAL LINE: context.AddChildScene(export_node_holder_->export_node(), offset_, hit_testable_);
-                context.AddChildScene(export_node_holder_.Dereference().export_node(), new SkPoint(offset_), hit_testable_);
+                context.AddChildScene(export_node_holder_.Dereference().export_node(), new SKPoint(offset_), hit_testable_);
             }
         }
 
-        private SkPoint offset_ = new SkPoint();
-        private SkSize size_ = new SkSize();
-        private fml.RefPtr<ExportNodeHolder> export_node_holder_ = new fml.RefPtr<ExportNodeHolder>();
+        private SKPoint offset_ = new SKPoint();
+        private SKSize size_ = new SKSize();
+        private ExportNodeHolder export_node_holder_ = new fml.RefPtr<ExportNodeHolder>();
         private bool hit_testable_ = true;
 
         //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':

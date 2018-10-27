@@ -1,4 +1,7 @@
-﻿// Copyright 2018 The Chromium Authors. All rights reserved.
+﻿using SkiaSharp;
+using static FlutterBinding.Flow.Helper;
+
+// Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -12,13 +15,13 @@ namespace FlutterBinding.Flow.Layers
         //C++ TO C# CONVERTER TODO TASK: The implementation of the following method could not be found:
         //  public void Dispose();
 
-        public void set_offset(SkPoint offset)
+        public void set_offset(SKPoint offset)
         {
             //C++ TO C# CONVERTER TODO TASK: The following line was determined to be a copy assignment (rather than a reference assignment) - this should be verified and a 'CopyFrom' method should be created:
             //ORIGINAL LINE: offset_ = offset;
             offset_.CopyFrom(offset);
         }
-        public void set_size(SkSize size)
+        public void set_size(SKSize size)
         {
             size_.CopyFrom(size);
         }
@@ -29,9 +32,9 @@ namespace FlutterBinding.Flow.Layers
             view_id_.CopyFrom(view_id);
         }
 
-        public override void Preroll(PrerollContext context, SkMatrix matrix)
+        public override void Preroll(PrerollContext context, SKMatrix matrix)
         {
-            set_paint_bounds(SkiaSharp.SKRect.MakeXYWH(offset_.x(), offset_.y(), size_.width(), size_.height()));
+            set_paint_bounds(SKRect.MakeXYWH(offset_.x(), offset_.y(), size_.width(), size_.height()));
         }
         //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
         //ORIGINAL LINE: void Paint(PaintContext& context) const override
@@ -44,15 +47,15 @@ namespace FlutterBinding.Flow.Layers
                 return;
             }
             EmbeddedViewParams @params = new EmbeddedViewParams();
-            SkMatrix transform = context.canvas.getTotalMatrix();
-            @params.offsetPixels = SkPoint.Make(transform.getTranslateX(), transform.getTranslateY());
+            SKMatrix transform = context.canvas.getTotalMatrix();
+            @params.offsetPixels = SKPoint.Make(transform.getTranslateX(), transform.getTranslateY());
             @params.sizePoints.CopyFrom(size_);
 
             context.view_embedder.CompositeEmbeddedView(new int64_t(view_id_), @params);
         }
 
-        private SkPoint offset_ = new SkPoint();
-        private SkSize size_ = new SkSize();
+        private SKPoint offset_ = new SKPoint();
+        private SKSize size_ = new SKSize();
         private int64_t view_id_ = new int64_t();
 
         //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':

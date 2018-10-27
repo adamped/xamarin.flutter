@@ -1,4 +1,6 @@
-﻿// Copyright 2016 The Chromium Authors. All rights reserved.
+﻿using static FlutterBinding.Flow.Helper;
+
+// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -17,7 +19,7 @@ namespace FlutterBinding.Flow.Layers
             shader_.CopyFrom(shader);
         }
 
-        public void set_mask_rect(SkiaSharp.SKRect mask_rect)
+        public void set_mask_rect(SKRect mask_rect)
         {
             //C++ TO C# CONVERTER TODO TASK: The following line was determined to be a copy assignment (rather than a reference assignment) - this should be verified and a 'CopyFrom' method should be created:
             //ORIGINAL LINE: mask_rect_ = mask_rect;
@@ -39,15 +41,15 @@ namespace FlutterBinding.Flow.Layers
             Layer.AutoSaveLayer save = Layer.AutoSaveLayer.Create(context, paint_bounds(), null);
             PaintChildren(context);
 
-            SkiaSharp.SKPaint paint = new SkiaSharp.SKPaint();
+            SKPaint paint = new SKPaint();
             paint.setBlendMode(blend_mode_);
             paint.setShader(new sk_sp<SkShader>(shader_));
             context.canvas.translate(mask_rect_.left(), mask_rect_.top());
-            context.canvas.drawRect(SkiaSharp.SKRect.MakeWH(mask_rect_.width(), mask_rect_.height()), paint);
+            context.canvas.drawRect(SKRect.MakeWH(mask_rect_.width(), mask_rect_.height()), paint);
         }
 
         private sk_sp<SkShader> shader_ = new sk_sp<SkShader>();
-        private SkiaSharp.SKRect mask_rect_ = new SkiaSharp.SKRect();
+        private SKRect mask_rect_ = new SKRect();
         private SkBlendMode blend_mode_;
 
         //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':

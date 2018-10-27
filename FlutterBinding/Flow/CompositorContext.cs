@@ -1,4 +1,6 @@
-﻿// Copyright 2015 The Chromium Authors. All rights reserved.
+﻿using static FlutterBinding.Flow.Helper;
+
+// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -12,13 +14,13 @@ namespace FlutterBinding.Flow
     {
         public class ScopedFrame : System.IDisposable
         {
-            public ScopedFrame(CompositorContext context, GrContext gr_context, SkiaSharp.SKCanvas canvas, ExternalViewEmbedder view_embedder, SkMatrix root_surface_transformation, bool instrumentation_enabled)
+            public ScopedFrame(CompositorContext context, GRContext gr_context, SKCanvas canvas, ExternalViewEmbedder view_embedder, SKMatrix root_surface_transformation, bool instrumentation_enabled)
             {
-                this.context_ = new flow.CompositorContext(context);
+                this.context_ = new CompositorContext(context);
                 this.gr_context_ = gr_context;
                 this.canvas_ = canvas;
                 this.view_embedder_ = view_embedder;
-                this.root_surface_transformation_ = new SkMatrix(root_surface_transformation);
+                this.root_surface_transformation_ = new SKMatrix(root_surface_transformation);
                 this.instrumentation_enabled_ = instrumentation_enabled;
                 context_.BeginFrame(this, instrumentation_enabled_);
             }
@@ -28,7 +30,7 @@ namespace FlutterBinding.Flow
                 context_.EndFrame(this, instrumentation_enabled_);
             }
 
-            public SkiaSharp.SKCanvas canvas()
+            public SKCanvas canvas()
             {
                 return canvas_;
             }
@@ -46,20 +48,20 @@ namespace FlutterBinding.Flow
             }
 
             //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
-            //ORIGINAL LINE: const SkMatrix& root_surface_transformation() const
-            public SkMatrix root_surface_transformation()
+            //ORIGINAL LINE: const SKMatrix& root_surface_transformation() const
+            public SKMatrix root_surface_transformation()
             {
                 return root_surface_transformation_;
             }
 
             //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
-            //ORIGINAL LINE: GrContext* gr_context() const
-            public GrContext gr_context()
+            //ORIGINAL LINE: GRContext* gr_context() const
+            public GRContext gr_context()
             {
                 return gr_context_;
             }
 
-            public virtual bool Raster(flow.LayerTree layer_tree, bool ignore_raster_cache)
+            public virtual bool Raster(LayerTree layer_tree, bool ignore_raster_cache)
             {
                 layer_tree.Preroll(this, ignore_raster_cache);
                 layer_tree.Paint(this, ignore_raster_cache);
@@ -67,10 +69,10 @@ namespace FlutterBinding.Flow
             }
 
             private CompositorContext context_;
-            private GrContext gr_context_;
-            private SkiaSharp.SKCanvas canvas_;
+            private GRContext gr_context_;
+            private SKCanvas canvas_;
             private ExternalViewEmbedder view_embedder_;
-            private readonly SkMatrix root_surface_transformation_;
+            private readonly SKMatrix root_surface_transformation_;
             private readonly bool instrumentation_enabled_;
 
             //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':
@@ -85,20 +87,20 @@ namespace FlutterBinding.Flow
         //C++ TO C# CONVERTER TODO TASK: The implementation of the following method could not be found:
         //  public void Dispose();
 
-        public virtual std::unique_ptr<CompositorContext.ScopedFrame> AcquireFrame(GrContext gr_context, SkiaSharp.SKCanvas canvas, ExternalViewEmbedder view_embedder, SkMatrix root_surface_transformation, bool instrumentation_enabled)
+        public virtual std::unique_ptr<CompositorContext.ScopedFrame> AcquireFrame(GRContext gr_context, SKCanvas canvas, ExternalViewEmbedder view_embedder, SKMatrix root_surface_transformation, bool instrumentation_enabled)
         {
             return std::make_unique<ScopedFrame>(this, gr_context, canvas, view_embedder, root_surface_transformation, instrumentation_enabled);
         }
 
-        public void OnGrContextCreated()
+        public void OnGRContextCreated()
         {
-            texture_registry_.OnGrContextCreated();
+            texture_registry_.OnGRContextCreated();
             raster_cache_.Clear();
         }
 
-        public void OnGrContextDestroyed()
+        public void OnGRContextDestroyed()
         {
-            texture_registry_.OnGrContextDestroyed();
+            texture_registry_.OnGRContextDestroyed();
             raster_cache_.Clear();
         }
 

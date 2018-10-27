@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using static FlutterBinding.Flow.Helper;
 
 // Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
@@ -56,8 +57,8 @@ namespace FlutterBinding.Flow
         // Initialize the SkSurface for drawing into. Draws the base background and any
         // timing data from before the initial Visualize() call.
         //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
-        //ORIGINAL LINE: void InitVisualizeSurface(const SkiaSharp.SKRect& rect) const
-        public void InitVisualizeSurface(SkiaSharp.SKRect rect)
+        //ORIGINAL LINE: void InitVisualizeSurface(const SKRect& rect) const
+        public void InitVisualizeSurface(SKRect rect)
         {
             if (!cache_dirty_)
             {
@@ -68,7 +69,7 @@ namespace FlutterBinding.Flow
             // TODO(garyq): Use a GPU surface instead of a CPU surface.
             visualize_cache_surface_.CopyFrom(SkSurface.MakeRasterN32Premul(rect.width(), rect.height()));
 
-            SkiaSharp.SKCanvas cache_canvas = visualize_cache_surface_.Dereference().getCanvas();
+            SKCanvas cache_canvas = visualize_cache_surface_.Dereference().getCanvas();
 
             // Establish the graph position.
             const float x = 0F;
@@ -76,33 +77,33 @@ namespace FlutterBinding.Flow
             float width = rect.width();
             float height = rect.height();
 
-            SkiaSharp.SKPaint paint = new SkiaSharp.SKPaint();
+            SKPaint paint = new SKPaint();
             paint.setColor(0x99FFFFFF);
-            cache_canvas.drawRect(SkiaSharp.SKRect.MakeXYWH(x, y, width, height), paint);
+            cache_canvas.drawRect(SKRect.MakeXYWH(x, y, width, height), paint);
 
             // Scale the graph to show frame times up to those that are 3 times the frame
             // time.
             double max_interval = GlobalMembers.kOneFrameMS * 3.0;
-            double max_unit_interval = flow.GlobalMembers.UnitFrameInterval(max_interval);
+            double max_unit_interval = GlobalMembers.UnitFrameInterval(max_interval);
 
             // Draw the old data to initially populate the graph.
             // Prepare a path for the data. We start at the height of the last point, so
             // it looks like we wrap around
-            SkPath path = new SkPath();
+            SKPath path = new SKPath();
             path.setIsVolatile(true);
             path.moveTo(x, height);
-            path.lineTo(x, y + height * (1.0 - flow.GlobalMembers.UnitHeight(laps_[0].ToMillisecondsF(), max_unit_interval)));
+            path.lineTo(x, y + height * (1.0 - GlobalMembers.UnitHeight(laps_[0].ToMillisecondsF(), max_unit_interval)));
             double unit_x;
             double unit_next_x = 0.0;
             for (size_t i = 0; i < GlobalMembers.kMaxSamples; i += 1)
             {
                 unit_x = unit_next_x;
                 unit_next_x = ((double)(i + 1) / GlobalMembers.kMaxSamples);
-                double sample_y = y + height * (1.0 - flow.GlobalMembers.UnitHeight(laps_[i].ToMillisecondsF(), max_unit_interval));
+                double sample_y = y + height * (1.0 - GlobalMembers.UnitHeight(laps_[i].ToMillisecondsF(), max_unit_interval));
                 path.lineTo(x + width * unit_x, sample_y);
                 path.lineTo(x + width * unit_next_x, sample_y);
             }
-            path.lineTo(width, y + height * (1.0 - flow.GlobalMembers.UnitHeight(laps_[GlobalMembers.kMaxSamples - 1].ToMillisecondsF(), max_unit_interval)));
+            path.lineTo(width, y + height * (1.0 - GlobalMembers.UnitHeight(laps_[GlobalMembers.kMaxSamples - 1].ToMillisecondsF(), max_unit_interval)));
             path.lineTo(width, height);
             path.close();
 
@@ -112,14 +113,14 @@ namespace FlutterBinding.Flow
         }
 
         //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
-        //ORIGINAL LINE: void Visualize(SkiaSharp.SKCanvas& canvas, const SkiaSharp.SKRect& rect) const
-        public void Visualize(SkiaSharp.SKCanvas canvas, SkiaSharp.SKRect rect)
+        //ORIGINAL LINE: void Visualize(SKCanvas& canvas, const SKRect& rect) const
+        public void Visualize(SKCanvas canvas, SKRect rect)
         {
             // Initialize visualize cache if it has not yet been initialized.
             InitVisualizeSurface(rect);
 
-            SkiaSharp.SKCanvas cache_canvas = visualize_cache_surface_.Dereference().getCanvas();
-            SkiaSharp.SKPaint paint = new SkiaSharp.SKPaint();
+            SKCanvas cache_canvas = visualize_cache_surface_.Dereference().getCanvas();
+            SKPaint paint = new SKPaint();
 
             // Establish the graph position.
             const float x = 0F;
@@ -130,27 +131,27 @@ namespace FlutterBinding.Flow
             // Scale the graph to show frame times up to those that are 3 times the frame
             // time.
             double max_interval = GlobalMembers.kOneFrameMS * 3.0;
-            double max_unit_interval = flow.GlobalMembers.UnitFrameInterval(max_interval);
+            double max_unit_interval = GlobalMembers.UnitFrameInterval(max_interval);
 
             double sample_unit_width = (1.0 / GlobalMembers.kMaxSamples);
 
             // Draw vertical replacement bar to erase old/stale pixels.
             paint.setColor(0x99FFFFFF);
-            paint.setStyle(SkiaSharp.SKPaint.Style.kFill_Style);
+            paint.setStyle(SKPaint.Style.kFill_Style);
             paint.setBlendMode(SkBlendMode.kSrc);
             double sample_x = x + width * ((double)prev_drawn_sample_index_ / GlobalMembers.kMaxSamples);
-            var eraser_rect = SkiaSharp.SKRect.MakeLTRB(sample_x, y, sample_x + width * sample_unit_width, height);
+            var eraser_rect = SKRect.MakeLTRB(sample_x, y, sample_x + width * sample_unit_width, height);
             cache_canvas.drawRect(eraser_rect, paint);
 
             // Draws blue timing bar for new data.
             paint.setColor(0xAA0000FF);
             paint.setBlendMode(SkBlendMode.kSrcOver);
-            var bar_rect = SkiaSharp.SKRect.MakeLTRB(sample_x, y + height * (1.0 - flow.GlobalMembers.UnitHeight(laps_[current_sample_ == 0 ? GlobalMembers.kMaxSamples - 1 : current_sample_ - 1].ToMillisecondsF(), max_unit_interval)), sample_x + width * sample_unit_width, height);
+            var bar_rect = SKRect.MakeLTRB(sample_x, y + height * (1.0 - GlobalMembers.UnitHeight(laps_[current_sample_ == 0 ? GlobalMembers.kMaxSamples - 1 : current_sample_ - 1].ToMillisecondsF(), max_unit_interval)), sample_x + width * sample_unit_width, height);
             cache_canvas.drawRect(bar_rect, paint);
 
             // Draw horizontal frame markers.
             paint.setStrokeWidth(0F); // hairline
-            paint.setStyle(SkiaSharp.SKPaint.Style.kStroke_Style);
+            paint.setStyle(SKPaint.Style.kStroke_Style);
             paint.setColor(0xCC000000);
 
             if (max_interval > GlobalMembers.kOneFrameMS)
@@ -167,7 +168,7 @@ namespace FlutterBinding.Flow
 
                 for (size_t frame_index = 0; frame_index < frame_marker_count; frame_index++)
                 {
-                    double frame_height = height * (1.0 - (flow.GlobalMembers.UnitFrameInterval((frame_index + 1) * GlobalMembers.kOneFrameMS) / max_unit_interval));
+                    double frame_height = height * (1.0 - (GlobalMembers.UnitFrameInterval((frame_index + 1) * GlobalMembers.kOneFrameMS) / max_unit_interval));
                     cache_canvas.drawLine(x, y + frame_height, width, y + frame_height, paint);
                 }
             }
@@ -175,9 +176,9 @@ namespace FlutterBinding.Flow
             // Paint the vertical marker for the current frame.
             // We paint it over the current frame, not after it, because when we
             // paint this we don't yet have all the times for the current frame.
-            paint.setStyle(SkiaSharp.SKPaint.Style.kFill_Style);
+            paint.setStyle(SKPaint.Style.kFill_Style);
             paint.setBlendMode(SkBlendMode.kSrcOver);
-            if (flow.GlobalMembers.UnitFrameInterval(LastLap().ToMillisecondsF()) > 1.0)
+            if (GlobalMembers.UnitFrameInterval(LastLap().ToMillisecondsF()) > 1.0)
             {
                 // budget exceeded
                 paint.setColor(new uint32_t(GlobalMembers.SK_ColorRED));
@@ -188,7 +189,7 @@ namespace FlutterBinding.Flow
                 paint.setColor(new uint32_t(GlobalMembers.SK_ColorGREEN));
             }
             sample_x = x + width * ((double)current_sample_ / GlobalMembers.kMaxSamples);
-            var marker_rect = SkiaSharp.SKRect.MakeLTRB(sample_x, y, sample_x + width * sample_unit_width, height);
+            var marker_rect = SKRect.MakeLTRB(sample_x, y, sample_x + width * sample_unit_width, height);
             cache_canvas.drawRect(marker_rect, paint);
             //C++ TO C# CONVERTER TODO TASK: The following line was determined to be a copy assignment (rather than a reference assignment) - this should be verified and a 'CopyFrom' method should be created:
             //ORIGINAL LINE: prev_drawn_sample_index_ = current_sample_;
@@ -286,8 +287,8 @@ namespace FlutterBinding.Flow
         //  void Add(int64_t value);
 
         //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
-        //ORIGINAL LINE: void Visualize(SkiaSharp.SKCanvas& canvas, const SkiaSharp.SKRect& rect) const
-        public void Visualize(SkiaSharp.SKCanvas canvas, SkiaSharp.SKRect rect)
+        //ORIGINAL LINE: void Visualize(SKCanvas& canvas, const SKRect& rect) const
+        public void Visualize(SKCanvas canvas, SKRect rect)
         {
             size_t max_bytes = GetMaxValue();
 
@@ -299,7 +300,7 @@ namespace FlutterBinding.Flow
 
             size_t min_bytes = GetMinValue();
 
-            SkiaSharp.SKPaint paint = new SkiaSharp.SKPaint();
+            SKPaint paint = new SKPaint();
 
             // Paint the background.
             paint.setColor(0x99FFFFFF);
@@ -314,7 +315,7 @@ namespace FlutterBinding.Flow
             float right = x + width;
 
             // Prepare a path for the data.
-            SkPath path = new SkPath();
+            SKPath path = new SKPath();
             path.moveTo(x, bottom);
 
             for (size_t i = 0; i < GlobalMembers.kMaxSamples; ++i)
@@ -336,10 +337,10 @@ namespace FlutterBinding.Flow
             double sample_unit_width = (1.0 / GlobalMembers.kMaxSamples);
             double sample_margin_unit_width = sample_unit_width / 6.0;
             double sample_margin_width = width * sample_margin_unit_width;
-            paint.setStyle(SkiaSharp.SKPaint.Style.kFill_Style);
+            paint.setStyle(SKPaint.Style.kFill_Style);
             paint.setColor(new uint32_t(GlobalMembers.SK_ColorGRAY));
             double sample_x = x + width * ((double)current_sample_ / GlobalMembers.kMaxSamples) - sample_margin_width;
-            var marker_rect = SkiaSharp.SKRect.MakeLTRB(sample_x, y, sample_x + width * sample_unit_width + sample_margin_width * 2, bottom);
+            var marker_rect = SKRect.MakeLTRB(sample_x, y, sample_x + width * sample_unit_width + sample_margin_width * 2, bottom);
             canvas.drawRect(marker_rect, paint);
         }
 

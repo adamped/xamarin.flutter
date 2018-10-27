@@ -1,4 +1,7 @@
-﻿// Copyright 2015 The Chromium Authors. All rights reserved.
+﻿using SkiaSharp;
+using static FlutterBinding.Flow.Helper;
+
+// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -9,19 +12,19 @@ namespace FlutterBinding.Flow.Layers
     {
         public ClipRRectLayer(Clip clip_behavior)
         {
-            this.clip_behavior_ = new flow.Clip(clip_behavior);
+            this.clip_behavior_ = clip_behavior;
         }
         //C++ TO C# CONVERTER TODO TASK: The implementation of the following method could not be found:
         //  public void Dispose();
 
-        public void set_clip_rrect(SkRRect clip_rrect)
+        public void set_clip_rrect(SKRRect clip_rrect)
         {
             clip_rrect_.CopyFrom(clip_rrect);
         }
 
-        public override void Preroll(PrerollContext context, SkMatrix matrix)
+        public override void Preroll(PrerollContext context, SKMatrix matrix)
         {
-            SkiaSharp.SKRect child_paint_bounds = SkiaSharp.SKRect.MakeEmpty();
+            SKRect child_paint_bounds = SKRect.MakeEmpty();
             PrerollChildren(context, matrix, child_paint_bounds);
 
             if (child_paint_bounds.intersect(clip_rrect_.getBounds()))
@@ -49,7 +52,7 @@ namespace FlutterBinding.Flow.Layers
             }
         }
 
-        private SkRRect clip_rrect_ = new SkRRect();
+        private SKRRect clip_rrect_ = new SKRRect();
         private Clip clip_behavior_;
 
         //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':

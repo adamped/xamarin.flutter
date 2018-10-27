@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------------------------
 
 using System.Collections.Generic;
+using static FlutterBinding.Flow.Helper;
 
 internal static class VectorHelper
 {

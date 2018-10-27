@@ -1,4 +1,6 @@
-﻿// Copyright 2016 The Chromium Authors. All rights reserved.
+﻿using static FlutterBinding.Flow.Helper;
+
+// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -12,9 +14,9 @@ namespace FlutterBinding.Flow.Layers
         //C++ TO C# CONVERTER TODO TASK: The implementation of the following method could not be found:
         //  public void Dispose();
 
-        public void set_filter(sk_sp<SkImageFilter> filter)
+        public void set_filter(sk_sp<SKImageFilter> filter)
         {
-            filter_ = std::move(filter);
+            filter_ = filter;
         }
 
         //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
@@ -24,11 +26,11 @@ namespace FlutterBinding.Flow.Layers
             TRACE_EVENT0("flutter", "BackdropFilterLayer::Paint");
             FML_DCHECK(needs_painting());
 
-            Layer.AutoSaveLayer save = Layer.AutoSaveLayer.Create(context, new SkiaSharp.SKCanvas.SaveLayerRec({ paint_bounds(), null, filter_.get(), 0 }));
+            Layer.AutoSaveLayer save = Layer.AutoSaveLayer.Create(context, new SKCanvas.SaveLayerRec({ paint_bounds(), null, filter_.get(), 0 }));
             PaintChildren(context);
         }
 
-        private sk_sp<SkImageFilter> filter_ = new sk_sp<SkImageFilter>();
+        private sk_sp<SKImageFilter> filter_ = new sk_sp<SKImageFilter>();
 
         //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':
         //  BackdropFilterLayer(const BackdropFilterLayer&) = delete;

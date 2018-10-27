@@ -1,4 +1,6 @@
-﻿// Copyright 2016 The Chromium Authors. All rights reserved.
+﻿using static FlutterBinding.Flow.Helper;
+
+// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -28,7 +30,7 @@ namespace FlutterBinding.Flow
         }
 
         // Calls Bind() on the wrapped ExportNode.
-        public void Bind(SceneUpdateContext context, scenic.ContainerNode container, SkPoint offset, bool hit_testable)
+        public void Bind(SceneUpdateContext context, scenic.ContainerNode container, SKPoint offset, bool hit_testable)
         {
             export_node_.Bind(context, container, offset, hit_testable);
         }
@@ -70,7 +72,7 @@ namespace FlutterBinding.Flow
 
         // Binds the export token to the entity node and adds it as a child of
         // the specified container. Must be called on the Rasterizer thread.
-        public void Bind(SceneUpdateContext context, scenic.ContainerNode container, SkPoint offset, bool hit_testable)
+        public void Bind(SceneUpdateContext context, scenic.ContainerNode container, SKPoint offset, bool hit_testable)
         {
             if (export_token_ != null)
             {

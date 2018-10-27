@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using static FlutterBinding.Flow.Helper;
 
 // Copyright 2017 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
@@ -11,12 +12,12 @@ namespace FlutterBinding.Flow
     //ORIGINAL LINE: template <typename ID>
     public class RasterCacheKey<ID>
     {
-        public RasterCacheKey(ID id, SkMatrix ctm)
+        public RasterCacheKey(ID id, SKMatrix ctm)
         {
             this.id_ = id;
-            this.matrix_ = new SkMatrix(ctm);
-            matrix_[SkMatrix.kMTransX] = GlobalMembers.SkScalarFraction(ctm.getTranslateX());
-            matrix_[SkMatrix.kMTransY] = GlobalMembers.SkScalarFraction(ctm.getTranslateY());
+            this.matrix_ = new SKMatrix(ctm);
+            matrix_[SKMatrix.kMTransX] = GlobalMembers.SkScalarFraction(ctm.getTranslateX());
+            matrix_[SKMatrix.kMTransY] = GlobalMembers.SkScalarFraction(ctm.getTranslateY());
 #if !SUPPORT_FRACTIONAL_TRANSLATION
             FML_DCHECK(matrix_.getTranslateX() == 0F && matrix_.getTranslateY() == 0F);
 #endif
@@ -29,8 +30,8 @@ namespace FlutterBinding.Flow
             return id_;
         }
         //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
-        //ORIGINAL LINE: const SkMatrix& matrix() const
-        public SkMatrix matrix()
+        //ORIGINAL LINE: const SKMatrix& matrix() const
+        public SKMatrix matrix()
         {
             return matrix_;
         }
@@ -64,7 +65,7 @@ namespace FlutterBinding.Flow
 
     // ctm where only fractional (0-1) translations are preserved:
     //   matrix_ = ctm;
-    //   matrix_[SkMatrix::kMTransX] = SkScalarFraction(ctm.getTranslateX());
-    //   matrix_[SkMatrix::kMTransY] = SkScalarFraction(ctm.getTranslateY());
-    private SkMatrix matrix_ = new SkMatrix();
+    //   matrix_[SKMatrix::kMTransX] = SkScalarFraction(ctm.getTranslateX());
+    //   matrix_[SKMatrix::kMTransY] = SkScalarFraction(ctm.getTranslateY());
+    private SKMatrix matrix_ = new SKMatrix();
 }

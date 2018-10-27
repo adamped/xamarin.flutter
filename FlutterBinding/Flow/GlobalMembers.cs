@@ -1,4 +1,5 @@
 ﻿using System;
+using static FlutterBinding.Flow.Helper;
 
 namespace FlutterBinding.Flow
 {
@@ -9,23 +10,23 @@ namespace FlutterBinding.Flow
         public static readonly int kDisplayEngineStatistics = 1 << 2;
         public static readonly int kVisualizeEngineStatistics = 1 << 3;
 
-        public static void DrawStatisticsText(SkiaSharp.SKCanvas canvas, string @string, int x, int y)
+        public static void DrawStatisticsText(SKCanvas canvas, string @string, int x, int y)
         {
-            SkiaSharp.SKPaint paint = new SkiaSharp.SKPaint();
+            SKPaint paint = new SKPaint();
             paint.setTextSize(15F);
             paint.setLinearText(false);
             paint.setColor(new uint32_t(GlobalMembers.SK_ColorGRAY));
             canvas.drawText(@string, @string.Length, x, y, paint);
         }
 
-        public static void VisualizeStopWatch(SkiaSharp.SKCanvas canvas, Stopwatch stopwatch, float x, float y, float width, float height, bool show_graph, bool show_labels, string label_prefix)
+        public static void VisualizeStopWatch(SKCanvas canvas, Stopwatch stopwatch, float x, float y, float width, float height, bool show_graph, bool show_labels, string label_prefix)
         {
             const int label_x = 8; // distance from x
             const int label_y = -10; // distance from y+height
 
             if (show_graph)
             {
-                SkiaSharp.SKRect visualization_rect = SkiaSharp.SKRect.MakeXYWH(x, y, width, height);
+                SKRect visualization_rect = SKRect.MakeXYWH(x, y, width, height);
                 stopwatch.Visualize(canvas, visualization_rect);
             }
 
@@ -76,14 +77,14 @@ namespace FlutterBinding.Flow
         //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = default':
         //CounterValues::~CounterValues() = default;
 
-        public static void DrawCheckerboard(SkiaSharp.SKCanvas canvas, uint32_t c1, uint32_t c2, int size)
+        public static void DrawCheckerboard(SKCanvas canvas, uint32_t c1, uint32_t c2, int size)
         {
-            SkiaSharp.SKPaint paint = new SkiaSharp.SKPaint();
+            SKPaint paint = new SKPaint();
             paint.setShader(GlobalMembers.CreateCheckerboardShader(new uint32_t(c1), new uint32_t(c2), size));
             canvas.drawPaint(paint);
         }
 
-        public static void DrawCheckerboard(SkiaSharp.SKCanvas canvas, SkiaSharp.SKRect rect)
+        public static void DrawCheckerboard(SKCanvas canvas, SKRect rect)
         {
             // Draw a checkerboard
             canvas.save();
@@ -95,10 +96,10 @@ namespace FlutterBinding.Flow
             canvas.restore();
 
             // Stroke the drawn area
-            SkiaSharp.SKPaint debugPaint = new SkiaSharp.SKPaint();
+            SKPaint debugPaint = new SKPaint();
             debugPaint.setStrokeWidth(8F);
             debugPaint.setColor(GlobalMembers.SkColorSetA(checkerboard_color, 255));
-            debugPaint.setStyle(SkiaSharp.SKPaint.Style.kStroke_Style);
+            debugPaint.setStyle(SKPaint.Style.kStroke_Style);
             canvas.drawRect(rect, debugPaint);
         }
 
@@ -112,14 +113,14 @@ namespace FlutterBinding.Flow
             return SkShader.MakeBitmapShader(bm, SkShader.TileMode.kRepeat_TileMode, SkShader.TileMode.kRepeat_TileMode);
         }
 
-        internal static bool CanRasterizePicture(SkPicture picture)
+        internal static bool CanRasterizePicture(SKPicture picture)
         {
             if (picture == null)
             {
                 return false;
             }
 
-            SkiaSharp.SKRect cull_rect = picture.cullRect();
+            SKRect cull_rect = picture.cullRect();
 
             if (cull_rect.isEmpty())
             {
@@ -136,7 +137,7 @@ namespace FlutterBinding.Flow
             return true;
         }
 
-        internal static bool IsPictureWorthRasterizing(SkPicture picture, bool will_change, bool is_complex)
+        internal static bool IsPictureWorthRasterizing(SKPicture picture, bool will_change, bool is_complex)
         {
             if (will_change)
             {
@@ -164,11 +165,11 @@ namespace FlutterBinding.Flow
             return picture.approximateOpCount() > 10;
         }
 
-        internal static RasterCacheResult Rasterize(GrContext context, SkMatrix ctm, SkColorSpace dst_color_space, bool checkerboard, SkiaSharp.SKRect logical_rect, Action<SkiaSharp.SKCanvas> draw_function)
+        internal static RasterCacheResult Rasterize(GRContext context, SKMatrix ctm, SKColorSpace dst_color_space, bool checkerboard, SKRect logical_rect, Action<SKCanvas> draw_function)
         {
             SkIRect cache_rect = RasterCache.GetDeviceBounds(logical_rect, ctm);
 
-            SkImageInfo image_info = SkImageInfo.MakeN32Premul(cache_rect.width(), cache_rect.height());
+            SKImageInfo image_info = SKImageInfo.MakeN32Premul(cache_rect.width(), cache_rect.height());
 
             sk_sp<SkSurface> surface = context != null ? SkSurface.MakeRenderTarget(context, SkBudgeted.kYes, image_info) : SkSurface.MakeRaster(image_info);
 
@@ -177,8 +178,8 @@ namespace FlutterBinding.Flow
                 return new RasterCacheResult();
             }
 
-            SkiaSharp.SKCanvas canvas = surface.Dereference().getCanvas();
-            std::unique_ptr<SkiaSharp.SKCanvas> xformCanvas = new std::unique_ptr<SkiaSharp.SKCanvas>();
+            SKCanvas canvas = surface.Dereference().getCanvas();
+            std::unique_ptr<SKCanvas> xformCanvas = new std::unique_ptr<SKCanvas>();
             if (dst_color_space != null)
             {
                 xformCanvas = SkCreateColorSpaceXformCanvas(surface.Dereference().getCanvas(), GlobalMembers.sk_ref_sp(dst_color_space));
@@ -201,15 +202,15 @@ namespace FlutterBinding.Flow
             return new RasterCacheResult(surface.Dereference().makeImageSnapshot(), logical_rect);
         }
 
-        public static RasterCacheResult RasterizePicture(SkPicture picture, GrContext context, SkMatrix ctm, SkColorSpace dst_color_space, bool checkerboard)
+        public static RasterCacheResult RasterizePicture(SKPicture picture, GRContext context, SKMatrix ctm, SKColorSpace dst_color_space, bool checkerboard)
         {
             TRACE_EVENT0("flutter", "RasterCachePopulate");
 
             //C++ TO C# CONVERTER TODO TASK: Only lambda expressions having all locals passed by reference can be converted to C#:
-            //ORIGINAL LINE: return Rasterize(context, ctm, dst_color_space, checkerboard, picture->cullRect(), [=](SkiaSharp.SKCanvas* canvas)
-            return Rasterize(context, ctm, dst_color_space, checkerboard, picture.cullRect(), (SkiaSharp.SKCanvas canvas) =>
+            //ORIGINAL LINE: return Rasterize(context, ctm, dst_color_space, checkerboard, picture->cullRect(), [=](SKCanvas* canvas)
+            return Rasterize(context, ctm, dst_color_space, checkerboard, picture.cullRect(), (SKCanvas canvas) =>
             {
-                canvas.drawPicture(picture);
+                canvas.DrawPicture(picture);
             });
         }
 
@@ -233,7 +234,7 @@ namespace FlutterBinding.Flow
 public static class GlobalMembers
 {
     
-    public static std::ostream operator <<(std::ostream os, flow.MatrixDecomposition m)
+    public static std::ostream operator <<(std::ostream os, MatrixDecomposition m)
     {
         if (!m.IsValid())
         {
@@ -254,19 +255,19 @@ public static class GlobalMembers
         os << "Picture: " << k.id() << " matrix: " << k.matrix();
         return os;
     }
-    public static std::ostream operator <<(std::ostream os, SkISize size)
+    public static std::ostream operator <<(std::ostream os, SKSizeI size)
     {
         os << size.width() << ", " << size.height();
         return os;
     }
-    public static std::ostream operator <<(std::ostream os, SkMatrix m)
+    public static std::ostream operator <<(std::ostream os, SKMatrix m)
     {
         SkString string = new SkString();
         string.printf("[%8.4f %8.4f %8.4f][%8.4f %8.4f %8.4f][%8.4f %8.4f %8.4f]", m[0], m[1], m[2], m[3], m[4], m[5], m[6], m[7], m[8]);
         os << string.c_str();
         return os;
     }
-    public static std::ostream operator <<(std::ostream os, SkMatrix44 m)
+    public static std::ostream operator <<(std::ostream os, SKMatrix44 m)
     {
         os << m.get(0, 0) << ", " << m.get(0, 1) << ", " << m.get(0, 2) << ", " << m.get(0, 3) << std::endl;
         os << m.get(1, 0) << ", " << m.get(1, 1) << ", " << m.get(1, 2) << ", " << m.get(1, 3) << std::endl;
@@ -274,22 +275,22 @@ public static class GlobalMembers
         os << m.get(3, 0) << ", " << m.get(3, 1) << ", " << m.get(3, 2) << ", " << m.get(3, 3);
         return os;
     }
-    public static std::ostream operator <<(std::ostream os, SkPoint r)
+    public static std::ostream operator <<(std::ostream os, SKPoint r)
     {
         os << "XY: " << r.fX << ", " << r.fY;
         return os;
     }
-    public static std::ostream operator <<(std::ostream os, SkiaSharp.SKRect r)
+    public static std::ostream operator <<(std::ostream os, SKRect r)
     {
         os << "LTRB: " << r.fLeft << ", " << r.fTop << ", " << r.fRight << ", " << r.fBottom;
         return os;
     }
-    public static std::ostream operator <<(std::ostream os, SkRRect r)
+    public static std::ostream operator <<(std::ostream os, SKRRect r)
     {
         os << "LTRB: " << r.rect().fLeft << ", " << r.rect().fTop << ", " << r.rect().fRight << ", " << r.rect().fBottom;
         return os;
     }
-    public static std::ostream operator <<(std::ostream os, SkPoint3 v)
+    public static std::ostream operator <<(std::ostream os, SKPoint3 v)
     {
         os << v.x() << ", " << v.y() << ", " << v.z();
         return os;
@@ -303,12 +304,12 @@ public static class GlobalMembers
     //C++ TO C# CONVERTER WARNING: The following constructor is declared outside of its associated class:
     public static TEST(MatrixDecomposition UnnamedParameter, Rotation UnnamedParameter2)
     {
-        SkMatrix44 matrix = SkMatrix44.I();
+        SKMatrix44 matrix = SKMatrix44.I();
 
         var angle = M_PI_4;
         matrix.setRotateAbout(0.0, 0.0, 1.0, angle);
 
-        flow.MatrixDecomposition decomposition = new flow.MatrixDecomposition(matrix);
+        MatrixDecomposition decomposition = new MatrixDecomposition(matrix);
         ASSERT_TRUE(decomposition.IsValid());
 
         var sine = Math.Sin(angle * 0.5);
@@ -322,12 +323,12 @@ public static class GlobalMembers
     //C++ TO C# CONVERTER WARNING: The following constructor is declared outside of its associated class:
     public static TEST(MatrixDecomposition UnnamedParameter, Scale UnnamedParameter2)
     {
-        SkMatrix44 matrix = SkMatrix44.I();
+        SKMatrix44 matrix = SKMatrix44.I();
 
         const var scale = 5.0;
         matrix.setScale(scale + 0, scale + 1, scale + 2);
 
-        flow.MatrixDecomposition decomposition = new flow.MatrixDecomposition(matrix);
+        MatrixDecomposition decomposition = new MatrixDecomposition(matrix);
         ASSERT_TRUE(decomposition.IsValid());
 
         ASSERT_FLOAT_EQ(scale + 0, decomposition.scale().fX);
@@ -338,12 +339,12 @@ public static class GlobalMembers
     //C++ TO C# CONVERTER WARNING: The following constructor is declared outside of its associated class:
     public static TEST(MatrixDecomposition UnnamedParameter, Translate UnnamedParameter2)
     {
-        SkMatrix44 matrix = SkMatrix44.I();
+        SKMatrix44 matrix = SKMatrix44.I();
 
         const var translate = 125.0;
         matrix.setTranslate(translate + 0, translate + 1, translate + 2);
 
-        flow.MatrixDecomposition decomposition = new flow.MatrixDecomposition(matrix);
+        MatrixDecomposition decomposition = new MatrixDecomposition(matrix);
         ASSERT_TRUE(decomposition.IsValid());
 
         ASSERT_FLOAT_EQ(translate + 0, decomposition.translation().fX);
@@ -354,24 +355,24 @@ public static class GlobalMembers
     //C++ TO C# CONVERTER WARNING: The following constructor is declared outside of its associated class:
     public static TEST(MatrixDecomposition UnnamedParameter, Combination UnnamedParameter2)
     {
-        SkMatrix44 matrix = SkMatrix44.I();
+        SKMatrix44 matrix = SKMatrix44.I();
 
         var rotation = M_PI_4;
         const var scale = 5;
         const var translate = 125.0;
 
-        SkMatrix44 m1 = SkMatrix44.I();
+        SKMatrix44 m1 = SKMatrix44.I();
         m1.setRotateAbout(0, 0, 1, rotation);
 
-        SkMatrix44 m2 = SkMatrix44.I();
+        SKMatrix44 m2 = SKMatrix44.I();
         m2.setScale(scale);
 
-        SkMatrix44 m3 = SkMatrix44.I();
+        SKMatrix44 m3 = SKMatrix44.I();
         m3.setTranslate(translate, translate, translate);
 
-        SkMatrix44 combined = m3 * m2 * m1;
+        SKMatrix44 combined = m3 * m2 * m1;
 
-        flow.MatrixDecomposition decomposition = new flow.MatrixDecomposition(combined);
+        MatrixDecomposition decomposition = new MatrixDecomposition(combined);
         ASSERT_TRUE(decomposition.IsValid());
 
         ASSERT_FLOAT_EQ(translate, decomposition.translation().fX);
@@ -395,10 +396,10 @@ public static class GlobalMembers
     {
         for (float scale = 0.0001f; scale < 2.0f; scale += 0.000001f)
         {
-            SkMatrix44 matrix = SkMatrix44.I();
+            SKMatrix44 matrix = SKMatrix44.I();
             matrix.setScale(scale, scale, 1.0f);
 
-            flow.MatrixDecomposition decomposition3 = new flow.MatrixDecomposition(matrix);
+            MatrixDecomposition decomposition3 = new MatrixDecomposition(matrix);
             ASSERT_TRUE(decomposition3.IsValid());
 
             ASSERT_FLOAT_EQ(scale, decomposition3.scale().fX);
@@ -409,27 +410,27 @@ public static class GlobalMembers
             ASSERT_FLOAT_EQ(0, decomposition3.rotation().fData[2]);
         }
 
-        SkMatrix44 matrix = SkMatrix44.I();
+        SKMatrix44 matrix = SKMatrix44.I();
         const var scale = 1.7734375f;
         matrix.setScale(scale, scale, 1.0f);
 
         // Bug upper bound (empirical)
         const var scale2 = 1.773437559603f;
-        SkMatrix44 matrix2 = SkMatrix44.I();
+        SKMatrix44 matrix2 = SKMatrix44.I();
         matrix2.setScale(scale2, scale2, 1.0f);
 
         // Bug lower bound (empirical)
         const var scale3 = 1.7734374403954f;
-        SkMatrix44 matrix3 = SkMatrix44.I();
+        SKMatrix44 matrix3 = SKMatrix44.I();
         matrix3.setScale(scale3, scale3, 1.0f);
 
-        flow.MatrixDecomposition decomposition = new flow.MatrixDecomposition(matrix);
+        MatrixDecomposition decomposition = new MatrixDecomposition(matrix);
         ASSERT_TRUE(decomposition.IsValid());
 
-        flow.MatrixDecomposition decomposition2 = new flow.MatrixDecomposition(matrix2);
+        MatrixDecomposition decomposition2 = new MatrixDecomposition(matrix2);
         ASSERT_TRUE(decomposition2.IsValid());
 
-        flow.MatrixDecomposition decomposition3 = new flow.MatrixDecomposition(matrix3);
+        MatrixDecomposition decomposition3 = new MatrixDecomposition(matrix3);
         ASSERT_TRUE(decomposition3.IsValid());
 
         ASSERT_FLOAT_EQ(scale, decomposition.scale().fX);
@@ -454,20 +455,20 @@ public static class GlobalMembers
         ASSERT_FLOAT_EQ(0, decomposition3.rotation().fData[2]);
     }
 
-    public static sk_sp<SkPicture> GetSamplePicture()
+    public static sk_sp<SKPicture> GetSamplePicture()
     {
-        SkPictureRecorder recorder = new SkPictureRecorder();
-        recorder.beginRecording(SkiaSharp.SKRect.MakeWH(150, 100));
-        SkiaSharp.SKPaint paint = new SkiaSharp.SKPaint();
+        SKPictureRecorder recorder = new SKPictureRecorder();
+        recorder.beginRecording(SKRect.MakeWH(150, 100));
+        SKPaint paint = new SKPaint();
         paint.setColor(new uint32_t(SK_ColorRED));
-        recorder.getRecordingCanvas().drawRect(SkiaSharp.SKRect.MakeXYWH(10, 10, 80, 80), paint);
+        recorder.getRecordingCanvas().drawRect(SKRect.MakeXYWH(10, 10, 80, 80), paint);
         return recorder.finishRecordingAsPicture();
     }
 
     //C++ TO C# CONVERTER WARNING: The following constructor is declared outside of its associated class:
     public static TEST(RasterCache UnnamedParameter, SimpleInitialization UnnamedParameter2)
     {
-        flow.RasterCache cache = new flow.RasterCache();
+        RasterCache cache = new RasterCache();
         ASSERT_TRUE(true);
     }
 
@@ -475,15 +476,15 @@ public static class GlobalMembers
     public static TEST(RasterCache UnnamedParameter, ThresholdIsRespected UnnamedParameter2)
     {
         size_t threshold = 3;
-        flow.RasterCache cache = new flow.RasterCache(new size_t(threshold));
+        RasterCache cache = new RasterCache(new size_t(threshold));
 
-        SkMatrix matrix = SkMatrix.I();
+        SKMatrix matrix = SKMatrix.I();
 
         var picture = GetSamplePicture();
 
-        sk_sp<SkImage> image = new sk_sp<SkImage>();
+        sk_sp<SKImage> image = new sk_sp<SKImage>();
 
-        sk_sp<SkColorSpace> srgb = SkColorSpace.MakeSRGB();
+        sk_sp<SKColorSpace> srgb = SKColorSpace.MakeSRGB();
         ASSERT_FALSE(cache.Prepare(null, picture.get(), matrix, srgb.get(), true, false)); // 1
         cache.SweepAfterFrame();
         ASSERT_FALSE(cache.Prepare(null, picture.get(), matrix, srgb.get(), true, false)); // 2
@@ -496,15 +497,15 @@ public static class GlobalMembers
     public static TEST(RasterCache UnnamedParameter, ThresholdIsRespectedWhenZero UnnamedParameter2)
     {
         size_t threshold = 0;
-        flow.RasterCache cache = new flow.RasterCache(new size_t(threshold));
+        RasterCache cache = new RasterCache(new size_t(threshold));
 
-        SkMatrix matrix = SkMatrix.I();
+        SKMatrix matrix = SKMatrix.I();
 
         var picture = GetSamplePicture();
 
-        sk_sp<SkImage> image = new sk_sp<SkImage>();
+        sk_sp<SKImage> image = new sk_sp<SKImage>();
 
-        sk_sp<SkColorSpace> srgb = SkColorSpace.MakeSRGB();
+        sk_sp<SKColorSpace> srgb = SKColorSpace.MakeSRGB();
         ASSERT_FALSE(cache.Prepare(null, picture.get(), matrix, srgb.get(), true, false)); // 1
         cache.SweepAfterFrame();
         ASSERT_FALSE(cache.Prepare(null, picture.get(), matrix, srgb.get(), true, false)); // 2
@@ -517,15 +518,15 @@ public static class GlobalMembers
     public static TEST(RasterCache UnnamedParameter, SweepsRemoveUnusedFrames UnnamedParameter2)
     {
         size_t threshold = 3;
-        flow.RasterCache cache = new flow.RasterCache(new size_t(threshold));
+        RasterCache cache = new RasterCache(new size_t(threshold));
 
-        SkMatrix matrix = SkMatrix.I();
+        SKMatrix matrix = SKMatrix.I();
 
         var picture = GetSamplePicture();
 
-        sk_sp<SkImage> image = new sk_sp<SkImage>();
+        sk_sp<SKImage> image = new sk_sp<SKImage>();
 
-        sk_sp<SkColorSpace> srgb = SkColorSpace.MakeSRGB();
+        sk_sp<SKColorSpace> srgb = SKColorSpace.MakeSRGB();
         ASSERT_FALSE(cache.Prepare(null, picture.get(), matrix, srgb.get(), true, false)); // 1
         cache.SweepAfterFrame();
         ASSERT_FALSE(cache.Prepare(null, picture.get(), matrix, srgb.get(), true, false)); // 2
