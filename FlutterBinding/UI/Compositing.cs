@@ -1,4 +1,5 @@
-﻿using FlutterBinding.Mapping;
+﻿using FlutterBinding.Engine;
+using FlutterBinding.Mapping;
 using System;
 using System.Collections.Generic;
 using static FlutterBinding.Mapping.Helper;
@@ -56,6 +57,7 @@ namespace FlutterBinding.UI
         public SceneBuilder() { _constructor(); }
         void _constructor()
         {
+            this.Constructor();
             //native 'SceneBuilder_constructor';
         }
 
@@ -74,6 +76,7 @@ namespace FlutterBinding.UI
         }
         void _pushTransform(List<double> matrix4)
         {
+            this.PushTransform(matrix4);
             // native 'SceneBuilder_pushTransform';
         }
 
