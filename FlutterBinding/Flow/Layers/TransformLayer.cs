@@ -25,7 +25,7 @@ namespace FlutterBinding.Flow.Layers
         public override void Preroll(PrerollContext context, SKMatrix matrix)
         {
             SKMatrix child_matrix = new SKMatrix();
-            child_matrix.setConcat(matrix, transform_);
+            child_matrix.SetConcat(matrix, transform_);
 
             SKRect child_paint_bounds = SKRect.Empty;
             PrerollChildren(context, child_matrix, child_paint_bounds);
