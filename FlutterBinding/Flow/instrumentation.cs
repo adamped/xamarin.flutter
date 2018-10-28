@@ -75,12 +75,12 @@ namespace FlutterBinding.Flow
             // Establish the graph position.
             const float x = 0F;
             const float y = 0F;
-            float width = rect.width();
-            float height = rect.height();
+            float width = rect.Width;
+            float height = rect.Height;
 
             SKPaint paint = new SKPaint();
-            paint.setColor(0x99FFFFFF);
-            cache_canvas.DrawRect(SKRect.MakeXYWH(x, y, width, height), paint);
+            paint.Color = 0x99FFFFFF;
+            cache_canvas.DrawRect(new SKRect(x, y, x + width, y + height), paint);
 
             // Scale the graph to show frame times up to those that are 3 times the frame
             // time.
@@ -92,8 +92,8 @@ namespace FlutterBinding.Flow
             // it looks like we wrap around
             SKPath path = new SKPath();
             path.setIsVolatile(true);
-            path.moveTo(x, height);
-            path.lineTo(x, y + height * (1.0 - GlobalMembers.UnitHeight(laps_[0].ToMillisecondsF(), max_unit_interval)));
+            path.MoveTo(x, height);
+            path.LineTo(x, y + height * (1.0 - GlobalMembers.UnitHeight(laps_[0].ToMillisecondsF(), max_unit_interval)));
             double unit_x;
             double unit_next_x = 0.0;
             for (int i = 0; i < GlobalMembers.kMaxSamples; i += 1)
@@ -101,16 +101,16 @@ namespace FlutterBinding.Flow
                 unit_x = unit_next_x;
                 unit_next_x = ((double)(i + 1) / GlobalMembers.kMaxSamples);
                 double sample_y = y + height * (1.0 - GlobalMembers.UnitHeight(laps_[i].ToMillisecondsF(), max_unit_interval));
-                path.lineTo(x + width * unit_x, sample_y);
-                path.lineTo(x + width * unit_next_x, sample_y);
+                path.LineTo((float)(x + width * unit_x), (float)sample_y);
+                path.LineTo((float)(x + width * unit_next_x), (float)sample_y);
             }
-            path.lineTo(width, y + height * (1.0 - GlobalMembers.UnitHeight(laps_[GlobalMembers.kMaxSamples - 1].ToMillisecondsF(), max_unit_interval)));
-            path.lineTo(width, height);
-            path.close();
+            path.LineTo(width, y + height * (1.0 - GlobalMembers.UnitHeight(laps_[GlobalMembers.kMaxSamples - 1].ToMillisecondsF(), max_unit_interval)));
+            path.LineTo(width, height);
+            path.Close();
 
             // Draw the graph.
-            paint.setColor(0xAA0000FF);
-            cache_canvas.drawPath(path, paint);
+            paint.Color = 0xAA0000FF;
+            cache_canvas.DrawPath(path, paint);
         }
 
         //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
@@ -126,8 +126,8 @@ namespace FlutterBinding.Flow
             // Establish the graph position.
             const float x = 0F;
             const float y = 0F;
-            float width = rect.width();
-            float height = rect.height();
+            float width = rect.Width;
+            float height = rect.Height;
 
             // Scale the graph to show frame times up to those that are 3 times the frame
             // time.
@@ -141,19 +141,19 @@ namespace FlutterBinding.Flow
             paint.Style = SKPaintStyle.Fill;
             paint.BlendMode = SKBlendMode.Src;
             double sample_x = x + width * ((double)prev_drawn_sample_index_ / GlobalMembers.kMaxSamples);
-            var eraser_rect = SKRect.MakeLTRB(sample_x, y, sample_x + width * sample_unit_width, height);
+            var eraser_rect = new SKRect((float)sample_x, y, (float)(sample_x + width * sample_unit_width), height);
             cache_canvas.DrawRect(eraser_rect, paint);
 
             // Draws blue timing bar for new data.
             paint.Color = 0xAA0000FF;
             paint.BlendMode = SKBlendMode.SrcOver;
-            var bar_rect = SKRect.MakeLTRB(sample_x, y + height * (1.0 - GlobalMembers.UnitHeight(laps_[current_sample_ == 0 ? GlobalMembers.kMaxSamples - 1 : current_sample_ - 1].ToMillisecondsF(), max_unit_interval)), sample_x + width * sample_unit_width, height);
+            var bar_rect = new SKRect((float)sample_x, y + height * (1.0 - GlobalMembers.UnitHeight(laps_[current_sample_ == 0 ? GlobalMembers.kMaxSamples - 1 : current_sample_ - 1].ToMillisecondsF(), max_unit_interval)), (float)(sample_x + width * sample_unit_width), height);
             cache_canvas.DrawRect(bar_rect, paint);
 
             // Draw horizontal frame markers.
-            paint.setStrokeWidth(0F); // hairline
-            paint.setStyle(SKPaint.Style.kStroke_Style);
-            paint.setColor(0xCC000000);
+            paint.StrokeWidth = 0F; // hairline
+            paint.Style = SKPaintStyle.Stroke;
+            paint.Color = 0xCC000000;
 
             if (max_interval > GlobalMembers.kOneFrameMS)
             {
@@ -170,35 +170,35 @@ namespace FlutterBinding.Flow
                 for (int frame_index = 0; frame_index < frame_marker_count; frame_index++)
                 {
                     double frame_height = height * (1.0 - (GlobalMembers.UnitFrameInterval((frame_index + 1) * GlobalMembers.kOneFrameMS) / max_unit_interval));
-                    cache_canvas.DrawLine(x, y + frame_height, width, y + frame_height, paint);
+                    cache_canvas.DrawLine(x, (float)(y + frame_height), width, (float)(y + frame_height), paint);
                 }
             }
 
             // Paint the vertical marker for the current frame.
             // We paint it over the current frame, not after it, because when we
             // paint this we don't yet have all the times for the current frame.
-            paint.setStyle(SKPaint.Style.kFill_Style);
-            paint.setBlendMode(SKBlendMode.kSrcOver);
+            paint.Style = SKPaintStyle.Fill;
+            paint.BlendMode = SKBlendMode.SrcOver;
             if (GlobalMembers.UnitFrameInterval(LastLap().ToMillisecondsF()) > 1.0)
             {
                 // budget exceeded
-                paint.setColor(GlobalMembers.SK_ColorRED);
+                paint.Color = GlobalMembers.SK_ColorRED;
             }
             else
             {
                 // within budget
-                paint.setColor(GlobalMembers.SK_ColorGREEN);
+                paint.Color = GlobalMembers.SK_ColorGREEN;
             }
             sample_x = x + width * ((double)current_sample_ / GlobalMembers.kMaxSamples);
-            var marker_rect = SKRect.MakeLTRB(sample_x, y, sample_x + width * sample_unit_width, height);
+            var marker_rect = new SKRect((float)sample_x, y, (float)(sample_x + width * sample_unit_width), height);
             cache_canvas.DrawRect(marker_rect, paint);
             //C++ TO C# CONVERTER TODO TASK: The following line was determined to be a copy assignment (rather than a reference assignment) - this should be verified and a 'CopyFrom' method should be created:
             //ORIGINAL LINE: prev_drawn_sample_index_ = current_sample_;
-            prev_drawn_sample_index_.CopyFrom(current_sample_);
+            prev_drawn_sample_index_ = current_sample_;
 
             // Draw the cached surface onto the output canvas.
-            paint.reset();
-            visualize_cache_surface_.Dereference().draw(canvas, rect.x(), rect.y(), paint);
+            paint.Reset();
+            visualize_cache_surface_.Dereference().draw(canvas, rect.Left, rect.Top, paint);
         }
 
         public void Start()
@@ -206,7 +206,7 @@ namespace FlutterBinding.Flow
             start_ = fml.TimePoint.Now();
             //C++ TO C# CONVERTER TODO TASK: The following line was determined to be a copy assignment (rather than a reference assignment) - this should be verified and a 'CopyFrom' method should be created:
             //ORIGINAL LINE: current_sample_ = (current_sample_ + 1) % kMaxSamples;
-            current_sample_.CopyFrom((current_sample_ + 1) % GlobalMembers.kMaxSamples);
+            current_sample_ = (current_sample_ + 1) % GlobalMembers.kMaxSamples;
         }
 
         public void Stop()
@@ -308,8 +308,8 @@ namespace FlutterBinding.Flow
             canvas.DrawRect(rect, paint);
 
             // Establish the graph position.
-            float x = rect.x();
-            float y = rect.y();
+            float x = rect.Left;
+            float y = rect.Top;
             float width = rect.Width;
             float height = rect.Height;
             float bottom = y + height;
@@ -321,9 +321,9 @@ namespace FlutterBinding.Flow
 
             for (int i = 0; i < GlobalMembers.kMaxSamples; ++i)
             {
-                long current_bytes = values_[i];
+                ulong current_bytes = values_[i];
                 double ratio = (double)(current_bytes - min_bytes) / (max_bytes - min_bytes);
-                path.lineTo(x + (((double)(i) / (double)GlobalMembers.kMaxSamples) * width), y + ((1.0 - ratio) * height));
+                path.LineTo((float)(x + (((double)(i) / (double)GlobalMembers.kMaxSamples) * width)), (float)(y + ((1.0 - ratio) * height)));
             }
 
             path.RLineTo(100F, 0F);
@@ -338,10 +338,10 @@ namespace FlutterBinding.Flow
             double sample_unit_width = (1.0 / GlobalMembers.kMaxSamples);
             double sample_margin_unit_width = sample_unit_width / 6.0;
             double sample_margin_width = width * sample_margin_unit_width;
-            paint.setStyle(SKPaint.Style.kFill_Style);
-            paint.setColor(GlobalMembers.SK_ColorGRAY);
+            paint.Style = SKPaintStyle.Fill;
+            paint.Color = GlobalMembers.SK_ColorGRAY;
             double sample_x = x + width * ((double)current_sample_ / GlobalMembers.kMaxSamples) - sample_margin_width;
-            var marker_rect = SKRect.MakeLTRB(sample_x, y, sample_x + width * sample_unit_width + sample_margin_width * 2, bottom);
+            var marker_rect = new SKRect((float)sample_x, y, (float)(sample_x + width * sample_unit_width + sample_margin_width * 2), bottom);
             canvas.DrawRect(marker_rect, paint);
         }
 
