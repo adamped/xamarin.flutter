@@ -1,5 +1,6 @@
 ﻿using FlutterBinding.Flow.Layers;
 using SkiaSharp;
+using System;
 using System.Collections.Generic;
 using static FlutterBinding.Flow.Helper;
 
@@ -24,17 +25,17 @@ namespace FlutterBinding.Flow
 
         //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
         //ORIGINAL LINE: operator bool() const
-        public static implicit operator bool(RasterCacheResult ImpliedObject)
-        {
-            return (bool)ImpliedObject.image_;
-        }
+        //public static implicit operator bool(RasterCacheResult ImpliedObject)
+        //{
+        //    return (bool)ImpliedObject.image_;
+        //}
 
         //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
         //ORIGINAL LINE: bool is_valid() const
-        public bool is_valid()
-        {
-            return (bool)image_;
-        }
+        public bool is_valid;
+        //{
+        //    return (bool)image_;
+        //}
 
         //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
         //ORIGINAL LINE: void draw(SKCanvas& canvas, const SKPaint* paint = null) const
@@ -43,9 +44,9 @@ namespace FlutterBinding.Flow
             //C++ TO C# CONVERTER TODO TASK: There is no equivalent in C# to 'static_assert':
             //  (...) static_assert(false, "missing name for " "SkAutoCanvasRestore") auto_restore(&canvas, true);
             var bounds = RasterCache.GetDeviceBounds(logical_rect_, canvas.TotalMatrix);
-            FML_DCHECK(bounds.Size == image_.Dereference().dimensions());
+            //FML_DCHECK(bounds.Size == image_..dimensions());
             canvas.ResetMatrix();
-            canvas.DrawImage(image_, bounds.fLeft, bounds.fTop, paint);
+            canvas.DrawImage(image_, bounds.Left, bounds.Top, paint);
         }
 
         private SKImage image_;
@@ -81,8 +82,8 @@ namespace FlutterBinding.Flow
             //C++ TO C# CONVERTER TODO TASK: The following line was determined to contain a copy constructor call - this should be verified and a copy constructor should be created:
             //ORIGINAL LINE: SKMatrix result = ctm;
             SKMatrix result = ctm;
-            result[SKMatrix.kMTransX] = floorf((ctm.getTranslateX()) + 0.5f);
-            result[SKMatrix.kMTransY] = floorf((ctm.getTranslateY()) + 0.5f);
+            result.TransX = (float)Math.Floor((ctm.TransX) + 0.5f);
+            result.TransY = (float)Math.Floor((ctm.TransY) + 0.5f);
             return result;
         }
 
@@ -115,7 +116,7 @@ namespace FlutterBinding.Flow
             Entry entry = picture_cache_[cache_key];
             //C++ TO C# CONVERTER TODO TASK: The following line was determined to be a copy assignment (rather than a reference assignment) - this should be verified and a 'CopyFrom' method should be created:
             //ORIGINAL LINE: entry.access_count = ClampSize(entry.access_count + 1, 0, threshold_);
-            entry.access_count.CopyFrom(GlobalMembers.ClampSize(entry.access_count + 1, 0, threshold_));
+            entry.access_count = GlobalMembers.ClampSize(entry.access_count + 1, 0, threshold_);
             entry.used_this_frame = true;
 
             if (entry.access_count < threshold_ || threshold_ == 0)
@@ -128,7 +129,7 @@ namespace FlutterBinding.Flow
             {
                 //C++ TO C# CONVERTER TODO TASK: The following line was determined to be a copy assignment (rather than a reference assignment) - this should be verified and a 'CopyFrom' method should be created:
                 //ORIGINAL LINE: entry.image = RasterizePicture(picture, context, transformation_matrix, dst_color_space, checkerboard_images_);
-                entry.image.CopyFrom(GlobalMembers.RasterizePicture(picture, context, transformation_matrix, dst_color_space, checkerboard_images_));
+                entry.image = GlobalMembers.RasterizePicture(picture, context, transformation_matrix, dst_color_space, checkerboard_images_);
             }
             return true;
         }
@@ -139,18 +140,18 @@ namespace FlutterBinding.Flow
             Entry entry = layer_cache_[cache_key];
             //C++ TO C# CONVERTER TODO TASK: The following line was determined to be a copy assignment (rather than a reference assignment) - this should be verified and a 'CopyFrom' method should be created:
             //ORIGINAL LINE: entry.access_count = ClampSize(entry.access_count + 1, 0, threshold_);
-            entry.access_count.CopyFrom(GlobalMembers.ClampSize(entry.access_count + 1, 0, threshold_));
+            entry.access_count = GlobalMembers.ClampSize(entry.access_count + 1, 0, threshold_);
             entry.used_this_frame = true;
             if (!entry.image.is_valid())
             {
                 //C++ TO C# CONVERTER TODO TASK: Only lambda expressions having all locals passed by reference can be converted to C#:
                 //ORIGINAL LINE: entry.image = Rasterize(context->gr_context, ctm, context->dst_color_space, checkerboard_images_, layer->paint_bounds(), [layer, context](SKCanvas* canvas)
                 //C++ TO C# CONVERTER TODO TASK: The following line was determined to be a copy assignment (rather than a reference assignment) - this should be verified and a 'CopyFrom' method should be created:
-                entry.image.CopyFrom(GlobalMembers.Rasterize(context.gr_context, ctm, context.dst_color_space, checkerboard_images_, layer.paint_bounds(), (SKCanvas canvas) =>
+                entry.image = GlobalMembers.Rasterize(context.gr_context, ctm, context.dst_color_space, checkerboard_images_, layer.paint_bounds(), (SKCanvas canvas) =>
                 {
-                    Layer.PaintContext paintContext = new Layer.PaintContext(canvas, null, context.frame_time, context.engine_time, context.texture_registry, context.raster_cache, context.checkerboard_offscreen_layers);
+                    Layer.PaintContext paintContext = new Layer.PaintContext(canvas, null, context.texture_registry, context.raster_cache, context.checkerboard_offscreen_layers);
                     layer.Paint(paintContext);
-                }));
+                });
             }
         }
 

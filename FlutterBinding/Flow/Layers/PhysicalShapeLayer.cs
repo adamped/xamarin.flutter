@@ -1,4 +1,5 @@
-﻿using static FlutterBinding.Flow.Helper;
+﻿using SkiaSharp;
+using static FlutterBinding.Flow.Helper;
 
 // Copyright 2017 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
@@ -19,13 +20,13 @@ namespace FlutterBinding.Flow.Layers
 
         public void set_path(SKPath path)
         {
-            path_.CopyFrom(path);
+            path_ = path;
             isRect_ = false;
             SKRect rect = new SKRect();
             if (path.isRect(rect))
             {
                 isRect_ = true;
-                frameRRect_.CopyFrom(SKRoundRect.MakeRect(rect));
+                frameRRect_ = new SKRoundRect(rect);
             }
             else if (path.isRRect(frameRRect_))
             {
@@ -35,7 +36,7 @@ namespace FlutterBinding.Flow.Layers
             {
                 // isRRect returns false for ovals, so we need to explicitly check isOval
                 // as well.
-                frameRRect_.CopyFrom(SKRoundRect.MakeOval(rect));
+                frameRRect_ = new SKRoundRect(rect);
             }
             else
             {
@@ -45,7 +46,7 @@ namespace FlutterBinding.Flow.Layers
                 // default to use the bounding rectangle.
                 // TODO(amirh): fix this once we have a way to create a Scenic shape from
                 // an SKPath.
-                frameRRect_.CopyFrom(SKRoundRect.MakeRect(path.getBounds()));
+                frameRRect_ = new SKRoundRect(path.Bounds);
             }
         }
 
@@ -92,22 +93,17 @@ namespace FlutterBinding.Flow.Layers
 
             if (elevation_ == 0F)
             {
-                set_paint_bounds(path_.getBounds());
+                set_paint_bounds(path_.Bounds);
             }
             else
             {
-#if OS_FUCHSIA
-	  // Let the system compositor draw all shadows for us.
-	  set_needs_system_composite(true);
-#else
                 // Add some margin to the paint bounds to leave space for the shadow.
                 // The margin is hardcoded to an arbitrary maximum for now because Skia
                 // doesn't provide a way to calculate it.  We fill this whole region
                 // and clip children to it so we don't need to join the child paint bounds.
-                SKRect bounds = new SKRect(path_.getBounds());
-                bounds.outset(20.0, 20.0);
+                SKRect bounds = path_.Bounds;
+                bounds.Offset(20.0f, 20.0f);
                 set_paint_bounds(bounds);
-#endif
             }
         }
 
@@ -125,24 +121,24 @@ namespace FlutterBinding.Flow.Layers
 
             // Call drawPath without clip if possible for better performance.
             SKPaint paint = new SKPaint();
-            paint.setColor(color_);
+            paint.Color = color_;
             if (clip_behavior_ != Clip.antiAliasWithSaveLayer)
             {
-                context.canvas.drawPath(path_, paint);
+                context.canvas.DrawPath(path_, paint);
             }
 
-            int saveCount = context.canvas.save();
+            int saveCount = context.canvas.Save();
             switch (clip_behavior_)
             {
                 case Clip.hardEdge:
-                    context.canvas.clipPath(path_, false);
+                    context.canvas.ClipPath(path_, antialias: false);
                     break;
                 case Clip.antiAlias:
-                    context.canvas.clipPath(path_, true);
+                    context.canvas.ClipPath(path_, antialias: true);
                     break;
                 case Clip.antiAliasWithSaveLayer:
-                    context.canvas.clipPath(path_, true);
-                    context.canvas.saveLayer(paint_bounds(), null);
+                    context.canvas.ClipPath(path_, antialias: true);
+                    context.canvas.SaveLayer(paint_bounds(), null);
                     break;
                 case Clip.none:
                     break;
@@ -154,12 +150,12 @@ namespace FlutterBinding.Flow.Layers
                 // (https://github.com/flutter/flutter/issues/18057#issue-328003931)
                 // using saveLayer, we have to call drawPaint instead of drawPath as
                 // anti-aliased drawPath will always have such artifacts.
-                context.canvas.drawPaint(paint);
+                context.canvas.DrawPaint(paint);
             }
 
             PaintChildren(context);
 
-            context.canvas.restoreToCount(saveCount);
+            context.canvas.RestoreToCount(saveCount);
         }
 
 

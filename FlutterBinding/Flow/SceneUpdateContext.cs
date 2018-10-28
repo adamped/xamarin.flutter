@@ -156,7 +156,7 @@ namespace FlutterBinding.Flow
             {
                 this.rrect_ = new SKRoundRect(rrect);
                 this.color_ = color;
-                this.paint_bounds_ = new SKRect(SKRect.Empty);
+                this.paint_bounds_ = SKRect.Empty;
                 if (elevation != 0.0F)
                 {
                     entity_node().SetTranslation(0.0f, 0.0f, elevation);

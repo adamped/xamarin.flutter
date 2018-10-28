@@ -121,15 +121,15 @@ namespace FlutterBinding.Flow
                 return false;
             }
 
-            SKRect cull_rect = picture.cullRect();
+            SKRect cull_rect = picture.CullRect;
 
-            if (cull_rect.isEmpty())
+            if (cull_rect.IsEmpty)
             {
                 // No point in ever rasterizing an empty picture.
                 return false;
             }
 
-            if (!cull_rect.isFinite())
+            if (float.IsInfinity(cull_rect.Width) || float.IsInfinity(cull_rect.Height))
             {
                 // Cannot attempt to rasterize into an infinitely large surface.
                 return false;
@@ -179,11 +179,11 @@ namespace FlutterBinding.Flow
                 return new RasterCacheResult();
             }
 
-            SKCanvas canvas = surface.Dereference().getCanvas();
-            SKCanvas xformCanvas = new SKCanvas();
+            SKCanvas canvas = surface.Canvas;
+            SKCanvas xformCanvas = canvas;
             if (dst_color_space != null)
             {
-                xformCanvas = SkCreateColorSpaceXformCanvas(surface.Dereference().getCanvas(), GlobalMembers.sk_ref_sp(dst_color_space));
+                xformCanvas = SkCreateColorSpaceXformCanvas(canvas, GlobalMembers.sk_ref_sp(dst_color_space));
                 if (xformCanvas != null)
                 {
                     canvas = xformCanvas.get();
@@ -200,7 +200,7 @@ namespace FlutterBinding.Flow
                 DrawCheckerboard(canvas, logical_rect);
             }
 
-            return new RasterCacheResult(surface.Dereference().makeImageSnapshot(), logical_rect);
+            return new RasterCacheResult(surface.Snapshot(), logical_rect);
         }
 
         public static RasterCacheResult RasterizePicture(SKPicture picture, GRContext context, SKMatrix ctm, SKColorSpace dst_color_space, bool checkerboard)
@@ -209,7 +209,7 @@ namespace FlutterBinding.Flow
 
             //C++ TO C# CONVERTER TODO TASK: Only lambda expressions having all locals passed by reference can be converted to C#:
             //ORIGINAL LINE: return Rasterize(context, ctm, dst_color_space, checkerboard, picture->cullRect(), [=](SKCanvas* canvas)
-            return Rasterize(context, ctm, dst_color_space, checkerboard, picture.cullRect(), (SKCanvas canvas) =>
+            return Rasterize(context, ctm, dst_color_space, checkerboard, picture.CullRect, (SKCanvas canvas) =>
             {
                 canvas.DrawPicture(picture);
             });
