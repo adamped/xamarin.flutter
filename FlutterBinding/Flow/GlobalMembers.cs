@@ -11,6 +11,8 @@ namespace FlutterBinding.Flow
         public static readonly int kDisplayEngineStatistics = 1 << 2;
         public static readonly int kVisualizeEngineStatistics = 1 << 3;
 
+        public static SKColor SK_ColorTRANSPARENT = SKColor.Parse("#FF000000");
+
         //public static void DrawStatisticsText(SKCanvas canvas, string @string, int x, int y)
         //{
         //    SKPaint paint = new SKPaint();
@@ -163,16 +165,16 @@ namespace FlutterBinding.Flow
 
             // TODO(abarth): We should find a better heuristic here that lets us avoid
             // wasting memory on trivial layers that are easy to re-rasterize every frame.
-            return picture.approximateOpCount() > 10;
+            return false; //picture.approximateOpCount() > 10;
         }
 
         internal static RasterCacheResult Rasterize(GRContext context, SKMatrix ctm, SKColorSpace dst_color_space, bool checkerboard, SKRect logical_rect, Action<SKCanvas> draw_function)
         {
             SKRectI cache_rect = RasterCache.GetDeviceBounds(logical_rect, ctm);
 
-            SKImageInfo image_info = SKImageInfo.MakeN32Premul(cache_rect.width(), cache_rect.height());
+            SKImageInfo image_info = new SKImageInfo(cache_rect.Width, cache_rect.Height);
 
-            SKSurface surface = context != null ? SKSurface.MakeRenderTarget(context, SkBudgeted.kYes, image_info) : SKSurface.MakeRaster(image_info);
+            SKSurface surface = context != null ? SKSurface.CreateAsRenderTarget(context, new GRGlBackendTextureDesc() { Width = cache_rect.Width, Height = cache_rect.Height } ) : SKSurface.Create(image_info); //{ image_info.
 
             if (surface == null)
             {
@@ -181,24 +183,24 @@ namespace FlutterBinding.Flow
 
             SKCanvas canvas = surface.Canvas;
             SKCanvas xformCanvas = canvas;
-            if (dst_color_space != null)
-            {
-                xformCanvas = SkCreateColorSpaceXformCanvas(canvas, GlobalMembers.sk_ref_sp(dst_color_space));
-                if (xformCanvas != null)
-                {
-                    canvas = xformCanvas.get();
-                }
-            }
+            //if (dst_color_space != null)
+            //{
+            //    xformCanvas = SkCreateColorSpaceXformCanvas(canvas, GlobalMembers.sk_ref_sp(dst_color_space));
+            //    if (xformCanvas != null)
+            //    {
+            //        canvas = xformCanvas;
+            //    }
+            //}
 
             canvas.Clear(GlobalMembers.SK_ColorTRANSPARENT);
-            canvas.Translate(-cache_rect.left(), -cache_rect.top());
-            canvas.Concat(ctm);
+            canvas.Translate(-cache_rect.Left, -cache_rect.Top);
+            canvas.Concat(ref ctm);
             draw_function(canvas);
 
-            if (checkerboard)
-            {
-                DrawCheckerboard(canvas, logical_rect);
-            }
+            //if (checkerboard)
+            //{
+            //    DrawCheckerboard(canvas, logical_rect);
+            //}
 
             return new RasterCacheResult(surface.Snapshot(), logical_rect);
         }

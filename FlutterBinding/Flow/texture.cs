@@ -69,9 +69,9 @@ namespace FlutterBinding.Flow
         // Called from GPU thread.
         public Texture GetTexture(ulong id)
         {
-            var it = mapping_.find(id);
+            var it = mapping_[id];
             //C++ TO C# CONVERTER TODO TASK: Iterators are only converted within the context of 'while' and 'for' loops:
-            return it != mapping_.end() ? it.second : null;
+            return it; //: null; // This isn't right either
         }
 
         // Called from GPU thread.
@@ -79,7 +79,7 @@ namespace FlutterBinding.Flow
         {
             foreach (var it in mapping_)
             {
-                it.second.OnGRContextCreated();
+                it.Value.OnGRContextCreated();
             }
         }
 
@@ -88,7 +88,7 @@ namespace FlutterBinding.Flow
         {
             foreach (var it in mapping_)
             {
-                it.second.OnGRContextDestroyed();
+                it.Value.OnGRContextDestroyed();
             }
         }
 

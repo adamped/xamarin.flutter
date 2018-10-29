@@ -60,13 +60,13 @@ namespace FlutterBinding.Flow
         {
             public Entity(SceneUpdateContext context)
             {
-                this.context_ = new SceneUpdateContext(context);
+                this.context_ = context;
                 this.previous_entity_ = context.top_entity_;
-                this.entity_node_ = context.session();
-                if (previous_entity_ != null)
-                {
-                    previous_entity_.entity_node_.AddChild(entity_node_);
-                }
+                //this.entity_node_ = context.session();
+                //if (previous_entity_ != null)
+                //{
+                //    previous_entity_.entity_node_.AddChild(entity_node_);
+                //}
                 context.top_entity_ = this;
             }
             public void Dispose()
@@ -90,8 +90,8 @@ namespace FlutterBinding.Flow
             //private scenic.EntityNode entity_node_ = new scenic.EntityNode();
         }
 
-        public class Clip : Entity
-        {
+        //public class Clip : Entity
+        //{
             //public Clip(SceneUpdateContext context, scenic.Shape shape, SKRect shape_bounds) : base(context)
             //{
             //    scenic.ShapeNode shape_node = new scenic.ShapeNode(context.session());
@@ -103,7 +103,7 @@ namespace FlutterBinding.Flow
             //}
             //C++ TO C# CONVERTER TODO TASK: The implementation of the following method could not be found:
             //	public void Dispose();
-        }
+        //}
 
         public class Transform : Entity
         {
@@ -111,22 +111,22 @@ namespace FlutterBinding.Flow
             {
                 this.previous_scale_x_ = context.top_scale_x_;
                 this.previous_scale_y_ = context.top_scale_y_;
-                if (!transform.isIdentity())
-                {
-                    // TODO(MZ-192): The perspective and shear components in the matrix
-                    // are not handled correctly.
-                    MatrixDecomposition decomposition = new MatrixDecomposition(transform);
-                    if (decomposition.IsValid())
-                    {
-                        entity_node().SetTranslation(decomposition.translation().x(), decomposition.translation().y(), decomposition.translation().z());
+                //if (!transform.isIdentity())
+                //{
+                //    // TODO(MZ-192): The perspective and shear components in the matrix
+                //    // are not handled correctly.
+                //    MatrixDecomposition decomposition = new MatrixDecomposition(transform);
+                //    if (decomposition.IsValid())
+                //    {
+                //        entity_node().SetTranslation(decomposition.translation().x(), decomposition.translation().y(), decomposition.translation().z());
 
-                        entity_node().SetScale(decomposition.scale().x(), decomposition.scale().y(), decomposition.scale().z());
-                        context.top_scale_x_ *= decomposition.scale().x();
-                        context.top_scale_y_ *= decomposition.scale().y();
+                //        entity_node().SetScale(decomposition.scale().x(), decomposition.scale().y(), decomposition.scale().z());
+                //        context.top_scale_x_ *= decomposition.scale().x();
+                //        context.top_scale_y_ *= decomposition.scale().y();
 
-                        entity_node().SetRotation(decomposition.rotation().fData[0], decomposition.rotation().fData[1], decomposition.rotation().fData[2], decomposition.rotation().fData[3]);
-                    }
-                }
+                //        entity_node().SetRotation(decomposition.rotation().fData[0], decomposition.rotation().fData[1], decomposition.rotation().fData[2], decomposition.rotation().fData[3]);
+                //    }
+                //}
             }
             public Transform(SceneUpdateContext context, float scale_x, float scale_y, float scale_z) : base(context)
             {
@@ -134,7 +134,7 @@ namespace FlutterBinding.Flow
                 this.previous_scale_y_ = context.top_scale_y_;
                 if (scale_x != 1.0f || scale_y != 1.0f || scale_z != 1.0f)
                 {
-                    entity_node().SetScale(scale_x, scale_y, scale_z);
+                    //entity_node().SetScale(scale_x, scale_y, scale_z);
                     context.top_scale_x_ *= scale_x;
                     context.top_scale_y_ *= scale_y;
                 }
@@ -159,12 +159,12 @@ namespace FlutterBinding.Flow
                 this.paint_bounds_ = SKRect.Empty;
                 if (elevation != 0.0F)
                 {
-                    entity_node().SetTranslation(0.0f, 0.0f, elevation);
+                    //entity_node().SetTranslation(0.0f, 0.0f, elevation);
                 }
             }
             public new void Dispose()
             {
-                context().CreateFrame(entity_node(), rrect_, color_, paint_bounds_, paint_layers_);
+                //context().CreateFrame(entity_node(), rrect_, color_, paint_bounds_, paint_layers_);
                 base.Dispose();
             }
 
@@ -172,7 +172,7 @@ namespace FlutterBinding.Flow
             {
                 FML_DCHECK(layer.needs_painting());
                 paint_layers_.Add(layer);
-                paint_bounds_.join(layer.paint_bounds());
+                paint_bounds_.Union(layer.paint_bounds());
             }
 
             private readonly SKRoundRect rrect_;
@@ -194,7 +194,7 @@ namespace FlutterBinding.Flow
             // Release Mozart session resources for all ExportNodes.
             foreach (var export_node in export_nodes_)
             {
-                export_node.Dispose(false);
+                export_node.Dispose(); // (false);
             }
         }
 
@@ -222,9 +222,9 @@ namespace FlutterBinding.Flow
 
         public void AddChildScene(ExportNode export_node, SKPoint offset, bool hit_testable)
         {
-            FML_DCHECK(top_entity_);
+            //FML_DCHECK(top_entity_);
 
-            export_node.Bind(this, top_entity_.entity_node(), offset, hit_testable);
+            //export_node.Bind(this, top_entity_.entity_node(), offset, hit_testable);
         }
 
         // Adds reference to |export_node| so we can call export_node->Dispose() in
@@ -238,7 +238,7 @@ namespace FlutterBinding.Flow
         // Removes reference to |export_node|.
         public void RemoveExportNode(ExportNode export_node)
         {
-            export_nodes_.erase(export_node);
+            export_nodes_.Remove(export_node);
         }
 
         // TODO(chinmaygarde): This method must submit the surfaces as soon as paint
@@ -255,7 +255,7 @@ namespace FlutterBinding.Flow
             {
                 //FML_DCHECK(task.surface);
                 SKCanvas canvas = task.surface.GetSkiaSurface().Canvas;
-                Layer.PaintContext context = new Layer.PaintContext(canvas, frame.context().frame_time(), frame.context().engine_time(), frame.context().texture_registry(), frame.context().raster_cache(), false);
+                Layer.PaintContext context = new Layer.PaintContext(canvas, null, frame.context().texture_registry(), frame.context().raster_cache(), false);
                 canvas.RestoreToCount(1);
                 canvas.Save();
                 canvas.Clear(task.background_color);
@@ -265,7 +265,7 @@ namespace FlutterBinding.Flow
                 {
                     layer.Paint(context);
                 }
-                surfaces_to_submit.emplace_back(task.surface);
+                surfaces_to_submit.Add(task.surface);
             }
             paint_tasks_.Clear();
             return surfaces_to_submit;

@@ -23,23 +23,23 @@ namespace FlutterBinding.Flow.Layers
             path_ = path;
             isRect_ = false;
             SKRect rect = new SKRect();
-            if (path.isRect(rect))
-            {
-                isRect_ = true;
-                frameRRect_ = new SKRoundRect(rect);
-            }
-            else if (path.isRRect(frameRRect_))
-            {
-                isRect_ = frameRRect_.isRect();
-            }
-            else if (path.isOval(rect))
-            {
-                // isRRect returns false for ovals, so we need to explicitly check isOval
-                // as well.
-                frameRRect_ = new SKRoundRect(rect);
-            }
-            else
-            {
+            //if (path.isRect(rect))
+            //{
+            //    isRect_ = true;
+            //    frameRRect_ = new SKRoundRect(rect);
+            //}
+            //else if (SKPath.path.isRRect(frameRRect_))
+            //{
+            //    isRect_ = frameRRect_.isRect();
+            //}
+            //else if (path.isOval(rect))
+            //{
+            //    // isRRect returns false for ovals, so we need to explicitly check isOval
+            //    // as well.
+            //    frameRRect_ = new SKRoundRect(rect);
+            //}
+            //else
+            //{
                 // Scenic currently doesn't provide an easy way to create shapes from
                 // arbitrary paths.
                 // For shapes that cannot be represented as a rounded rectangle we
@@ -47,7 +47,7 @@ namespace FlutterBinding.Flow.Layers
                 // TODO(amirh): fix this once we have a way to create a Scenic shape from
                 // an SKPath.
                 frameRRect_ = new SKRoundRect(path.Bounds);
-            }
+            //}
         }
 
         public void set_elevation(float elevation)
@@ -69,21 +69,21 @@ namespace FlutterBinding.Flow.Layers
 
         public static void DrawShadow(SKCanvas canvas, SKPath path, uint color, float elevation, bool transparentOccluder, float dpr)
         {
-            const float kAmbientAlpha = 0.039f;
-            const float kSpotAlpha = 0.25f;
-            const float kLightHeight = 600F;
-            const float kLightRadius = 800F;
+            //const float kAmbientAlpha = 0.039f;
+            //const float kSpotAlpha = 0.25f;
+            //const float kLightHeight = 600F;
+            //const float kLightRadius = 800F;
 
-            SkShadowFlags flags = transparentOccluder ? SkShadowFlags.kTransparentOccluder_ShadowFlag : SkShadowFlags.kNone_ShadowFlag;
-            SKRect bounds = path.getBounds();
-            float shadow_x = (bounds.left() + bounds.right()) / 2;
-            float shadow_y = bounds.top() - 600.0f;
-            uint inAmbient = GlobalMembers.SkColorSetA(color, kAmbientAlpha * (((color) >> 24) & 0xFF));
-            uint inSpot = GlobalMembers.SkColorSetA(color, kSpotAlpha * (((color) >> 24) & 0xFF));
-            uint ambientColor;
-            uint spotColor;
-            SkShadowUtils.ComputeTonalColors(inAmbient, inSpot, ref ambientColor, ref spotColor);
-            SkShadowUtils.DrawShadow(canvas, path, SKPoint3.Make(0, 0, dpr * elevation), SKPoint3.Make(shadow_x, shadow_y, dpr * kLightHeight), dpr * kLightRadius, ambientColor, spotColor, flags);
+            //SkShadowFlags flags = transparentOccluder ? SkShadowFlags.kTransparentOccluder_ShadowFlag : SkShadowFlags.kNone_ShadowFlag;
+            //SKRect bounds = path.Bounds;
+            //float shadow_x = (bounds.Left + bounds.Right) / 2;
+            //float shadow_y = bounds.Top - 600.0f;
+            //uint inAmbient = GlobalMembers.SkColorSetA(color, kAmbientAlpha * (((color) >> 24) & 0xFF));
+            //uint inSpot = GlobalMembers.SkColorSetA(color, kSpotAlpha * (((color) >> 24) & 0xFF));
+            //uint ambientColor;
+            //uint spotColor;
+            //SkShadowUtils.ComputeTonalColors(inAmbient, inSpot, ref ambientColor, ref spotColor);
+            //SkShadowUtils.DrawShadow(canvas, path, SKPoint3.Make(0, 0, dpr * elevation), SKPoint3.Make(shadow_x, shadow_y, dpr * kLightHeight), dpr * kLightRadius, ambientColor, spotColor, flags);
         }
 
         public override void Preroll(PrerollContext context, SKMatrix matrix)

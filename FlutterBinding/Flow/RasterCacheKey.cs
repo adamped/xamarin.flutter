@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using static FlutterBinding.Flow.Helper;
 using SkiaSharp;
+using static FlutterBinding.Flow.RasterCache;
 
 // Copyright 2017 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
@@ -11,16 +12,16 @@ namespace FlutterBinding.Flow
 
     //C++ TO C# CONVERTER TODO TASK: The original C++ template specifier was replaced with a C# generic specifier, which may not produce the same behavior:
     //ORIGINAL LINE: template <typename ID>
-    public class RasterCacheKey<ID>
+    public class RasterCacheKey<ID> where ID : Entry
     {
         public RasterCacheKey(ID id, SKMatrix ctm)
         {
             this.id_ = id;
-            this.matrix_ = new SKMatrix(ctm);
-            matrix_[SKMatrix.kMTransX] = GlobalMembers.SkScalarFraction(ctm.getTranslateX());
-            matrix_[SKMatrix.kMTransY] = GlobalMembers.SkScalarFraction(ctm.getTranslateY());
+            this.matrix_ = ctm;
+            //matrix_[SKMatrix.kMTransX] = ctm.getTranslateX());
+            //matrix_[SKMatrix.kMTransY] = ctm.getTranslateY());
 #if !SUPPORT_FRACTIONAL_TRANSLATION
-            FML_DCHECK(matrix_.getTranslateX() == 0F && matrix_.getTranslateY() == 0F);
+            FML_DCHECK(ctm.TransX == 0F && ctm.TransY == 0F);
 #endif
         }
 
@@ -41,9 +42,10 @@ namespace FlutterBinding.Flow
         {
             //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
             //ORIGINAL LINE: uint operator ()(RasterCacheKey const& key) const
-            public static uint functorMethod(RasterCacheKey key)
+            public static uint functorMethod(RasterCacheKey<ID> key)
             {
-                return std::hash<ID>()(key.id_);
+               return (uint)key.GetHashCode();
+               // return std::hash<ID>()(key.id_);
             }
         }
 
@@ -51,9 +53,9 @@ namespace FlutterBinding.Flow
         {
             //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
             //ORIGINAL LINE: constexpr bool operator ()(const RasterCacheKey& lhs, const RasterCacheKey& rhs) const
-            public static bool functorMethod(RasterCacheKey lhs, RasterCacheKey rhs)
+            public static bool functorMethod(RasterCacheKey<ID> lhs, RasterCacheKey<ID> rhs)
             {
-                return lhs.id_ == rhs.id_ && lhs.matrix_ == rhs.matrix_;
+                return lhs.id_.Equals(rhs.id_) && lhs.matrix_.Equals(rhs.matrix_);
             }
         }
 

@@ -84,7 +84,7 @@ namespace FlutterBinding.Flow.Layers
             {
                 SKMatrix ctm = context.canvas.TotalMatrix;
                 RasterCacheResult result = context.raster_cache.Get(picture(), ctm);
-                if (result.is_valid())
+                if (result.is_valid)
                 {
                     result.draw(context.canvas);
                     return;

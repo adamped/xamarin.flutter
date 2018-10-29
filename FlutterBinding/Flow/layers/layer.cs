@@ -1,5 +1,6 @@
 ﻿using SkiaSharp;
 using static FlutterBinding.Flow.Helper;
+using static FlutterBinding.Flow.RasterCache;
 
 // Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
@@ -52,7 +53,7 @@ namespace FlutterBinding.Flow.Layers
 
     // Represents a single composited layer. Created on the UI thread but then
     // subquently used on the Rasterizer thread.
-    public abstract class Layer //: System.IDisposable
+    public abstract class Layer: Entry //: System.IDisposable
     {
         public Layer()
         {

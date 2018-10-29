@@ -24,7 +24,9 @@ namespace FlutterBinding.Flow.Layers
         public void Preroll(CompositorContext.ScopedFrame frame, bool ignore_raster_cache = false)
         {
             TRACE_EVENT0("flutter", "LayerTree::Preroll");
-            SKColorSpace color_space = frame.canvas() != null ? frame.canvas().imageInfo().colorSpace() : null;
+            
+            //frame.canvas().imageInfo().colorSpace()
+            SKColorSpace color_space = frame.canvas() != null ? SKImageInfo.Empty.ColorSpace : null;
             frame.context().raster_cache().SetCheckboardCacheImages(checkerboard_raster_cache_images_);
             PrerollContext context = ignore_raster_cache ? null :new PrerollContext(frame.context().raster_cache(), frame.gr_context(), color_space, SKRect.Empty, frame.context().texture_registry(), checkerboard_offscreen_layers_);
 
