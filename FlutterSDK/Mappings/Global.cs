@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FlutterSDK.animation.animation;
+using System;
 
 namespace FlutterSDK
 {
@@ -135,6 +136,8 @@ namespace FlutterSDK
             return h;
         }
     }
+
+    public delegate void AnimationStatusListener(AnimationStatus status);
 
     public class Paint
     {
