@@ -12,17 +12,17 @@ namespace FlutterBinding.Flow
     //C++ TO C# CONVERTER NOTE: C# has no need of forward class declarations:
     //class LayerTree;
 
-    public class CompositorContext : System.IDisposable
+    public class CompositorContext //: System.IDisposable
     {
         public class ScopedFrame : System.IDisposable
         {
             public ScopedFrame(CompositorContext context, GRContext gr_context, SKCanvas canvas, ExternalViewEmbedder view_embedder, SKMatrix root_surface_transformation, bool instrumentation_enabled)
             {
-                this.context_ = new CompositorContext(context);
+                this.context_ = context;
                 this.gr_context_ = gr_context;
                 this.canvas_ = canvas;
                 this.view_embedder_ = view_embedder;
-                this.root_surface_transformation_ = new SKMatrix(root_surface_transformation);
+                this.root_surface_transformation_ = root_surface_transformation;
                 this.instrumentation_enabled_ = instrumentation_enabled;
                 context_.BeginFrame(this, instrumentation_enabled_);
             }
@@ -125,38 +125,38 @@ namespace FlutterBinding.Flow
 
         //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
         //ORIGINAL LINE: const Stopwatch& frame_time() const
-        public Stopwatch frame_time()
-        {
-            return frame_time_;
-        }
+        //public Stopwatch frame_time()
+        //{
+        //    return frame_time_;
+        //}
 
-        public Stopwatch engine_time()
-        {
-            return engine_time_;
-        }
+        //public Stopwatch engine_time()
+        //{
+        //    return engine_time_;
+        //}
 
         private RasterCache raster_cache_ = new RasterCache();
         private TextureRegistry texture_registry_ = new TextureRegistry();
         private Counter frame_count_ = new Counter();
-        private Stopwatch frame_time_ = new Stopwatch();
-        private Stopwatch engine_time_ = new Stopwatch();
+        //private Stopwatch frame_time_ = new Stopwatch();
+        //private Stopwatch engine_time_ = new Stopwatch();
 
         private void BeginFrame(ScopedFrame frame, bool enable_instrumentation)
         {
-            if (enable_instrumentation)
-            {
-                frame_count_.Increment();
-                frame_time_.Start();
-            }
+            //if (enable_instrumentation)
+            //{
+            //    frame_count_.Increment();
+            //    frame_time_.Start();
+            //}
         }
 
         private void EndFrame(ScopedFrame frame, bool enable_instrumentation)
         {
             raster_cache_.SweepAfterFrame();
-            if (enable_instrumentation)
-            {
-                frame_time_.Stop();
-            }
+            //if (enable_instrumentation)
+            //{
+            //    frame_time_.Stop();
+            //}
         }
 
         //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':

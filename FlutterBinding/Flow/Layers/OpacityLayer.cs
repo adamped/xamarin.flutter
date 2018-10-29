@@ -31,11 +31,11 @@ namespace FlutterBinding.Flow.Layers
             //C++ TO C# CONVERTER TODO TASK: The following line was determined to contain a copy constructor call - this should be verified and a copy constructor should be created:
             //ORIGINAL LINE: SKMatrix child_matrix = matrix;
             SKMatrix child_matrix = matrix;
-            child_matrix.postTranslate(offset_.fX, offset_.fY);
+            child_matrix.SetScaleTranslate(child_matrix.ScaleX, child_matrix.ScaleY, offset_.X, offset_.Y);
             base.Preroll(context, child_matrix);
             if (context.raster_cache != null && layers().Count == 1)
             {
-                Layer child = layers()[0].get();
+                Layer child = layers()[0];//.get();
                 //C++ TO C# CONVERTER TODO TASK: The following line was determined to contain a copy constructor call - this should be verified and a copy constructor should be created:
                 //ORIGINAL LINE: SKMatrix ctm = child_matrix;
                 SKMatrix ctm = child_matrix;
@@ -69,8 +69,8 @@ namespace FlutterBinding.Flow.Layers
             if (layers().Count == 1)// && context.raster_cache)
             {
                 SKMatrix ctm = context.canvas.TotalMatrix;
-                RasterCacheResult child_cache = context.raster_cache.Get(layers()[0].get(), ctm);
-                if (child_cache.is_valid())
+                RasterCacheResult child_cache = context.raster_cache.Get(layers()[0], ctm);
+                if (child_cache.is_valid)
                 {
                     child_cache.draw(context.canvas, paint);
                     return;

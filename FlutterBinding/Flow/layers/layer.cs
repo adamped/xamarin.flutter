@@ -1,5 +1,6 @@
 ﻿using SkiaSharp;
 using static FlutterBinding.Flow.Helper;
+using static FlutterBinding.Flow.RasterCache;
 
 // Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
@@ -28,21 +29,37 @@ namespace FlutterBinding.Flow.Layers
         public SKRect child_paint_bounds = new SKRect();
 
         // The following allows us to paint in the end of subtree preroll
-        public readonly Stopwatch frame_time;
-        public readonly Stopwatch engine_time;
+        //public readonly Stopwatch frame_time;
+        //public readonly Stopwatch engine_time;
         public TextureRegistry texture_registry;
         public readonly bool checkerboard_offscreen_layers;
+
+        public PrerollContext(RasterCache raster_cache,
+                              GRContext gr_context,
+                              SKColorSpace dst_color_space,
+                              SKRect child_paint_bounds,
+                              TextureRegistry texture_registry,
+                              bool checkerboard_offscreen_layers)
+        {
+            this.raster_cache = raster_cache;
+            this.gr_context = gr_context;
+            this.dst_color_space = dst_color_space;
+            this.child_paint_bounds = child_paint_bounds;
+            this.texture_registry = texture_registry;
+            this.checkerboard_offscreen_layers = checkerboard_offscreen_layers;
+        }
+
     }
 
     // Represents a single composited layer. Created on the UI thread but then
     // subquently used on the Rasterizer thread.
-    public abstract class Layer : System.IDisposable
+    public abstract class Layer: Entry //: System.IDisposable
     {
         public Layer()
         {
             this.parent_ = null;
             this.needs_system_composite_ = false;
-            this.paint_bounds_ = new SKRect(SKRect.Empty);
+            this.paint_bounds_ = SKRect.Empty;
         }
         //C++ TO C# CONVERTER TODO TASK: The implementation of the following method could not be found:
         //  public void Dispose();
@@ -55,11 +72,24 @@ namespace FlutterBinding.Flow.Layers
         {
             public SKCanvas canvas;
             public ExternalViewEmbedder view_embedder;
-            public readonly Stopwatch frame_time;
-            public readonly Stopwatch engine_time;
+            //public readonly Stopwatch frame_time;
+            //public readonly Stopwatch engine_time;
             public TextureRegistry texture_registry;
             public readonly RasterCache raster_cache;
             public readonly bool checkerboard_offscreen_layers;
+
+            public PaintContext(SKCanvas canvas,
+                                ExternalViewEmbedder view_embedder,
+                                TextureRegistry texture_registry,
+                                RasterCache raster_cache,
+                                bool checkerboard_offscreen_layers)
+            {
+                this.canvas = canvas;
+                this.view_embedder = view_embedder;
+                this.texture_registry = texture_registry;
+                this.raster_cache = raster_cache;
+                this.checkerboard_offscreen_layers = checkerboard_offscreen_layers;
+            }
         }
 
         // Calls SKCanvas::saveLayer and restores the layer upon destruction. Also
@@ -71,35 +101,35 @@ namespace FlutterBinding.Flow.Layers
                 return new Layer.AutoSaveLayer(paint_context, bounds, paint);
             }
 
-            public static Layer.AutoSaveLayer Create(PaintContext paint_context, SKCanvas.SaveLayerRec layer_rec)
-            {
-                return new Layer.AutoSaveLayer(paint_context, layer_rec);
-            }
+            //public static Layer.AutoSaveLayer Create(PaintContext paint_context, SKCanvas.SaveLayerRec layer_rec)
+            //{
+            //    return new Layer.AutoSaveLayer(paint_context, layer_rec);
+            //}
 
             public void Dispose()
             {
                 if (paint_context_.checkerboard_offscreen_layers)
                 {
-                    DrawCheckerboard(paint_context_.canvas, bounds_);
+                    //DrawCheckerboard(paint_context_.canvas, bounds_);
                 }
-                paint_context_.canvas.restore();
+                paint_context_.canvas.Restore();
             }
 
             private AutoSaveLayer(PaintContext paint_context, SKRect bounds, SKPaint paint)
             {
-                this.paint_context_ = new Layer.PaintContext(paint_context);
+                this.paint_context_ = paint_context;
                 this.bounds_ = bounds;
                 //C++ TO C# CONVERTER TODO TASK: The following line was determined to contain a copy constructor call - this should be verified and a copy constructor should be created:
                 //ORIGINAL LINE: paint_context_.canvas.saveLayer(bounds_, paint);
-                paint_context_.canvas.saveLayer(bounds_, paint);
+                paint_context_.canvas.SaveLayer(bounds_, paint);
             }
 
-            private AutoSaveLayer(PaintContext paint_context, SKCanvas.SaveLayerRec layer_rec)
-            {
-                this.paint_context_ = paint_context;
-                this.bounds_ = layer_rec.fBounds;
-                paint_context_.canvas.SaveLayer(layer_rec);
-            }
+            //private AutoSaveLayer(PaintContext paint_context, SKCanvas.SaveLayerRec layer_rec)
+            //{
+            //    this.paint_context_ = paint_context;
+            //    this.bounds_ = layer_rec.fBounds;
+            //    paint_context_.canvas.SaveLayer(layer_rec);
+            //}
 
             private readonly PaintContext paint_context_;
             private readonly SKRect bounds_ = new SKRect();
@@ -154,7 +184,7 @@ namespace FlutterBinding.Flow.Layers
         //ORIGINAL LINE: bool needs_painting() const
         public bool needs_painting()
         {
-            return !paint_bounds_.isEmpty();
+            return !paint_bounds_.IsEmpty;
         }
 
         private ContainerLayer parent_;

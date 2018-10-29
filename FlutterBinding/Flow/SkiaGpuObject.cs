@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using static FlutterBinding.Flow.Helper;
 // Copyright 2017 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
@@ -6,10 +7,14 @@ using static FlutterBinding.Flow.Helper;
 
 namespace FlutterBinding.Flow
 {
+    public class SkRefCnt
+    {
+        public void unref() { }
+    }
 
     // A queue that holds Skia objects that must be destructed on the the given task
     // runner.
-    public class SkiaUnrefQueue : fml.RefCountedThreadSafe<SkiaUnrefQueue>
+    public class SkiaUnrefQueue //: fml.RefCountedThreadSafe<SkiaUnrefQueue>
     {
         public void Unref(SkRefCnt @object)
         {
@@ -22,10 +27,12 @@ namespace FlutterBinding.Flow
                 drain_pending_ = true;
                 //C++ TO C# CONVERTER TODO TASK: Only lambda expressions having all locals passed by reference can be converted to C#:
                 //ORIGINAL LINE: task_runner_->PostDelayedTask([strong = fml::Ref(this)]()
-                task_runner_.Dereference().PostDelayedTask(() =>
-                {
-                    strong.Drain();
-                }, drain_delay_);
+                //task_runner_.Dereference().PostDelayedTask(() =>
+                //{
+                //    strong.Drain();
+                //}, drain_delay_);
+                var drain_delay_ = 50; // I just put this here, no idea where it comes from.
+                Task.Delay(drain_delay_).ContinueWith(t => this.Drain());
             }
         }
 
@@ -39,7 +46,7 @@ namespace FlutterBinding.Flow
             LinkedList<SkRefCnt> skia_objects = new LinkedList<SkRefCnt>();
             lock (mutex_)
             {
-                objects_.swap(skia_objects);
+                objects_ = skia_objects;
                 drain_pending_ = false;
             }
 
@@ -49,23 +56,23 @@ namespace FlutterBinding.Flow
             }
         }
 
-        private readonly fml.TaskRunner task_runner_ = new fml.TaskRunner();
-        private readonly fml.TimeDelta drain_delay_ = new fml.TimeDelta();
+        //private readonly fml.TaskRunner task_runner_ = new fml.TaskRunner();
+        //private readonly fml.TimeDelta drain_delay_ = new fml.TimeDelta();
         private object mutex_ = new object();
         private LinkedList<SkRefCnt> objects_ = new LinkedList<SkRefCnt>();
         private bool drain_pending_;
 
-        private SkiaUnrefQueue(fml.TaskRunner task_runner, fml.TimeDelta delay)
-        {
-            this.task_runner_ = new fml.RefPtr<fml.TaskRunner>(std::move(task_runner));
-            this.drain_delay_ = new fml.TimeDelta(delay);
-            this.drain_pending_ = false;
-        }
+        //private SkiaUnrefQueue(fml.TaskRunner task_runner, fml.TimeDelta delay)
+        //{
+        //    this.task_runner_ = new fml.RefPtr<fml.TaskRunner>(std::move(task_runner));
+        //    this.drain_delay_ = new fml.TimeDelta(delay);
+        //    this.drain_pending_ = false;
+        //}
 
         public new void Dispose()
         {
             Drain();
-            base.Dispose();
+            //base.Dispose();
         }
 
         //C++ TO C# CONVERTER TODO TASK: C# has no concept of a 'friend' class:
@@ -89,10 +96,10 @@ namespace FlutterBinding.Flow
         //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = default':
         //  SkiaGPUObject() = default;
 
-        public SkiaGPUObject(sk_sp<T> @object, fml.RefPtr<SkiaUnrefQueue> queue)
+        public SkiaGPUObject(T @object, SkiaUnrefQueue queue)
         {
-            this.object_ = new sk_sp<T>(std::move(@object));
-            this.queue_ = new fml.RefPtr<SkiaUnrefQueue>(std::move(queue));
+            this.object_ = @object;
+            this.queue_ = queue;
             FML_DCHECK(queue_ != null && object_ != null);
         }
 
@@ -118,7 +125,7 @@ namespace FlutterBinding.Flow
         {
             if (object_ != null)
             {
-                queue_.Dereference().Unref(object_.release());
+                //queue_.Unref(object_.release());
             }
             queue_ = null;
             FML_DCHECK(object_ == null);

@@ -9,13 +9,13 @@ using static FlutterBinding.Flow.Helper;
 namespace FlutterBinding.Flow
 {
 
-    public abstract class Texture : System.IDisposable
+    public abstract class Texture //: System.IDisposable
     {
         protected Texture(ulong id)
         {
             //C++ TO C# CONVERTER TODO TASK: The following line was determined to be a copy assignment (rather than a reference assignment) - this should be verified and a 'CopyFrom' method should be created:
             //ORIGINAL LINE: this.id_ = id;
-            this.id_.CopyFrom(id);
+            this.id_ = id;
         }
 
         // Called from GPU thread.
@@ -47,7 +47,7 @@ namespace FlutterBinding.Flow
         //  Texture& operator =(const Texture&) = delete;
     }
 
-    public class TextureRegistry : System.IDisposable
+    public class TextureRegistry //: System.IDisposable
     {
         //C++ TO C# CONVERTER TODO TASK: The implementation of the following method could not be found:
         //  TextureRegistry();
@@ -69,9 +69,9 @@ namespace FlutterBinding.Flow
         // Called from GPU thread.
         public Texture GetTexture(ulong id)
         {
-            var it = mapping_.find(id);
+            var it = mapping_[id];
             //C++ TO C# CONVERTER TODO TASK: Iterators are only converted within the context of 'while' and 'for' loops:
-            return it != mapping_.end() ? it.second : null;
+            return it; //: null; // This isn't right either
         }
 
         // Called from GPU thread.
@@ -79,7 +79,7 @@ namespace FlutterBinding.Flow
         {
             foreach (var it in mapping_)
             {
-                it.second.OnGRContextCreated();
+                it.Value.OnGRContextCreated();
             }
         }
 
@@ -88,7 +88,7 @@ namespace FlutterBinding.Flow
         {
             foreach (var it in mapping_)
             {
-                it.second.OnGRContextDestroyed();
+                it.Value.OnGRContextDestroyed();
             }
         }
 
