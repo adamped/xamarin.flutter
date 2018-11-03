@@ -1,20 +1,20 @@
+import 'package:analyzer/dart/ast/token.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:analyzer/dart/element/element.dart';
 
 import 'config.dart';
 
 class Naming {
-  static List<String> namespacePartsFromIdentifier(
-      String identifier) {
+  static List<String> namespacePartsFromIdentifier(String identifier) {
     var namespacePath = identifier
-        .replaceAll("file:///" + Config.directoryPath.replaceAll("\\", "/") + "/", "")
+        .replaceAll(
+            "file:///" + Config.directoryPath.replaceAll("\\", "/") + "/", "")
         .replaceAll(".dart", "");
     return namespacePath.split('/');
   }
 
-  static String namespaceFromIdentifier(
-      String identifier) {
-    return  Config.rootNamespace +
+  static String namespaceFromIdentifier(String identifier) {
+    return Config.rootNamespace +
         "." +
         namespacePartsFromIdentifier(identifier).join(".");
   }
@@ -67,5 +67,16 @@ class Naming {
   static String mixinInterfaceName(ClassElement mxin) {
     var name = nameWithTypeParameters(mxin, true);
     return name;
+  }
+
+  static String getReturnType(FunctionTypedElement element) {
+    return element.returnType.displayName;
+  }
+
+  static String tokenToText(Token token) {
+    var text = token.lexeme;
+    //if (token.next != null && token.next.isEof == false )
+    //  text += tokenToText(token.next);
+    return text;
   }
 }

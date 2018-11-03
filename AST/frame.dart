@@ -2,6 +2,7 @@ import 'package:analyzer/dart/element/element.dart';
 
 import 'comments.dart';
 import 'config.dart';
+import 'fields.dart';
 import 'methods.dart';
 import 'naming.dart';
 
@@ -120,6 +121,7 @@ class Frame {
 
     code.writeln("{\n");
 
+    code.writeln("#region mixin methods");
     var addedByMxin = new List<MethodElement>();
     var mxinMethods = new List<MethodElement>();
     // Add mixin fields and method implementations
@@ -143,16 +145,26 @@ class Frame {
         // Store the overriding method to avoid adding it again when adding the other methods
         if (overrideElement != null) addedByMxin.add(overrideElement);
 
-        code.writeln(
-            Methods.printMxinMethod(mxinMethod, fieldName, overrideElement, element));
+        code.writeln(Methods.printMxinMethod(
+            mxinMethod, fieldName, overrideElement, element));
       }
     }
+    code.writeln("#endregion\n");
 
+    code.writeln("#region fields");
+    for (var field in element.fields) {
+      code.writeln(Fields.printField(field));
+    }
+    code.writeln("#endregion\n");
+
+    code.writeln("#region methods");
     // Add methods that are not already handled as mixin method overrides
     for (var method
         in element.methods.where((method) => !addedByMxin.contains(method))) {
-      code.writeln(Methods.printMethod(method, handleAsMixing, Methods.overridesParentBaseMethod(method, element)));
+      code.writeln(Methods.printMethod(method, handleAsMixing,
+          Methods.overridesParentBaseMethod(method, element)));
     }
+    code.writeln("#endregion\n");
 
     code.writeln("}");
     return code.toString();

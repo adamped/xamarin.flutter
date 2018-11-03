@@ -1,3 +1,4 @@
+import 'package:analyzer/analyzer.dart';
 import 'package:analyzer/dart/element/element.dart';
 
 import 'comments.dart';
@@ -56,7 +57,7 @@ class Methods {
       code.writeln(";");
     } else {
       code.writeln("{");
-      code.writeln(printMethodBody(element));
+      code.writeln(printMethodBody(element.computeNode().body));
       code.writeln("}");
     }
 
@@ -84,28 +85,29 @@ class Methods {
       code.writeln(
           "${mxinFieldName}.${name}(${element.parameters.map((p) => p.name).join(",")});");
     } else {
-      code.writeln(printMethodBody(element));
+      code.writeln(printMethodBody(element.computeNode().body));
     }
     code.writeln("}");
 
     return code.toString();
-  }
+  } 
 
-  static String methodSignature(MethodElement element, String name) {
-    var returnType = element.returnType.displayName;
-
+  static String methodSignature(MethodElement element, String name) {  
     var parameters = element.parameters.map((p) {
       var parameterName = p.name;
-      var parameterType = p.computeNode().beginToken.lexeme;
+      var parameterType = Naming.tokenToText(p.computeNode().beginToken);
+      if(parameterType == "Animatable")
+      {
+        print(parameterType);
+      }
       return parameterType + " " + parameterName;
     });
     var parameter = parameters == null ? "" : parameters.join(",");
-    return "${returnType} ${name}(${parameter})";
+    return "${Naming.getReturnType(element)} ${name}(${parameter})";
   }
 
-  static String printMethodBody(MethodElement element) {
-    var bodyLines =
-        element.computeNode().body.childEntities.first.toString().split("\n");
+  static String printMethodBody(FunctionBody element) {
+    var bodyLines = Naming.tokenToText(element.beginToken).split("\n");
     return bodyLines.map((l) => "// ${l}\n").join() +
         "throw new NotImplementedException();";
   }
