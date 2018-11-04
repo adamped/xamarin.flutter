@@ -66,9 +66,9 @@
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-    <PackageReference Include="SkiaSharp" Version="1.68.0-static-win32-featurepreview12" />
+    <PackageReference Include="SkiaSharp" Version="1.60.3" />
     <PackageReference Include="SkiaSharp.Extended" Version="1.60.0" />
-    <PackageReference Include="SkiaSharp.HarfBuzz" Version="1.68.0-static-win32-featurepreview12" />
+    <PackageReference Include="SkiaSharp.HarfBuzz" Version="1.60.3" />
     <PackageReference Include="SkiaSharp.Svg" Version="1.60.0" />
     <PackageReference Include="SkiaSharp.Views" Version="1.60.3" />
   </ItemGroup>
