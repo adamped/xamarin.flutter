@@ -211,7 +211,7 @@ namespace FlutterBinding.Flow
         //}
         //public void set_metrics(fuchsia.ui.gfx.MetricsPtr metrics)
         //{
-        //    metrics_ = std::move(metrics);
+        //    metrics_ = metrics;
         //}
         //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
         //ORIGINAL LINE: const fuchsia::ui::gfx::MetricsPtr& metrics() const
@@ -335,16 +335,16 @@ namespace FlutterBinding.Flow
         //        inner_node.SetShape(inner_shape);
         //        inner_node.SetTranslation(inner_bounds.width() * 0.5f + inner_bounds.left(), inner_bounds.height() * 0.5f + inner_bounds.top(), 0.0f);
         //        entity_node.AddPart(inner_node);
-        //        SetShapeTextureOrColor(inner_node, color, scale_x, scale_y, inner_bounds, std::move(paint_layers));
+        //        SetShapeTextureOrColor(inner_node, color, scale_x, scale_y, inner_bounds, paint_layers);
         //        return;
         //    }
 
         //    // Apply a texture to the whole shape.
-        //    SetShapeTextureOrColor(shape_node, color, scale_x, scale_y, shape_bounds, std::move(paint_layers));
+        //    SetShapeTextureOrColor(shape_node, color, scale_x, scale_y, shape_bounds, paint_layers);
         //}
         //private void SetShapeTextureOrColor(scenic.ShapeNode shape_node, uint color, float scale_x, float scale_y, SKRect paint_bounds, List<Layer> paint_layers)
         //{
-        //    scenic.Image image = GenerateImageIfNeeded(color, scale_x, scale_y, paint_bounds, std::move(paint_layers));
+        //    scenic.Image image = GenerateImageIfNeeded(color, scale_x, scale_y, paint_bounds, paint_layers);
         //    if (image != null)
         //    {
         //        scenic.Material material = new scenic.Material(session_);
@@ -394,7 +394,7 @@ namespace FlutterBinding.Flow
         //    var image = surface.GetImage();
 
         //    // Enqueue the paint task.
-        //    paint_tasks_.Add({.surface = std::move(surface), .left = paint_bounds.left(), .top = paint_bounds.top(), .scale_x = scale_x, .scale_y = scale_y, .background_color = color, .layers = std::move(paint_layers)});
+        //    paint_tasks_.Add({.surface = surface, .left = paint_bounds.left(), .top = paint_bounds.top(), .scale_x = scale_x, .scale_y = scale_y, .background_color = color, .layers = paint_layers)};
         //    return image;
         //}
 

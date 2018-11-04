@@ -15,14 +15,14 @@ namespace FlutterBinding.Flow
     {
         //public ExportNodeHolder(fml.RefPtr<fml.TaskRunner> gpu_task_runner, fml.RefPtr<zircon.dart.Handle> export_token_handle)
         //{
-        //    this.gpu_task_runner_ = new fml.RefPtr<fml.TaskRunner>(std::move(gpu_task_runner));
+        //    this.gpu_task_runner_ = new fml.RefPtr<fml.TaskRunner>(gpu_task_runner);
         //    this.export_node_ = std::make_unique<ExportNode>(export_token_handle);
         //    FML_DCHECK(gpu_task_runner_);
         //}
         //public new void Dispose()
         //{
         //    //C++ TO C# CONVERTER TODO TASK: Only lambda expressions having all locals passed by reference can be converted to C#:
-        //    //ORIGINAL LINE: gpu_task_runner_->PostTask(fml::MakeCopyable([export_node = std::move(export_node_)]()
+        //    //ORIGINAL LINE: gpu_task_runner_->PostTask(fml::MakeCopyable([export_node = export_node_)](
         //    gpu_task_runner_.Dereference().PostTask(fml.GlobalMembers.MakeCopyable.functorMethod(() =>
         //    {
         //        export_node.Dispose(true);
@@ -79,7 +79,7 @@ namespace FlutterBinding.Flow
         //    {
         //        // Happens first time we bind.
         //        node_.reset(new scenic.EntityNode(container.session()));
-        //        node_.Export(std::move(export_token_));
+        //        node_.Export(export_token_);
 
         //        // Add ourselves to the context so it can call Dispose() on us if the Scenic
         //        // session is closed.

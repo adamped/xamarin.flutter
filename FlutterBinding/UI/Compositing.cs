@@ -1,4 +1,6 @@
-﻿using FlutterBinding.Engine;
+﻿using FlutterBinding.Engine.Compositing;
+using FlutterBinding.Engine.Painting;
+using FlutterBinding.Flow.Layers;
 using FlutterBinding.Mapping;
 using System;
 using System.Collections.Generic;
@@ -13,8 +15,16 @@ namespace FlutterBinding.UI
     ///
     /// Scene objects can be displayed on the screen using the
     /// [Window.render] method.
-    public class Scene : NativeFieldWrapperClass2
+    public class Scene : NativeScene
     {
+
+        // Not sure if this should be here and public to the FlutterBinding Library
+        public Scene(Layer rootLayer,
+             uint rasterizerTracingThreshold,
+             bool checkerboardRasterCacheImages,
+             bool checkerboardOffscreenLayers) : base(rootLayer, rasterizerTracingThreshold, checkerboardRasterCacheImages, checkerboardOffscreenLayers)
+        { }
+
         /// Creates a raster image representation of the current state of the scene.
         /// This is a slow operation that is performed on a background thread.
         public Future<Image> toImage(int width, int height)
@@ -30,9 +40,8 @@ namespace FlutterBinding.UI
         {
             // create image and send via callback
             // only send string if an error occurs.
-
-            // native 'Scene_toImage';
-            return string.Empty; // Tmp to resolve build
+            return this.ToImage(width, height, callback);
+            // [DONE] native 'Scene_toImage';
         }
 
         /// Releases the resources used by this scene.
@@ -40,7 +49,7 @@ namespace FlutterBinding.UI
         /// After calling this function, the scene is cannot be used further.
         public void dispose()
         {
-            //native 'Scene_dispose';
+            // native 'Scene_dispose';
         }
     }
 
@@ -51,14 +60,14 @@ namespace FlutterBinding.UI
     /// To draw graphical operations onto a [Scene], first create a
     /// [Picture] using a [PictureRecorder] and a [Canvas], and then add
     /// it to the scene using [addPicture].
-    public class SceneBuilder : NativeFieldWrapperClass2
+    public class SceneBuilder : NativeSceneBuilder
     {
         /// Creates an empty [SceneBuilder] object.
         public SceneBuilder() { _constructor(); }
         void _constructor()
         {
             this.Constructor();
-            //native 'SceneBuilder_constructor';
+            // [DONE] native 'SceneBuilder_constructor';
         }
 
         /// Pushes a transform operation onto the operation stack.
@@ -77,7 +86,7 @@ namespace FlutterBinding.UI
         void _pushTransform(List<double> matrix4)
         {
             this.PushTransform(matrix4);
-            // native 'SceneBuilder_pushTransform';
+            // [DONE] native 'SceneBuilder_pushTransform';
         }
 
         /// Pushes an offset operation onto the operation stack.
@@ -85,10 +94,10 @@ namespace FlutterBinding.UI
         /// This is equivalent to [pushTransform] with a matrix with only translation.
         ///
         /// See [pop] for details about the operation stack.
-        public EngineLayer pushOffset(double dx, double dy)
+        public NativeEngineLayer pushOffset(double dx, double dy)
         {
-            // native 'SceneBuilder_pushOffset';
-            return null; // Tmp to resolve build
+            return this.PushOffset(dx, dy);
+            // [DONE] native 'SceneBuilder_pushOffset';
         }
 
         /// Pushes a rectangular clip operation onto the operation stack.
@@ -110,7 +119,8 @@ namespace FlutterBinding.UI
                            double bottom,
                            int clipBehavior)
         {
-            // native 'SceneBuilder_pushClipRect';
+            this.PushClipRect(left, right, top, bottom, clipBehavior);
+            // [DONE] native 'SceneBuilder_pushClipRect';
         }
 
         /// Pushes a rounded-rectangular clip operation onto the operation stack.
@@ -231,11 +241,11 @@ namespace FlutterBinding.UI
         ///
         /// See [pop] for details about the operation stack, and [Clip] for different clip modes.
         // ignore: deprecated_member_use
-        public EngineLayer pushPhysicalShape(Path path, double elevation, Color color, Color shadowColor, Clip clipBehavior = Clip.none)
+        public NativeEngineLayer pushPhysicalShape(Path path, double elevation, Color color, Color shadowColor, Clip clipBehavior = Clip.none)
         {
             return _pushPhysicalShape(path, elevation, color.value, shadowColor?.value ?? 0xFF000000, (int)clipBehavior);
         }
-        EngineLayer _pushPhysicalShape(Path path, double elevation, uint color, uint shadowColor, int clipBehavior)
+        NativeEngineLayer _pushPhysicalShape(Path path, double elevation, uint color, uint shadowColor, int clipBehavior)
         {
             // native 'SceneBuilder_pushPhysicalShape';
             return null; // Tmp to resolve build
@@ -260,7 +270,7 @@ namespace FlutterBinding.UI
         /// Therefore, when implementing a subclas of the [Layer] concept defined in
         /// the rendering layer of Flutter's framework, once this is called, there's
         /// no need to call [addToScene] for its children layers.
-        public EngineLayer addRetained(EngineLayer retainedLayer)
+        public NativeEngineLayer addRetained(NativeEngineLayer retainedLayer)
         {
             // native 'SceneBuilder_addRetained';
             return null; // Tmp to resolve build

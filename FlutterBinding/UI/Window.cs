@@ -309,18 +309,19 @@ namespace FlutterBinding.UI
         }
 
 
-        public static bool operator ==(Locale first, Locale second)
-        {
-            if (first.Equals(second))
-                return true;
-            if (!(second is Locale))
-                return false;
-            Locale typedOther = second;
-            return second.languageCode == first.languageCode
-                && second.countryCode == first.countryCode;
-        }
+        //public static bool operator ==(Locale first, Locale second)
+        //{       
+        //
+        //    if (first.Equals(second))
+        //        return true;
+        //    if (!(second is Locale))
+        //        return false;
+        //    Locale typedOther = second;
+        //    return second.languageCode == first.languageCode
+        //        && second.countryCode == first.countryCode;
+        //}
 
-        public static bool operator !=(Locale first, Locale second) => !(first == second);
+        //public static bool operator !=(Locale first, Locale second) => !(first == second);
 
         public int hashCode
         {

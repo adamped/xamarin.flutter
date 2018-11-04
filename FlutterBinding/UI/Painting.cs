@@ -8,6 +8,7 @@ using static FlutterBinding.UI.Painting;
 using System.Linq;
 using FlutterBinding.Mapping;
 using System.Text;
+using FlutterBinding.Engine.Painting;
 
 namespace FlutterBinding.UI
 {
@@ -998,7 +999,7 @@ namespace FlutterBinding.UI
     ///
     ///  * [Paint.strokeCap] for how this value is used.
     ///  * [StrokeJoin] for the different kinds of line segment joins.
-    // These enum values must be kept in sync with SkPaint::Cap.
+    // These enum values must be kept in sync with SKPaint::Cap.
     public enum StrokeCap
     {
         /// Begin and end contours with a flat edge and no extension.
@@ -1045,7 +1046,7 @@ namespace FlutterBinding.UI
     /// * [Paint.strokeJoin] and [Paint.strokeMiterLimit] for how this value is
     ///   used.
     /// * [StrokeCap] for the different kinds of line endings.
-    // These enum values must be kept in sync with SkPaint::Join.
+    // These enum values must be kept in sync with SKPaint::Join.
     public enum StrokeJoin
     {
         /// Joins between line segments form sharp corners.
@@ -1097,10 +1098,10 @@ namespace FlutterBinding.UI
     /// Strategies for painting shapes and paths on a canvas.
     ///
     /// See [Paint.style].
-    // These enum values must be kept in sync with SkPaint::Style.
+    // These enum values must be kept in sync with SKPaint::Style.
     public enum PaintingStyle
     {
-        // This list comes from Skia's SkPaint.h and the values (order) should be kept
+        // This list comes from Skia's SKPaint.h and the values (order) should be kept
         // in sync.
 
         /// Apply the [Paint] to the inside of the shape. For example, when
@@ -1204,7 +1205,7 @@ namespace FlutterBinding.UI
         // Paint objects are encoded in two buffers:
         //
         // * _data is binary data in four-byte fields, each of which is either a
-        //   uint32_t or a float. The default value for each field is encoded as
+        //   uint or a float. The default value for each field is encoded as
         //   zero to make initialization trivial. Most values already have a default
         //   value of zero, but some, such as color, have a non-zero default value.
         //   To encode or decode these values, XOR the value with the default value.
@@ -1917,7 +1918,7 @@ namespace FlutterBinding.UI
     /// See also:
     ///
     /// * [Path.combine], which uses this enum to decide how to combine two paths.
-    // Must be kept in sync with SkPathOp
+    // Must be kept in sync with SKPathOp
     public enum PathOperation
     {
         /// Subtract the second path from the first path.
@@ -1969,14 +1970,15 @@ namespace FlutterBinding.UI
         reverseDifference,
     }
 
+    // I remove this, because it was just a handle to NativeEngineLayer anyway
     /// A handle for the framework to hold and retain an engine layer across frames.
-    public class EngineLayer : NativeFieldWrapperClass2
-    {
-        /// This class is created by the engine, and should not be instantiated
-        /// or extended directly.
-        // //@pragma('vm:entry-point')
-        private EngineLayer() { }
-    }
+    //public class EngineLayer
+    //{
+    //    /// This class is created by the engine, and should not be instantiated
+    //    /// or extended directly.
+    //    // //@pragma('vm:entry-point')
+    //    EngineLayer(): base(null) { }
+    //}
 
     /// A complex, one-dimensional subset of a plane.
     ///
@@ -2420,7 +2422,7 @@ namespace FlutterBinding.UI
         /// square is rotated, and the (axis-aligned, non-rotated) bounding box
         /// therefore ends up grossly overestimating the actual area covered by the
         /// circle.
-        // see https://skia.org/user/api/SkPath_Reference#SkPath_getBounds
+        // see https://skia.org/user/api/SKPath_Reference#SKPath_getBounds
         public Rect getBounds()
         {
             List<float> rect = _getBounds();
@@ -3272,7 +3274,7 @@ namespace FlutterBinding.UI
     ///
     // ignore: deprecated_member_use
     /// Used by [Canvas.drawPoints].
-    // These enum values must be kept in sync with SkCanvas::PointMode.
+    // These enum values must be kept in sync with SKCanvas::PointMode.
     public enum PointMode
     {
         /// Draw each point separately.
@@ -3980,7 +3982,7 @@ namespace FlutterBinding.UI
         /// If the text is centered, the centering axis will be at the position
         /// described by adding half of the [ParagraphConstraints.width] given to
         /// [Paragraph.layout], to the `offset` argument's [Offset.dx] coordinate.
-        void drawParagraph(Paragraph paragraph, Offset offset)
+        public void drawParagraph(Paragraph paragraph, Offset offset)
         {
             //assert(paragraph != null);
             //assert(_offsetIsValid(offset));
@@ -4503,6 +4505,7 @@ namespace FlutterBinding.UI
         public String toString() => $"TextShadow({color}, {offset}, {blurRadius})";
     }
 
+    // TODO: I think these should just be Action's or Func's no need for a delegate
     /// Generic callback signature, used by [_futurize].
     public delegate void _Callback<T>(T result);
     public delegate void _Callback();

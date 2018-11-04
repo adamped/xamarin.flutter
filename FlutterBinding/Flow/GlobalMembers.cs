@@ -285,12 +285,12 @@ public static class GlobalMembers
     //}
     //public static std::ostream operator <<(std::ostream os, SKRect r)
     //{
-    //    os << "LTRB: " << r.fLeft << ", " << r.fTop << ", " << r.fRight << ", " << r.fBottom;
+    //    os << "LTRB: " << r.Left << ", " << r.fTop << ", " << r.Right << ", " << r.fBottom;
     //    return os;
     //}
     //public static std::ostream operator <<(std::ostream os, SKRoundRect r)
     //{
-    //    os << "LTRB: " << r.rect().fLeft << ", " << r.rect().fTop << ", " << r.rect().fRight << ", " << r.rect().fBottom;
+    //    os << "LTRB: " << r.rect().Left << ", " << r.rect().fTop << ", " << r.rect().Right << ", " << r.rect().fBottom;
     //    return os;
     //}
     //public static std::ostream operator <<(std::ostream os, SKPoint3 v)
@@ -479,7 +479,7 @@ public static class GlobalMembers
     //public static TEST(RasterCache UnnamedParameter, ThresholdIsRespected UnnamedParameter2)
     //{
     //    int threshold = 3;
-    //    RasterCache cache = new RasterCache(new int(threshold));
+    //    RasterCache cache = new RasterCache(threshold);
 
     //    SKMatrix matrix = SKMatrix.I();
 
@@ -500,7 +500,7 @@ public static class GlobalMembers
     //public static TEST(RasterCache UnnamedParameter, ThresholdIsRespectedWhenZero UnnamedParameter2)
     //{
     //    int threshold = 0;
-    //    RasterCache cache = new RasterCache(new int(threshold));
+    //    RasterCache cache = new RasterCache(threshold);
 
     //    SKMatrix matrix = SKMatrix.I();
 
@@ -521,7 +521,7 @@ public static class GlobalMembers
     //public static TEST(RasterCache UnnamedParameter, SweepsRemoveUnusedFrames UnnamedParameter2)
     //{
     //    int threshold = 3;
-    //    RasterCache cache = new RasterCache(new int(threshold));
+    //    RasterCache cache = new RasterCache(threshold);
 
     //    SKMatrix matrix = SKMatrix.I();
 

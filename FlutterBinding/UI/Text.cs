@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FlutterBinding.Engine.Text;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using static FlutterBinding.Mapping.Helper;
@@ -426,17 +427,23 @@ namespace FlutterBinding.UI
         ///
         /// * `locale`: The locale used to select region-specific glyphs.
         public ParagraphStyle(
-            TextAlign textAlign,
-            TextDirection textDirection,
-            FontWeight fontWeight,
-            FontStyle fontStyle,
-            int maxLines,
-            String fontFamily,
-            double fontSize,
-            double lineHeight,
-            String ellipsis,
-            Locale locale)
+            TextAlign textAlign = TextAlign.left,
+            TextDirection textDirection = TextDirection.ltr,
+            FontWeight fontWeight = null,
+            FontStyle fontStyle = FontStyle.normal,
+            int maxLines = 0,
+            String fontFamily = "",
+            double fontSize = 0.0,
+            double lineHeight = 0.0,
+            String ellipsis = "",
+            Locale locale = null)
         {
+            if (fontWeight == null)
+                fontWeight = FontWeight.normal;
+
+            if (locale == null)
+                locale = new Locale("");
+
             _encoded = _encodeParagraphStyle(
           textAlign,
           textDirection,
@@ -923,7 +930,7 @@ namespace FlutterBinding.UI
     ///
     /// After constructing a [Paragraph], call [Paragraph.layout] on it and then
     /// paint it with [Canvas.drawParagraph].
-    public class ParagraphBuilder : NativeFieldWrapperClass2
+    public class ParagraphBuilder : NativeParagraphBuilder
     {
 
         /// Creates a [ParagraphBuilder] object, which is used to create a
@@ -972,7 +979,7 @@ namespace FlutterBinding.UI
         String _addText(String text)
         {
             // native 'ParagraphBuilder_addText';
-            return string.Empty; // Tmp to resolve build
+            return null; // Tmp to resolve build
         }
 
         /// Applies the given paragraph style and returns a [Paragraph] containing the
@@ -1037,6 +1044,9 @@ namespace FlutterBinding.UI
           Locale locale)
         {
             List<int> result = new List<int>(6); // also update paragraph_builder.cc
+            for (var i = 0; i <= 6; i++)
+                result.Add(0);
+
             if (textAlign != null)
             {
                 result[0] |= 1 << 1;
