@@ -10,13 +10,16 @@ class Naming {
         .replaceAll(
             "file:///" + Config.directoryPath.replaceAll("\\", "/") + "/", "")
         .replaceAll(".dart", "");
-    return namespacePath.split('/');
+    var splittedPath = namespacePath.split('/');
+    return splittedPath;
   }
 
   static String namespaceFromIdentifier(String identifier) {
-    return Config.rootNamespace +
-        "." +
-        namespacePartsFromIdentifier(identifier).join(".");
+    var parts = namespacePartsFromIdentifier(identifier);
+
+    //Dont include the filename in the namespace
+    parts.removeLast();
+    return Config.rootNamespace + "." + parts.join(".");
   }
 
   static String nameWithTypeArguments(
@@ -78,5 +81,25 @@ class Naming {
     //if (token.next != null && token.next.isEof == false )
     //  text += tokenToText(token.next);
     return text;
+  }
+
+  static String getVariableType(VariableElement element) {
+    if (element.type is InterfaceType) {
+      if (element.type.displayName == "Animation<T>") {
+        print("test");
+      }
+      return element.type.displayName;
+    }
+    if (element.type is TypeParameterType) {
+      if (element.type.displayName == "Animation<T>") {
+        print("test");
+      }
+      return element.type.displayName;
+    }
+    if (element.computeNode() == null) {
+      //TODO Find the correct type here
+      return "object";
+    }
+    return tokenToText(element.computeNode().beginToken);
   }
 }

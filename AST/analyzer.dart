@@ -14,12 +14,14 @@ import 'package:analyzer/src/source/source_resource.dart';
 
 import 'config.dart';
 import 'frame.dart';
-import 'naming.dart'; 
+import 'naming.dart';
+import 'packageResolver.dart';
 
 main() async {
   // 1) Get all directories and all files
-  var outputPath = Directory('..\\FlutterSDK\\src'); 
+  var outputPath = Directory('..\\FlutterSDK\\src');
 
+  print("Directory: " + Config.directoryPath);
   var contents = await dirContents(Directory(Config.directoryPath));
 
   PhysicalResourceProvider resourceProvider = PhysicalResourceProvider.INSTANCE;
@@ -28,7 +30,12 @@ main() async {
 
   var resolvers = [
     new DartUriResolver(sdk),
-    new ResourceUriResolver(resourceProvider)
+    new ResourceUriResolver(resourceProvider),
+    packageResolver(
+        resourceProvider,
+        'flutter',
+        resourceProvider.getFolder(Config.directoryPath
+            .substring(0, Config.directoryPath.lastIndexOf('\\'))))
   ];
 
   AnalysisContext context = AnalysisEngine.instance.createAnalysisContext()
@@ -54,7 +61,7 @@ main() async {
 
       var element = resolvedUnit.declaredElement;
       var namespaceParts =
-          Naming.namespacePartsFromIdentifier(element.library.identifier);
+          Naming.namespacePartsFromIdentifier(element.library.identifier); 
       var namespaceDartName =
           Naming.namespaceFromIdentifier(element.library.identifier);
       var code = Frame.printNamespace(element, namespaceDartName);
@@ -66,7 +73,7 @@ main() async {
       print("Wrote ${file.path} to file.");
     }
   }
-}  
+}
 
 Future<List<FileSystemEntity>> dirContents(Directory directory) async {
   Completer<List<FileSystemEntity>> completer =

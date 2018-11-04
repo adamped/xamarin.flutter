@@ -1,5 +1,6 @@
 import 'package:analyzer/analyzer.dart';
 import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/type.dart';
 
 import 'comments.dart';
 import 'naming.dart';
@@ -32,34 +33,25 @@ class Methods {
     code.writeln("");
     Comments.appendComment(code, element);
 
-    if (insideMixin) {
-      if (element.isPrivate)
-        code.write("private ");
-      else
-        code.write("public ");
-    } else {
-      if (element.hasProtected == true) code.write("protected ");
-      if (element.isPublic == true) code.write("public ");
-      if (element.isAbstract == true) code.write("abstract ");
-      if (element.isPrivate == true) code.write("private ");
-      if (element.hasOverride == true) code.write("override ");
-      if (element.hasSealed == true)
-        code.write("sealed ");
-      // Add virtual as default key if method is not already abstract since all methods are virtual in dart
-      else if (element.hasOverride == false &&
-          element.isAbstract == false &&
-          element.isPrivate == false) code.write("virtual ");
+    if (element.hasProtected == true) code.write("protected ");
+    if (element.isPublic == true) code.write("public ");
+    if (element.isPrivate == true) code.write("private ");
+    if (element.hasOverride == true) code.write("override ");
+    if (element.hasSealed == true)
+      code.write("sealed ");
+    // Add virtual as default key if method is not already abstract since all methods are virtual in dart
+    else if (element.hasOverride == false && element.isPrivate == false)
+      code.write("virtual ");
+
+    if (name == "addListener") {
+      print("test");
     }
 
     code.write(methodSignature(element, name));
 
-    if (element.isAbstract && !insideMixin) {
-      code.writeln(";");
-    } else {
-      code.writeln("{");
-      code.writeln(printMethodBody(element.computeNode().body));
-      code.writeln("}");
-    }
+    code.writeln("{");
+    code.writeln(printMethodBody(element.computeNode().body));
+    code.writeln("}");
 
     return code.toString();
   }
@@ -90,16 +82,12 @@ class Methods {
     code.writeln("}");
 
     return code.toString();
-  } 
+  }
 
-  static String methodSignature(MethodElement element, String name) {  
+  static String methodSignature(MethodElement element, String name) {
     var parameters = element.parameters.map((p) {
       var parameterName = p.name;
-      var parameterType = Naming.tokenToText(p.computeNode().beginToken);
-      if(parameterType == "Animatable")
-      {
-        print(parameterType);
-      }
+      var parameterType = Naming.getVariableType(p);
       return parameterType + " " + parameterName;
     });
     var parameter = parameters == null ? "" : parameters.join(",");

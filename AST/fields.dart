@@ -15,7 +15,7 @@ class Fields {
       code.write("virtual ");
 
     // type + name
-    code.write("${element.type.displayName} ${element.name} ");
+    code.write("${Naming.getVariableType(element)} ${element.name} ");
 
     var hasGetter = element.getter != null;
     var hasSetter = element.setter != null;
@@ -37,8 +37,71 @@ class Fields {
         if (setterNode == null)
           code.write("set;");
         else {
-          code.write("set ${printFieldBody(setterNode)}");
+          code.write("set {${printFieldBody(setterNode)}}");
         }
+      }
+      code.write("}");
+    } else
+      code.write(";");
+
+    return code.toString();
+  }
+
+  static String printImplementedField(
+      FieldElement element, String implementedFieldName) {
+    var code = new StringBuffer();
+
+    if (element.hasProtected == true) code.write("protected ");
+    if (element.isPublic == true) code.write("public ");
+    code.write("virtual ");
+
+    if (element.type.displayName == "Animation<T>") {
+      print("test");
+    }
+
+    // type + name
+    var type = Naming.getVariableType(element);
+    var name = element.name;
+    code.write("${type} ${name} ");
+
+    var hasGetter = element.getter != null;
+    var hasSetter = element.setter != null;
+
+    if (hasGetter || hasSetter) {
+      code.write("{");
+// getter
+      if (hasGetter) {
+        code.write("get => ${implementedFieldName}.${name};");
+      }
+      // setter
+      if (hasSetter) {
+        code.write("set => ${implementedFieldName}.${name} = value;");
+      }
+      code.write("}");
+    } else
+      code.write(";");
+
+    return code.toString();
+  }
+
+  static String getFieldSignature(FieldElement element) {
+    var code = new StringBuffer();
+
+    // type + name
+    code.write("${Naming.getVariableType(element)} ${element.name} ");
+
+    var hasGetter = element.getter != null;
+    var hasSetter = element.setter != null;
+
+    if (hasGetter || hasSetter) {
+      code.write("{");
+// getter
+      if (hasGetter) {
+        code.write("get;");
+      }
+      // setter
+      if (hasSetter) {
+        code.write("set;");
       }
       code.write("}");
     } else
