@@ -1,13 +1,12 @@
 import 'package:analyzer/analyzer.dart';
 import 'package:analyzer/dart/element/element.dart';
-import 'package:analyzer/dart/element/type.dart';
 
 import 'comments.dart';
 import 'naming.dart';
 
 class Methods {
   static bool isSameSignature(MethodElement m1, MethodElement m2) {
-    return methodSignature(m1, m1.name) == methodSignature(m2, m2.name);
+    return methodSignature(m1) == methodSignature(m2);
   }
 
   static bool overridesBaseMethod(MethodElement method, ClassElement element) {
@@ -47,7 +46,7 @@ class Methods {
       print("test");
     }
 
-    code.write(methodSignature(element, name));
+    code.write(methodSignature(element));
 
     code.writeln("{");
     code.writeln(printMethodBody(element.computeNode().body));
@@ -56,8 +55,11 @@ class Methods {
     return code.toString();
   }
 
-  static String printMxinMethod(MethodElement element, String mxinFieldName,
-      MethodElement overrideMethod, ClassElement classElement) {
+  static String printImplementedMethod(
+      MethodElement element,
+      String implementedInstanceName,
+      MethodElement overrideMethod,
+      ClassElement classElement) {
     var name = Naming.nameWithTypeParameters(element, false);
 
     var code = new StringBuffer();
@@ -70,12 +72,12 @@ class Methods {
     if (overridesParentBaseMethod(element, classElement))
       code.write("override ");
 
-    code.write(methodSignature(element, name));
+    code.write(methodSignature(element));
 
     code.writeln("{");
     if (overrideMethod == null) {
       code.writeln(
-          "${mxinFieldName}.${name}(${element.parameters.map((p) => p.name).join(",")});");
+          "${implementedInstanceName}.${name}(${element.parameters.map((p) => Naming.getFormattedName(p.name, NameStyle.LowerCamelCase)).join(",")});");
     } else {
       code.writeln(printMethodBody(element.computeNode().body));
     }
@@ -84,18 +86,30 @@ class Methods {
     return code.toString();
   }
 
-  static String methodSignature(MethodElement element, String name) {
+  static String methodSignature(MethodElement element) {
+    var methodName = Naming.nameWithTypeParameters(element, false);
+    methodName = Naming.getFormattedName(
+        methodName,
+        element.isPrivate
+            ? NameStyle.LeadingUnderscoreLowerCamelCase
+            : NameStyle.UpperCamelCase);
+
     var parameters = element.parameters.map((p) {
       var parameterName = p.name;
-      var parameterType = Naming.getVariableType(p);
+      parameterName =
+          Naming.getFormattedName(parameterName, NameStyle.LowerCamelCase);
+      if(parameterName == "")
+        parameterName = "p" + (element.parameters.indexOf(p) + 1).toString();
+      var parameterType =
+          Naming.getVariableType(p, VariableType.Parameter).split(" ").first;
       return parameterType + " " + parameterName;
     });
     var parameter = parameters == null ? "" : parameters.join(",");
-    return "${Naming.getReturnType(element)} ${name}(${parameter})";
+    return "${Naming.getReturnType(element)} ${methodName}(${parameter})";
   }
 
   static String printMethodBody(FunctionBody element) {
-    var bodyLines = Naming.tokenToText(element.beginToken).split("\n");
+    var bodyLines = Naming.tokenToText(element.beginToken, false).split("\n");
     return bodyLines.map((l) => "// ${l}\n").join() +
         "throw new NotImplementedException();";
   }

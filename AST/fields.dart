@@ -15,7 +15,8 @@ class Fields {
       code.write("virtual ");
 
     // type + name
-    code.write("${Naming.getVariableType(element)} ${element.name} ");
+    code.write(
+        "${Naming.getVariableType(element, VariableType.Field)} ${getFieldName(element)} ");
 
     var hasGetter = element.getter != null;
     var hasSetter = element.setter != null;
@@ -60,8 +61,8 @@ class Fields {
     }
 
     // type + name
-    var type = Naming.getVariableType(element);
-    var name = element.name;
+    var type = Naming.getVariableType(element, VariableType.Field);
+    var name = getFieldName(element);
     code.write("${type} ${name} ");
 
     var hasGetter = element.getter != null;
@@ -88,7 +89,8 @@ class Fields {
     var code = new StringBuffer();
 
     // type + name
-    code.write("${Naming.getVariableType(element)} ${element.name} ");
+    code.write(
+        "${Naming.getVariableType(element, VariableType.Field)} ${getFieldName(element)} ");
 
     var hasGetter = element.getter != null;
     var hasSetter = element.setter != null;
@@ -110,8 +112,16 @@ class Fields {
     return code.toString();
   }
 
+  static String getFieldName(FieldElement element) {
+    return Naming.getFormattedName(
+        element.name,
+        element.isPrivate
+            ? NameStyle.LeadingUnderscoreLowerCamelCase
+            : NameStyle.UpperCamelCase);
+  }
+
   static String printFieldBody(AstNode element) {
-    var bodyLines = Naming.tokenToText(element.beginToken).split("\n");
+    var bodyLines = Naming.tokenToText(element.beginToken, false).split("\n");
     return bodyLines.map((l) => "// ${l}\n").join() +
         "\nthrow new NotImplementedException();";
   }

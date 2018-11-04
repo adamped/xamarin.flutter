@@ -1,5 +1,7 @@
 ﻿using FlutterSDK.animation.animation;
 using System;
+using System.Threading.Tasks;
+using FlutterSDK.Animation;
 
 namespace FlutterSDK
 {
@@ -16,6 +18,10 @@ namespace FlutterSDK
         left
     }
 
+    public class Matrix4 // TODO
+    {
+
+    } 
 
     public class Function
     { }
@@ -45,8 +51,7 @@ namespace FlutterSDK
         //{
 
         //}
-    }
-
+    } 
 
     public class Null // todo
     { }
@@ -138,6 +143,8 @@ namespace FlutterSDK
     }
 
     public delegate void AnimationStatusListener(AnimationStatus status);
+
+    public delegate Task<bool> WillPopCallback(); 
 
     public class Paint
     {

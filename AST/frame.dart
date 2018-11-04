@@ -39,29 +39,25 @@ class Frame {
   }
 
   static String printImports(CompilationUnitElement element) {
-    var imports = new List<String>()..add("System");
+    var imports = new List<String>()..add("System")..add("FlutterSDK");
     for (var import in element.enclosingElement.imports) {
       // Skip dart:core, we import System instead.
       if (import.importedLibrary != null &&
           import.importedLibrary.displayName == "dart.core") continue;
       var name = import.uri;
 
-      // Check other default imports
-      switch (name) {
-        case "dart:ui":
-        case "dart:async":
-        case "dart:math":
-        case "package:meta/meta.dart":
-          continue;
-      }
+      // Check if import should get ignored
+      if (Config.ignoredImports.contains(name)) continue;
 
       if (name.contains("package:flutter/")) {
         name = name.replaceAll("package:flutter/", "");
         name = name.replaceAll(".dart", "");
-        name = Config.rootNamespace + "." + name;
+        name = Config.rootNamespace +
+            "." +
+            Naming.getFormattedName(name, NameStyle.UpperCamelCase);
       }
 
-      // Check if import is within the FlutterSDK library and modify the import
+      // Check if import is within the FlutterSDK library and modify the import to use the correct namespace
       if (import.importedLibrary != null &&
           import.importedLibrary.identifier
               .replaceAll("/", "\\")
@@ -89,7 +85,10 @@ class Frame {
     code.writeln("");
     for (var value in element.fields.where((e) => e.isEnumConstant)) {
       Comments.appendComment(code, value);
-      code.writeln(value.name + ",");
+      var fieldValue = value.name;
+      fieldValue = Naming.upperCamelCase(fieldValue);
+      fieldValue = Naming.escapeFixedWords(fieldValue);
+      code.writeln(fieldValue + ",");
     }
     code.writeln("}");
     return code.toString();
@@ -153,53 +152,64 @@ class Frame {
       StringBuffer code, ClassElement element, bool implementWithInterface) {
     // Add mixin fields and method implementations
     code.writeln("#region inherited methods and fields");
-    var addedByMxin = new List<ClassMemberElement>();
+    var overridenImplementations = new List<ClassMemberElement>();
     var implementedVariables = new List<ClassMemberElement>();
 
-    code.writeln("#region inherited from mixins");
-    for (var implementedMixin in element.mixins.reversed) {
-      code.writeln(implementedInstanceName(implementedMixin));
+    // Add mixin implementations
+    if (element.mixins.length > 0) {
+      code.writeln("#region inherited from mixins");
+      for (var implementedMixin in element.mixins.reversed) {
+        code.writeln("#region inherited from ${implementedMixin.name}");
+        code.writeln(implementedInstanceName(implementedMixin));
 
-      addImplementedFields(code, implementedMixin.element, element,
-          implementedVariables, addedByMxin);
-      addImplementedMethods(code, implementedMixin.element, element,
-          implementedVariables, addedByMxin);
+        addImplementedFields(code, implementedMixin.element, element,
+            implementedVariables, overridenImplementations);
+        addImplementedMethods(code, implementedMixin.element, element,
+            implementedVariables, overridenImplementations);
+        code.writeln("#endregion\n");
+      }
+      code.writeln("#endregion\n");
     }
-    code.writeln("#endregion");
 
-    code.writeln("#region inherited from abstract class interfaces");
-    for (var implementedClass in element.interfaces.reversed) {
-      code.writeln(implementedInstanceName(implementedClass));
+    // Add interface implementations
+    if (element.interfaces.length > 0) {
+      code.writeln("#region inherited from interfaces");
+      for (var implementedClass in element.interfaces.reversed) {
+        code.writeln("#region inherited from ${implementedClass.name}");
+        code.writeln(implementedInstanceName(implementedClass));
 
-      addImplementedFields(code, implementedClass.element, element,
-          implementedVariables, addedByMxin);
-      addImplementedMethods(code, implementedClass.element, element,
-          implementedVariables, addedByMxin);
+        addImplementedFields(code, implementedClass.element, element,
+            implementedVariables, overridenImplementations);
+        addImplementedMethods(code, implementedClass.element, element,
+            implementedVariables, overridenImplementations);
+        code.writeln("#endregion\n");
+      }
+      code.writeln("#endregion\n");
     }
-    code.writeln("#endregion");
     code.writeln("#endregion\n");
 
     code.writeln("#region fields");
-
     // Add fields that are not already handled as implementation overrides
     for (var field
-        in element.fields.where((method) => !addedByMxin.contains(method))) {
+        in element.fields.where((f) => !overridenImplementations.contains(f))) {
       code.writeln(Fields.printField(field));
     }
     code.writeln("#endregion\n");
 
-    // Add methods that are not already handled as mixin method overrides
-    for (var method
-        in element.methods.where((method) => !addedByMxin.contains(method))) {
+    code.writeln("#region methods");
+    // Add methods that are not already handled as implementation overrides
+    for (var method in element.methods
+        .where((m) => !overridenImplementations.contains(m))) {
       code.writeln(Methods.printMethod(method, implementWithInterface,
           Methods.overridesParentBaseMethod(method, element)));
     }
+    code.writeln("#endregion");
   }
 
   static String implementedInstanceName(InterfaceType element) {
     var implementedTypeName = element.name;
     var mxinNameWithTypes = Naming.nameWithTypeArguments(element, false);
-    if(mxinNameWithTypes.contains("AnimationWithParentMixin")){
+    if (mxinNameWithTypes.contains("AnimationWithParentMixin")) {
       print("test");
     }
     // Add instance of the implemented class
@@ -232,8 +242,10 @@ class Frame {
         overridenImplementedMethods.add(overrideElement);
 
       code.writeln(
-        // Pass the overriden element to get the correct field signature
-          Fields.printImplementedField(overrideElement != null ? overrideElement : implementedField, implementedTypeName));
+          // Pass the overriden element to get the correct field signature
+          Fields.printImplementedField(
+              overrideElement != null ? overrideElement : implementedField,
+              implementedTypeName));
     }
   }
 
@@ -260,9 +272,12 @@ class Frame {
       // Store the overriding method to avoid adding it again when adding the other methods
       if (overrideElement != null) addedByMxin.add(overrideElement);
 
-      code.writeln(Methods.printMxinMethod(
-        // Pass the overriden element to get the correct method signature
-          overrideElement != null ? overrideElement : implementedMethod, implementedTypeName, overrideElement, implementingType));
+      code.writeln(Methods.printImplementedMethod(
+          // Pass the overriden element to get the correct method signature
+          overrideElement != null ? overrideElement : implementedMethod,
+          implementedTypeName,
+          overrideElement,
+          implementingType));
     }
   }
 
@@ -280,8 +295,7 @@ class Frame {
 
     for (var method in element.methods
         .where((method) => method.isPublic || method.hasProtected)) {
-      var methodName = Naming.nameWithTypeParameters(method, false);
-      code.writeln(Methods.methodSignature(method, methodName) + ";");
+      code.writeln(Methods.methodSignature(method) + ";");
     }
 
     for (var field in element.fields
