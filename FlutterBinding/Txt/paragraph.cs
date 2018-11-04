@@ -1854,7 +1854,7 @@ namespace FlutterBinding.Txt
                     chunks.Add(chunk_start, chunk_end, text_direction, styled_run.style);
                     //C++ TO C# CONVERTER TODO TASK: The following line was determined to be a copy assignment (rather than a reference assignment) - this should be verified and a 'CopyFrom' method should be created:
                     //ORIGINAL LINE: chunk_start = chunk_end;
-                    chunk_start = chunk_end
+                    chunk_start = chunk_end;
                 }
 
                 if (text_direction == TextDirection.ltr)

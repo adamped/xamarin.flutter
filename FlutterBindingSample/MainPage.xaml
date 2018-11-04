@@ -6,7 +6,8 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-
-    <local:FlutterCanvas x:Name="FlutterCanvas" x:FieldModifier="public" />
+    xmlns:skia="using:SkiaSharp.Views.UWP">
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <skia:SKXamlCanvas x:Name="CanvasView" PaintSurface="OnCanvasViewPaintSurface" />
+    </Grid>
 </Page>

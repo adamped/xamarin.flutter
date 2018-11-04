@@ -2,6 +2,7 @@
 using FlutterBinding.Engine.Painting;
 using FlutterBinding.Flow.Layers;
 using FlutterBinding.Mapping;
+using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using static FlutterBinding.Mapping.Helper;
@@ -259,7 +260,8 @@ namespace FlutterBinding.UI
         /// stack.
         public void pop()
         {
-            // native 'SceneBuilder_pop';
+            this.Pop();
+            // [DONE] native 'SceneBuilder_pop';
         }
 
         /// Add a retained engine layer subtree from previous frames.
@@ -320,7 +322,7 @@ namespace FlutterBinding.UI
         /// Adds a [Picture] to the scene.
         ///
         /// The picture is rasterized at the given offset.
-        public void addPicture(Offset offset, Picture picture, bool isComplexHint = false, bool willChangeHint = false)
+        public void addPicture(Offset offset, SKPicture picture, bool isComplexHint = false, bool willChangeHint = false)
         {
             int hints = 0;
             if (isComplexHint)
@@ -329,9 +331,10 @@ namespace FlutterBinding.UI
                 hints |= 2;
             _addPicture(offset.dx, offset.dy, picture, hints);
         }
-        void _addPicture(double dx, double dy, Picture picture, int hints)
+        void _addPicture(double dx, double dy, SKPicture picture, int hints)
         {
-            // native 'SceneBuilder_addPicture';
+            this.AddPicture(dx, dy, picture, hints);
+            // [DONE] native 'SceneBuilder_addPicture';
         }
 
         /// Adds a backend texture to the scene.
@@ -455,8 +458,8 @@ namespace FlutterBinding.UI
         /// cannot be used further.
         public Scene build()
         {
-            // native 'SceneBuilder_build';
-            return null; // Tmp to resolve build
+            return this.Build();
+            // [DONE] native 'SceneBuilder_build';
         }
     }
 

@@ -820,7 +820,7 @@ namespace FlutterBinding.UI
     ///
     /// Paragraphs can be displayed on a [Canvas] using the [Canvas.drawParagraph]
     /// method.
-    public class Paragraph : NativeFieldWrapperClass2
+    public class Paragraph : NativeParagraph
     {
         /// This class is created by the engine, and should not be instantiated
         /// or extended directly.
@@ -874,7 +874,8 @@ namespace FlutterBinding.UI
         public void layout(ParagraphConstraints constraints) => _layout(constraints.width);
         void _layout(double width)
         {
-            // native 'Paragraph_layout';
+            this.Layout(width);
+            // [DONE] native 'Paragraph_layout';
         }
 
         /// Returns a list of text boxes that enclose the given text range.
@@ -910,9 +911,10 @@ namespace FlutterBinding.UI
         // Redirecting the paint function in this way solves some dependency problems
         // in the C++ code. If we straighten out the C++ dependencies, we can remove
         // this indirection.
-        public void _paint(Canvas canvas, double x, double y)
+        public void _paint(SkiaSharp.SKCanvas canvas, double x, double y)
         {
-            // native 'Paragraph_paint';
+            this.Paint(canvas, x, y);
+            // [DONE] native 'Paragraph_paint';
         }
     }
 
@@ -936,13 +938,14 @@ namespace FlutterBinding.UI
         /// Creates a [ParagraphBuilder] object, which is used to create a
         /// [Paragraph].
         //@pragma('vm:entry-point')
-        public ParagraphBuilder(ParagraphStyle style)
+        public ParagraphBuilder(ParagraphStyle style) : base(style._encoded, style._fontFamily, style._fontSize, style._lineHeight, style._ellipsis, _encodeLocale(style._locale))
         {
-            _constructor(style._encoded, style._fontFamily, style._fontSize, style._lineHeight, style._ellipsis, _encodeLocale(style._locale));
+            // _constructor();
         }
         void _constructor(List<int> encoded, String fontFamily, double fontSize, double lineHeight, String ellipsis, String locale)
         {
-            // native 'ParagraphBuilder_constructor';
+            // Completed by base contruction
+            // [DONE] native 'ParagraphBuilder_constructor';
         }
 
         /// Applies the given style to the added text until [pop] is called.
@@ -978,8 +981,8 @@ namespace FlutterBinding.UI
         }
         String _addText(String text)
         {
-            // native 'ParagraphBuilder_addText';
-            return null; // Tmp to resolve build
+            return this.AddText(text);
+            // [DONE] native 'ParagraphBuilder_addText';
         }
 
         /// Applies the given paragraph style and returns a [Paragraph] containing the
@@ -989,8 +992,8 @@ namespace FlutterBinding.UI
         /// cannot be used further.
         public Paragraph build()
         {
-            // native 'ParagraphBuilder_build';
-            return null; // Tmp to resolve build
+            return this.Build();
+            // [DONE] native 'ParagraphBuilder_build';
         }
     }
 

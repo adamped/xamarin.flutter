@@ -71,6 +71,9 @@ namespace FlutterBindingSample
                 // Ensure the current window is active
                 Window.Current.Activate();
             }
+
+            var appView = Windows.UI.ViewManagement.ApplicationView.GetForCurrentView();
+            appView.Title = "Xamarin.Flutter in UWP";
         }
 
         /// <summary>

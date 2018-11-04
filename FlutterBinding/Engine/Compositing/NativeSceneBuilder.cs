@@ -71,6 +71,43 @@ namespace FlutterBinding.Engine.Compositing
             current_layer_.Add(layer);
             current_layer_ = newLayer;
         }
+        Flow.SkiaUnrefQueue _queue = new Flow.SkiaUnrefQueue();
+        public void AddPicture(double dx, double dy, SKPicture picture, int hints)
+        {
+            if (current_layer_ == null)
+            {
+                return;
+            }
+            SKPoint offset = new SKPoint((float)dx, (float)dy);
+            SKRect pictureRect = picture.CullRect;
+            pictureRect.Offset(offset.X, offset.Y);
+            var layer = new PictureLayer();
+            layer.set_offset(offset);
+            layer.set_picture(new Flow.SkiaGPUObject<SKPicture>(picture, _queue)); // UIDartState::CreateGPUObject(picture->picture()));
+            layer.set_is_complex(true); // !!(hints & 1));
+            layer.set_will_change(true); // !!(hints & 2));
+            current_layer_.Add(layer);
+        }
+
+        public void Pop()
+        {
+            if (current_layer_ == null)
+            {
+                return;
+            }
+            current_layer_ = current_layer_.parent();
+        }
+        uint rasterizer_tracing_threshold_ = 0;
+        bool checkerboard_raster_cache_images_ = false;
+        bool checkerboard_offscreen_layers_ = false;
+
+        public Scene Build()
+        {
+            var scene = new Scene(root_layer_, rasterizer_tracing_threshold_,
+     checkerboard_raster_cache_images_, checkerboard_offscreen_layers_);
+            
+            return scene;
+        }
 
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FlutterBinding.Engine;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using static FlutterBinding.Mapping.Types;
@@ -347,7 +348,7 @@ namespace FlutterBinding.UI
     ///
     /// There is a single Window instance in the system, which you can
     /// obtain from the [window] property.
-    public class Window
+    public class Window: Engine.Window.NativeWindow
     {
         static Window _instance;
         public static Window Instance => _instance ?? (_instance = new Window());
@@ -715,7 +716,8 @@ namespace FlutterBinding.UI
         ///    painting.
         public void render(Scene scene)
         {
-            // native 'Window_render';
+            this.Render(scene);
+            // [DONE] native 'Window_render';
         }
 
         /// Whether the user has requested that [updateSemantics] be called when

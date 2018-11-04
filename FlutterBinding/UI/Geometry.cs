@@ -883,22 +883,22 @@ namespace FlutterBinding.UI
               lerpDouble(a.bottom, b.bottom, t));
         }
 
-        public static bool operator ==(Rect rect, Object other)
-        {
-            if (identical(rect, other))
-                return true;
-            if (rect.GetType() != other.GetType())
-                return false;
-            Rect typedOther = (Rect)other;
-            for (int i = 0; i < _kDataSize; i += 1)
-            {
-                if (rect._value[i] != typedOther._value[i])
-                    return false;
-            }
-            return true;
-        }
+        //public static bool operator ==(Rect rect, Object other)
+        //{
+        //    if (identical(rect, other))
+        //        return true;
+        //    if (rect.GetType() != other.GetType())
+        //        return false;
+        //    Rect typedOther = (Rect)other;
+        //    for (int i = 0; i < _kDataSize; i += 1)
+        //    {
+        //        if (rect._value[i] != typedOther._value[i])
+        //            return false;
+        //    }
+        //    return true;
+        //}
 
-        public static bool operator !=(Rect rect, Object other) => !(rect == other);
+        //public static bool operator !=(Rect rect, Object other) => !(rect == other);
 
         public int hashCode => hashList(_value);
 

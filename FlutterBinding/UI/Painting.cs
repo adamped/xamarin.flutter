@@ -9,6 +9,7 @@ using System.Linq;
 using FlutterBinding.Mapping;
 using System.Text;
 using FlutterBinding.Engine.Painting;
+using SkiaSharp;
 
 namespace FlutterBinding.UI
 {
@@ -3333,7 +3334,7 @@ namespace FlutterBinding.UI
     ///
     /// The current transform and clip can be saved and restored using the stack
     /// managed by the [save], [saveLayer], and [restore] methods.
-    public class Canvas : NativeFieldWrapperClass2
+    public class Canvas : NativeCanvas
     {
         /// Creates a canvas for recording graphical operations into the
         /// given picture recorder.
@@ -3348,7 +3349,7 @@ namespace FlutterBinding.UI
         /// To end the recording, call [PictureRecorder.endRecording] on the
         /// given recorder.
         // //@pragma('vm:entry-point')
-        public Canvas(PictureRecorder recorder, Rect cullRect = null) //: //assert(recorder != null)
+        public Canvas(PictureRecorder recorder, Rect cullRect = null): base(new SKBitmap()) //: //assert(recorder != null)
         {
             if (recorder.isRecording)
                 throw new ArgumentException("'recorder' must not already be associated with another Canvas.");
@@ -3362,7 +3363,8 @@ namespace FlutterBinding.UI
                           double right,
                           double bottom)
         {
-            // native 'Canvas_constructor';
+            this.Constructor(recorder, left, top, right, bottom);
+            // [DONE] native 'Canvas_constructor';
         }
 
         /// Saves a copy of the current transform and clip on the save stack.
@@ -3557,7 +3559,8 @@ namespace FlutterBinding.UI
 
         void _scale(double sx, double sy)
         {
-            // native 'Canvas_scale';
+            RecordingCanvas.Scale((float)sx, (float)sy);
+            // [DONE] native 'Canvas_scale';
         }
 
         /// Add a rotation to the current transform. The argument is in radians clockwise.
@@ -3952,12 +3955,12 @@ namespace FlutterBinding.UI
 
         /// Draw the given picture onto the canvas. To create a picture, see
         /// [PictureRecorder].
-        public void drawPicture(Picture picture)
+        public void drawPicture(SKPicture picture)
         {
             //assert(picture != null); // picture is checked on the engine side
             _drawPicture(picture);
         }
-        void _drawPicture(Picture picture)
+        void _drawPicture(SKPicture picture)
         {
             // native 'Canvas_drawPicture';
         }
@@ -3986,7 +3989,7 @@ namespace FlutterBinding.UI
         {
             //assert(paragraph != null);
             //assert(_offsetIsValid(offset));
-            paragraph._paint(this, offset.dx, offset.dy);
+            paragraph._paint(RecordingCanvas, offset.dx, offset.dy);
         }
 
         /// Draws a sequence of points according to the given [PointMode].
@@ -4189,47 +4192,47 @@ namespace FlutterBinding.UI
     /// A [Picture] can be placed in a [Scene] using a [SceneBuilder], via
     /// the [SceneBuilder.addPicture] method. A [Picture] can also be
     /// drawn into a [Canvas], using the [Canvas.drawPicture] method.
-    public class Picture : NativeFieldWrapperClass2
-    {
-        /// This class is created by the engine, and should not be instantiated
-        /// or extended directly.
-        ///
-        /// To create a [Picture], use a [PictureRecorder].
-        // //@pragma('vm:entry-point')
-        private Picture() { }
+    //public class SKPicture// : SkiaSharp.SKPicture
+    //{
+    //    /// This class is created by the engine, and should not be instantiated
+    //    /// or extended directly.
+    //    ///
+    //    /// To create a [Picture], use a [PictureRecorder].
+    //    // //@pragma('vm:entry-point')
+    //    //private Picture() { }
 
-        /// Creates an image from this picture.
-        ///
-        /// The picture is rasterized using the number of pixels specified by the
-        /// given width and height.
-        ///
-        /// Although the image is returned synchronously, the picture is actually
-        /// rasterized the first time the image is drawn and then cached.
-        public Image toImage(int width, int height)
-        {
-            // native 'Picture_toImage';
-            return null; // Tmp to resolve build
-        }
+    //    /// Creates an image from this picture.
+    //    ///
+    //    /// The picture is rasterized using the number of pixels specified by the
+    //    /// given width and height.
+    //    ///
+    //    /// Although the image is returned synchronously, the picture is actually
+    //    /// rasterized the first time the image is drawn and then cached.
+    //    public Image toImage(int width, int height)
+    //    {
+    //        // native 'Picture_toImage';
+    //        return null; // Tmp to resolve build
+    //    }
 
-        /// Release the resources used by this object. The object is no longer usable
-        /// after this method is called.
-        public void dispose()
-        {
-            // native 'Picture_dispose';
-        }
+    //    /// Release the resources used by this object. The object is no longer usable
+    //    /// after this method is called.
+    //    public void dispose()
+    //    {
+    //        // native 'Picture_dispose';
+    //    }
 
-        /// Returns the approximate number of bytes allocated for this object.
-        ///
-        /// The actual size of this picture may be larger, particularly if it contains
-        /// references to image or other large objects.
-        public int approximateBytesUsed => 0; // native 'Picture_GetAllocationSize';
-    }
+    //    /// Returns the approximate number of bytes allocated for this object.
+    //    ///
+    //    /// The actual size of this picture may be larger, particularly if it contains
+    //    /// references to image or other large objects.
+    //    public int approximateBytesUsed => 0; // native 'Picture_GetAllocationSize';
+    //}
 
     /// Records a [Picture] containing a sequence of graphical operations.
     ///
     /// To begin recording, construct a [Canvas] to record the commands.
     /// To end recording, use the [PictureRecorder.endRecording] method.
-    public class PictureRecorder : NativeFieldWrapperClass2
+    public class PictureRecorder : NativePictureRecorder
     {
         /// Creates a new idle PictureRecorder. To associate it with a
         /// [Canvas] and begin recording, pass this [PictureRecorder] to the
@@ -4238,6 +4241,7 @@ namespace FlutterBinding.UI
         public PictureRecorder() { _constructor(); }
         void _constructor()
         {
+            
             // native 'PictureRecorder_constructor';
         }
         /// Whether this object is currently recording commands.
@@ -4251,8 +4255,8 @@ namespace FlutterBinding.UI
         {
             get
             {
+                return this.RecordingCanvas != null;
                 // native 'PictureRecorder_isRecording';
-                return true; // Tmp to allow build
             }
         }
         /// Finishes recording graphical operations.
@@ -4262,10 +4266,10 @@ namespace FlutterBinding.UI
         /// and the canvas objects are invalid and cannot be used further.
         ///
         /// Returns null if the PictureRecorder is not associated with a canvas.
-        public Picture endRecording()
+        public SKPicture endRecording()
         {
-            // native 'PictureRecorder_endRecording';
-            return null; // Tmp to allow build
+            return this.EndRecording();
+            // [DONE] native 'PictureRecorder_endRecording';           
         }
     }
 

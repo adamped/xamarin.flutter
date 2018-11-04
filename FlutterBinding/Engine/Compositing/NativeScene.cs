@@ -19,6 +19,12 @@ namespace FlutterBinding.Engine.Compositing
 
         LayerTree m_layerTree;
 
+
+        public LayerTree TakeLayerTree()
+        {
+            return m_layerTree;
+        }
+
         public NativeScene(Layer rootLayer,
              uint rasterizerTracingThreshold,
              bool checkerboardRasterCacheImages,

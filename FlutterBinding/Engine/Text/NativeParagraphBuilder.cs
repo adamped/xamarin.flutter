@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FlutterBinding.UI;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -9,8 +10,6 @@ namespace FlutterBinding.Engine.Text
 
     public class NativeParagraphBuilder
     {
-
-        public NativeParagraphBuilder() { }
 
         // TextStyle
 
@@ -148,9 +147,9 @@ namespace FlutterBinding.Engine.Text
 
         const uint kBlurOffset = 3;
 
-        Txt.ParagraphBuilder m_paragraphBuilder;
+        //Txt.ParagraphBuilder m_paragraphBuilder;
 
-        NativeParagraphBuilder(List<int> encoded,
+        protected NativeParagraphBuilder(List<int> encoded,
                          string fontFamily,
                          double fontSize,
                          double lineHeight,
@@ -158,80 +157,99 @@ namespace FlutterBinding.Engine.Text
                          string locale)
         {
 
-            int mask = encoded[0];
+            //int mask = encoded[0];
 
-            NativeParagraphStyle style;
+            //Txt.ParagraphStyle style;
 
-            if (mask & psTextAlignMask)
+            //if (mask & psTextAlignMask)
 
-                style.text_align = TextAlign(encoded[psTextAlignIndex]);
-
-
-
-            if (mask & psTextDirectionMask)
-
-                style.text_direction = txt::TextDirection(encoded[psTextDirectionIndex]);
+            //    style.text_align = TextAlign(encoded[psTextAlignIndex]);
 
 
 
-            if (mask & psFontWeightMask)
+            //if (mask & psTextDirectionMask)
 
-                style.font_weight =
-
-                    static_cast<txt::FontWeight>(encoded[psFontWeightIndex]);
+            //    style.text_direction = txt::TextDirection(encoded[psTextDirectionIndex]);
 
 
 
-            if (mask & psFontStyleMask)
+            //if (mask & psFontWeightMask)
 
-                style.font_style = static_cast<txt::FontStyle>(encoded[psFontStyleIndex]);
+            //    style.font_weight =
 
-
-
-            if (mask & psFontFamilyMask)
-
-                style.font_family = fontFamily;
+            //        static_cast<txt::FontWeight>(encoded[psFontWeightIndex]);
 
 
 
-            if (mask & psFontSizeMask)
+            //if (mask & psFontStyleMask)
 
-                style.font_size = fontSize;
-
-
-
-            if (mask & psLineHeightMask)
-
-                style.line_height = lineHeight;
+            //    style.font_style = static_cast<txt::FontStyle>(encoded[psFontStyleIndex]);
 
 
 
-            if (mask & psMaxLinesMask)
+            //if (mask & psFontFamilyMask)
 
-                style.max_lines = encoded[psMaxLinesIndex];
-
-
-
-            if (mask & psEllipsisMask)
-
-                style.ellipsis = ellipsis;
+            //    style.font_family = fontFamily;
 
 
 
-            if (mask & psLocaleMask)
+            //if (mask & psFontSizeMask)
 
-                style.locale = locale;
+            //    style.font_size = fontSize;
 
 
 
-            FontCollection & font_collection =
+            //if (mask & psLineHeightMask)
 
-                UIDartState::Current()->window()->client()->GetFontCollection();
+            //    style.line_height = lineHeight;
 
-            m_paragraphBuilder = new NativeParagraphBuilder(
-                style, font_collection.GetFontCollection());
+
+
+            //if (mask & psMaxLinesMask)
+
+            //    style.max_lines = encoded[psMaxLinesIndex];
+
+
+
+            //if (mask & psEllipsisMask)
+
+            //    style.ellipsis = ellipsis;
+
+
+
+            //if (mask & psLocaleMask)
+
+            //    style.locale = locale;
+
+
+
+            //Txt.FontCollection font_collection =
+
+            //    UIDartState::Current()->window()->client()->GetFontCollection();
+
+            //m_paragraphBuilder = new Txt.ParagraphBuilder(
+            //    style, font_collection.GetFontCollection());
 
         }  // namespace blink
 
+
+        string _text = "";
+        protected string AddText(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+                return null;
+
+            _text += text;
+            
+            // TODO:
+            //m_paragraphBuilder->AddText(text);
+
+            return null;
+        }
+
+        protected Paragraph Build()
+        {
+            return new Paragraph() { Text = _text };
+        }
     }
 }

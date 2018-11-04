@@ -1,18 +1,10 @@
-﻿using FlutterBinding.UI;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
+﻿using FlutterBinding.Engine;
+using FlutterBinding.UI;
+using SkiaSharp;
+using SkiaSharp.Views.UWP;
+using System.Threading.Tasks;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
-using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
-using Windows.UI.Xaml.Navigation;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -26,19 +18,30 @@ namespace FlutterBindingSample
         public MainPage()
         {
             this.InitializeComponent();
-
-            this.Loaded += MainPage_Loaded;
-            
         }
 
-        private void MainPage_Loaded(object sender, RoutedEventArgs e)
+        bool _hasPainted = false;
+        protected void OnCanvasViewPaintSurface(object sender, SKPaintSurfaceEventArgs e)
         {
+            var canvas = e.Surface.Canvas;
+
+
+            if (_hasPainted)
+                return;
+
+            _hasPainted = true;
             var frame = ((Frame)Windows.UI.Xaml.Window.Current.Content);
 
             FlutterBinding.UI.Window.Instance.physicalSize = new FlutterBinding.UI.Size(frame.ActualWidth, frame.ActualHeight);
 
+            //await Task.Delay(2000); // Ugly hack to test, that the Surface loads
+
+            Engine.Instance.LoadCanvas(e.Surface.Canvas);
+            Engine.Instance.SetSize(frame.ActualWidth, frame.ActualHeight);
+
             BeginFrame();
         }
+
 
         public void BeginFrame()
         {
@@ -56,8 +59,9 @@ namespace FlutterBindingSample
 
             var physicalBounds = Offset.zero & physicalSize;
             var recorder = new PictureRecorder();
+
             var canvas = new FlutterBinding.UI.Canvas(recorder, physicalBounds);
-            canvas.scale(devicePixelRatio, devicePixelRatio);
+            canvas.scale((float)devicePixelRatio, (float)devicePixelRatio);
             canvas.drawParagraph(paragraph, new Offset(
                 (logicalSize.width - paragraph.maxIntrinsicWidth) / 2.0,
                 (logicalSize.height - paragraph.height) / 2.0
@@ -71,6 +75,10 @@ namespace FlutterBindingSample
             sceneBuilder.pop();
 
             var scene = sceneBuilder.build();
+
+            var display = Windows.Graphics.Display.DisplayInformation.GetForCurrentView();
+            var _scale = display.LogicalDpi / 96.0f;
+
             window.render(scene);
         }
     }
