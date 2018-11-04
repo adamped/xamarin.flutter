@@ -74,7 +74,7 @@ namespace FlutterBinding.Flow.Layers
             }
         }
 
-        private List<Layer> layers_ = new List<Layer>();
+        public List<Layer> layers_ = new List<Layer>();
 
         //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':
         //  ContainerLayer(const ContainerLayer&) = delete;

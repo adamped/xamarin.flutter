@@ -20,6 +20,7 @@ namespace FlutterBinding.Flow.Layers
 
         public void set_path(SKPath path)
         {
+            
             path_ = path;
             isRect_ = false;
             SKRect rect = new SKRect();

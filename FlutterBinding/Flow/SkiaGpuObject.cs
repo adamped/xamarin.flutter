@@ -64,7 +64,7 @@ namespace FlutterBinding.Flow
 
         //private SkiaUnrefQueue(fml.TaskRunner task_runner, fml.TimeDelta delay)
         //{
-        //    this.task_runner_ = new fml.RefPtr<fml.TaskRunner>(std::move(task_runner));
+        //    this.task_runner_ = new fml.RefPtr<fml.TaskRunner>(task_runner);
         //    this.drain_delay_ = new fml.TimeDelta(delay);
         //    this.drain_pending_ = false;
         //}

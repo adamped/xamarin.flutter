@@ -76,10 +76,10 @@ namespace FlutterBinding.Flow.Layers
             {
                 root_layer_.Preroll(preroll_context, root_surface_transformation);
                 // The needs painting flag may be set after the preroll. So check it after.
-                if (root_layer_.needs_painting())
-                {
+                //if (root_layer_.needs_painting())
+                //{
                     root_layer_.Paint(paint_context);
-                }
+                //}
             }
 
             return recorder.EndRecording(); // FinishRecordingAsPicture();
@@ -87,7 +87,7 @@ namespace FlutterBinding.Flow.Layers
 
         //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
         //ORIGINAL LINE: Layer* root_layer() const
-        public Layer root_layer;
+        //public Layer root_layer;
 
         public void set_root_layer(Layer root_layer)
         {
@@ -148,7 +148,7 @@ namespace FlutterBinding.Flow.Layers
         }
 
         private SKSizeI frame_size_ = new SKSizeI(); // Physical pixels.
-        private Layer root_layer_;
+        public Layer root_layer_;
         //private fml.TimeDelta construction_time_ = new fml.TimeDelta();
         private uint rasterizer_tracing_threshold_;
         private bool checkerboard_raster_cache_images_;

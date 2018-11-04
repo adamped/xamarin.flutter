@@ -42,6 +42,10 @@ namespace FlutterBinding.Flow.Layers
                               bool checkerboard_offscreen_layers)
         {
             this.raster_cache = raster_cache;
+
+            if (raster_cache == null)
+                this.raster_cache = new RasterCache();
+
             this.gr_context = gr_context;
             this.dst_color_space = dst_color_space;
             this.child_paint_bounds = child_paint_bounds;

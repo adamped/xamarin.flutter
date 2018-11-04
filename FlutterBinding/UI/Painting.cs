@@ -8,6 +8,8 @@ using static FlutterBinding.UI.Painting;
 using System.Linq;
 using FlutterBinding.Mapping;
 using System.Text;
+using FlutterBinding.Engine.Painting;
+using SkiaSharp;
 
 namespace FlutterBinding.UI
 {
@@ -998,7 +1000,7 @@ namespace FlutterBinding.UI
     ///
     ///  * [Paint.strokeCap] for how this value is used.
     ///  * [StrokeJoin] for the different kinds of line segment joins.
-    // These enum values must be kept in sync with SkPaint::Cap.
+    // These enum values must be kept in sync with SKPaint::Cap.
     public enum StrokeCap
     {
         /// Begin and end contours with a flat edge and no extension.
@@ -1045,7 +1047,7 @@ namespace FlutterBinding.UI
     /// * [Paint.strokeJoin] and [Paint.strokeMiterLimit] for how this value is
     ///   used.
     /// * [StrokeCap] for the different kinds of line endings.
-    // These enum values must be kept in sync with SkPaint::Join.
+    // These enum values must be kept in sync with SKPaint::Join.
     public enum StrokeJoin
     {
         /// Joins between line segments form sharp corners.
@@ -1097,10 +1099,10 @@ namespace FlutterBinding.UI
     /// Strategies for painting shapes and paths on a canvas.
     ///
     /// See [Paint.style].
-    // These enum values must be kept in sync with SkPaint::Style.
+    // These enum values must be kept in sync with SKPaint::Style.
     public enum PaintingStyle
     {
-        // This list comes from Skia's SkPaint.h and the values (order) should be kept
+        // This list comes from Skia's SKPaint.h and the values (order) should be kept
         // in sync.
 
         /// Apply the [Paint] to the inside of the shape. For example, when
@@ -1204,7 +1206,7 @@ namespace FlutterBinding.UI
         // Paint objects are encoded in two buffers:
         //
         // * _data is binary data in four-byte fields, each of which is either a
-        //   uint32_t or a float. The default value for each field is encoded as
+        //   uint or a float. The default value for each field is encoded as
         //   zero to make initialization trivial. Most values already have a default
         //   value of zero, but some, such as color, have a non-zero default value.
         //   To encode or decode these values, XOR the value with the default value.
@@ -1917,7 +1919,7 @@ namespace FlutterBinding.UI
     /// See also:
     ///
     /// * [Path.combine], which uses this enum to decide how to combine two paths.
-    // Must be kept in sync with SkPathOp
+    // Must be kept in sync with SKPathOp
     public enum PathOperation
     {
         /// Subtract the second path from the first path.
@@ -1969,14 +1971,15 @@ namespace FlutterBinding.UI
         reverseDifference,
     }
 
+    // I remove this, because it was just a handle to NativeEngineLayer anyway
     /// A handle for the framework to hold and retain an engine layer across frames.
-    public class EngineLayer : NativeFieldWrapperClass2
-    {
-        /// This class is created by the engine, and should not be instantiated
-        /// or extended directly.
-        // //@pragma('vm:entry-point')
-        private EngineLayer() { }
-    }
+    //public class EngineLayer
+    //{
+    //    /// This class is created by the engine, and should not be instantiated
+    //    /// or extended directly.
+    //    // //@pragma('vm:entry-point')
+    //    EngineLayer(): base(null) { }
+    //}
 
     /// A complex, one-dimensional subset of a plane.
     ///
@@ -2420,7 +2423,7 @@ namespace FlutterBinding.UI
         /// square is rotated, and the (axis-aligned, non-rotated) bounding box
         /// therefore ends up grossly overestimating the actual area covered by the
         /// circle.
-        // see https://skia.org/user/api/SkPath_Reference#SkPath_getBounds
+        // see https://skia.org/user/api/SKPath_Reference#SKPath_getBounds
         public Rect getBounds()
         {
             List<float> rect = _getBounds();
@@ -3272,7 +3275,7 @@ namespace FlutterBinding.UI
     ///
     // ignore: deprecated_member_use
     /// Used by [Canvas.drawPoints].
-    // These enum values must be kept in sync with SkCanvas::PointMode.
+    // These enum values must be kept in sync with SKCanvas::PointMode.
     public enum PointMode
     {
         /// Draw each point separately.
@@ -3331,7 +3334,7 @@ namespace FlutterBinding.UI
     ///
     /// The current transform and clip can be saved and restored using the stack
     /// managed by the [save], [saveLayer], and [restore] methods.
-    public class Canvas : NativeFieldWrapperClass2
+    public class Canvas : NativeCanvas
     {
         /// Creates a canvas for recording graphical operations into the
         /// given picture recorder.
@@ -3346,7 +3349,7 @@ namespace FlutterBinding.UI
         /// To end the recording, call [PictureRecorder.endRecording] on the
         /// given recorder.
         // //@pragma('vm:entry-point')
-        public Canvas(PictureRecorder recorder, Rect cullRect = null) //: //assert(recorder != null)
+        public Canvas(PictureRecorder recorder, Rect cullRect = null): base(new SKBitmap()) //: //assert(recorder != null)
         {
             if (recorder.isRecording)
                 throw new ArgumentException("'recorder' must not already be associated with another Canvas.");
@@ -3360,7 +3363,8 @@ namespace FlutterBinding.UI
                           double right,
                           double bottom)
         {
-            // native 'Canvas_constructor';
+            this.Constructor(recorder, left, top, right, bottom);
+            // [DONE] native 'Canvas_constructor';
         }
 
         /// Saves a copy of the current transform and clip on the save stack.
@@ -3555,7 +3559,8 @@ namespace FlutterBinding.UI
 
         void _scale(double sx, double sy)
         {
-            // native 'Canvas_scale';
+            RecordingCanvas.Scale((float)sx, (float)sy);
+            // [DONE] native 'Canvas_scale';
         }
 
         /// Add a rotation to the current transform. The argument is in radians clockwise.
@@ -3950,12 +3955,12 @@ namespace FlutterBinding.UI
 
         /// Draw the given picture onto the canvas. To create a picture, see
         /// [PictureRecorder].
-        public void drawPicture(Picture picture)
+        public void drawPicture(SKPicture picture)
         {
             //assert(picture != null); // picture is checked on the engine side
             _drawPicture(picture);
         }
-        void _drawPicture(Picture picture)
+        void _drawPicture(SKPicture picture)
         {
             // native 'Canvas_drawPicture';
         }
@@ -3980,11 +3985,11 @@ namespace FlutterBinding.UI
         /// If the text is centered, the centering axis will be at the position
         /// described by adding half of the [ParagraphConstraints.width] given to
         /// [Paragraph.layout], to the `offset` argument's [Offset.dx] coordinate.
-        void drawParagraph(Paragraph paragraph, Offset offset)
+        public void drawParagraph(Paragraph paragraph, Offset offset)
         {
             //assert(paragraph != null);
             //assert(_offsetIsValid(offset));
-            paragraph._paint(this, offset.dx, offset.dy);
+            paragraph._paint(RecordingCanvas, offset.dx, offset.dy);
         }
 
         /// Draws a sequence of points according to the given [PointMode].
@@ -4187,47 +4192,47 @@ namespace FlutterBinding.UI
     /// A [Picture] can be placed in a [Scene] using a [SceneBuilder], via
     /// the [SceneBuilder.addPicture] method. A [Picture] can also be
     /// drawn into a [Canvas], using the [Canvas.drawPicture] method.
-    public class Picture : NativeFieldWrapperClass2
-    {
-        /// This class is created by the engine, and should not be instantiated
-        /// or extended directly.
-        ///
-        /// To create a [Picture], use a [PictureRecorder].
-        // //@pragma('vm:entry-point')
-        private Picture() { }
+    //public class SKPicture// : SkiaSharp.SKPicture
+    //{
+    //    /// This class is created by the engine, and should not be instantiated
+    //    /// or extended directly.
+    //    ///
+    //    /// To create a [Picture], use a [PictureRecorder].
+    //    // //@pragma('vm:entry-point')
+    //    //private Picture() { }
 
-        /// Creates an image from this picture.
-        ///
-        /// The picture is rasterized using the number of pixels specified by the
-        /// given width and height.
-        ///
-        /// Although the image is returned synchronously, the picture is actually
-        /// rasterized the first time the image is drawn and then cached.
-        public Image toImage(int width, int height)
-        {
-            // native 'Picture_toImage';
-            return null; // Tmp to resolve build
-        }
+    //    /// Creates an image from this picture.
+    //    ///
+    //    /// The picture is rasterized using the number of pixels specified by the
+    //    /// given width and height.
+    //    ///
+    //    /// Although the image is returned synchronously, the picture is actually
+    //    /// rasterized the first time the image is drawn and then cached.
+    //    public Image toImage(int width, int height)
+    //    {
+    //        // native 'Picture_toImage';
+    //        return null; // Tmp to resolve build
+    //    }
 
-        /// Release the resources used by this object. The object is no longer usable
-        /// after this method is called.
-        public void dispose()
-        {
-            // native 'Picture_dispose';
-        }
+    //    /// Release the resources used by this object. The object is no longer usable
+    //    /// after this method is called.
+    //    public void dispose()
+    //    {
+    //        // native 'Picture_dispose';
+    //    }
 
-        /// Returns the approximate number of bytes allocated for this object.
-        ///
-        /// The actual size of this picture may be larger, particularly if it contains
-        /// references to image or other large objects.
-        public int approximateBytesUsed => 0; // native 'Picture_GetAllocationSize';
-    }
+    //    /// Returns the approximate number of bytes allocated for this object.
+    //    ///
+    //    /// The actual size of this picture may be larger, particularly if it contains
+    //    /// references to image or other large objects.
+    //    public int approximateBytesUsed => 0; // native 'Picture_GetAllocationSize';
+    //}
 
     /// Records a [Picture] containing a sequence of graphical operations.
     ///
     /// To begin recording, construct a [Canvas] to record the commands.
     /// To end recording, use the [PictureRecorder.endRecording] method.
-    public class PictureRecorder : NativeFieldWrapperClass2
+    public class PictureRecorder : NativePictureRecorder
     {
         /// Creates a new idle PictureRecorder. To associate it with a
         /// [Canvas] and begin recording, pass this [PictureRecorder] to the
@@ -4236,6 +4241,7 @@ namespace FlutterBinding.UI
         public PictureRecorder() { _constructor(); }
         void _constructor()
         {
+            
             // native 'PictureRecorder_constructor';
         }
         /// Whether this object is currently recording commands.
@@ -4249,8 +4255,8 @@ namespace FlutterBinding.UI
         {
             get
             {
+                return this.RecordingCanvas != null;
                 // native 'PictureRecorder_isRecording';
-                return true; // Tmp to allow build
             }
         }
         /// Finishes recording graphical operations.
@@ -4260,10 +4266,10 @@ namespace FlutterBinding.UI
         /// and the canvas objects are invalid and cannot be used further.
         ///
         /// Returns null if the PictureRecorder is not associated with a canvas.
-        public Picture endRecording()
+        public SKPicture endRecording()
         {
-            // native 'PictureRecorder_endRecording';
-            return null; // Tmp to allow build
+            return this.EndRecording();
+            // [DONE] native 'PictureRecorder_endRecording';           
         }
     }
 
@@ -4503,6 +4509,7 @@ namespace FlutterBinding.UI
         public String toString() => $"TextShadow({color}, {offset}, {blurRadius})";
     }
 
+    // TODO: I think these should just be Action's or Func's no need for a delegate
     /// Generic callback signature, used by [_futurize].
     public delegate void _Callback<T>(T result);
     public delegate void _Callback();
