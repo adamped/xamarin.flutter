@@ -80,6 +80,7 @@
 
   <ItemGroup>
     <Folder Include="Minikin\" />
+    <Folder Include="Txt\" />
   </ItemGroup>
 
 </Project>
