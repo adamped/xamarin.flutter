@@ -25,7 +25,7 @@ namespace FlutterBinding.Flow.Layers
         public override void Preroll(PrerollContext context, SKMatrix matrix)
         {
             SKRect child_paint_bounds = SKRect.Empty;
-            PrerollChildren(context, matrix, child_paint_bounds);
+            PrerollChildren(context, matrix, ref child_paint_bounds);
 
             if (child_paint_bounds.IntersectsWith(clip_path_.Bounds))
             {

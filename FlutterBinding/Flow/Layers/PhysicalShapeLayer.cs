@@ -90,7 +90,7 @@ namespace FlutterBinding.Flow.Layers
         public override void Preroll(PrerollContext context, SKMatrix matrix)
         {
             SKRect child_paint_bounds = new SKRect();
-            PrerollChildren(context, matrix, child_paint_bounds);
+            PrerollChildren(context, matrix, ref child_paint_bounds);
 
             if (elevation_ == 0F)
             {

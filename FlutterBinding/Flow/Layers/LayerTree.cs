@@ -76,10 +76,10 @@ namespace FlutterBinding.Flow.Layers
             {
                 root_layer_.Preroll(preroll_context, root_surface_transformation);
                 // The needs painting flag may be set after the preroll. So check it after.
-                //if (root_layer_.needs_painting())
-                //{
+                if (root_layer_.needs_painting())
+                {
                     root_layer_.Paint(paint_context);
-                //}
+                }
             }
 
             return recorder.EndRecording(); // FinishRecordingAsPicture();

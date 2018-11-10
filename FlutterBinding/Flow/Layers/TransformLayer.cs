@@ -28,7 +28,7 @@ namespace FlutterBinding.Flow.Layers
             SKMatrix.Concat(ref child_matrix, matrix, transform_);
             
             SKRect child_paint_bounds = SKRect.Empty;
-            PrerollChildren(context, child_matrix, child_paint_bounds);
+            PrerollChildren(context, child_matrix, ref child_paint_bounds);
 
             transform_.MapRect(child_paint_bounds);
             set_paint_bounds(child_paint_bounds);

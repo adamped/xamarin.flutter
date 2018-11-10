@@ -84,8 +84,8 @@ namespace FlutterBinding.Engine.Compositing
             var layer = new PictureLayer();
             layer.set_offset(offset);
             layer.set_picture(new Flow.SkiaGPUObject<SKPicture>(picture, _queue)); // UIDartState::CreateGPUObject(picture->picture()));
-            layer.set_is_complex(true); // !!(hints & 1));
-            layer.set_will_change(true); // !!(hints & 2));
+            layer.set_is_complex((hints & 1) == 1);
+            layer.set_will_change((hints & 2) == 2);
             current_layer_.Add(layer);
         }
 
