@@ -14,8 +14,6 @@ namespace FlutterBinding.Flow.Layers
         {
             this.clip_behavior_ = clip_behavior;
         }
-        //C++ TO C# CONVERTER TODO TASK: The implementation of the following method could not be found:
-        //  public void Dispose();
 
         public void set_clip_path(SKPath clip_path)
         {
@@ -33,15 +31,11 @@ namespace FlutterBinding.Flow.Layers
             }
         }
 
-        //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
-        //ORIGINAL LINE: void Paint(PaintContext& context) const override
         public override void Paint(PaintContext context)
         {
             TRACE_EVENT0("flutter", "ClipPathLayer::Paint");
             FML_DCHECK(needs_painting());
-
-            //C++ TO C# CONVERTER TODO TASK: There is no equivalent in C# to 'static_assert':
-            //  (...) static_assert(false, "missing name for " "SkAutoCanvasRestore") save(&context.canvas, true);
+            
             context.canvas.ClipPath(clip_path_, antialias: clip_behavior_ != Clip.hardEdge);
             if (clip_behavior_ == Clip.antiAliasWithSaveLayer)
             {
@@ -56,11 +50,6 @@ namespace FlutterBinding.Flow.Layers
 
         private SKPath clip_path_ = new SKPath();
         private Clip clip_behavior_;
-
-        //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':
-        //  ClipPathLayer(const ClipPathLayer&) = delete;
-        //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':
-        //  ClipPathLayer& operator =(const ClipPathLayer&) = delete;
     }
 
 }

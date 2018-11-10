@@ -17,16 +17,12 @@ and place this file directly in `flutter/lib` in this solution.
 
 4) In a terminal window or command prompt, run `dart analyzer`.
 
-This will run through the Flutter SDK and create an equivalent *.sm.json file. This is the generated semantic model.
+This will run through the Flutter SDK and create an equivalent *.cs files.
 
 ## Semantic Model
 
-This is just a JSON file that contains the customized semantic model from Dart. It is output by the Dart Analyzer, and read by the CSharpWriter.
+To generate the *.cs files, the Dart Analyzer creates a Semantic Model that is used by the writer.
 
 ## CSharp Writer
 
-Open the Dart2CSharpTranspiler and run the Console app, assuming all previous steps completed successfully.
-
-This will output the Flutter SDK in C# to the Flutter/FlutterSDK.csproj project.
-
-The FlutterBinding project is a manually created and edited project and is not part of the transpiling.
+The writer, will take the Semantic Model and output the transpiled C# files into the FlutterSDK project.

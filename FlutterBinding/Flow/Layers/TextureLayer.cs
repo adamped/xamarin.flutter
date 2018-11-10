@@ -10,15 +10,9 @@ namespace FlutterBinding.Flow.Layers
 
     public class TextureLayer : Layer
     {
-        //C++ TO C# CONVERTER TODO TASK: The implementation of the following method could not be found:
-        //  TextureLayer();
-        //C++ TO C# CONVERTER TODO TASK: The implementation of the following method could not be found:
-        //  public void Dispose();
 
         public void set_offset(SKPoint offset)
         {
-            //C++ TO C# CONVERTER TODO TASK: The following line was determined to be a copy assignment (rather than a reference assignment) - this should be verified and a 'CopyFrom' method should be created:
-            //ORIGINAL LINE: offset_ = offset;
             offset_ = offset;
         }
         public void set_size(SKSize size)
@@ -27,8 +21,6 @@ namespace FlutterBinding.Flow.Layers
         }
         public void set_texture_id(ulong texture_id)
         {
-            //C++ TO C# CONVERTER TODO TASK: The following line was determined to be a copy assignment (rather than a reference assignment) - this should be verified and a 'CopyFrom' method should be created:
-            //ORIGINAL LINE: texture_id_ = texture_id;
             texture_id_ = texture_id;
         }
         public void set_freeze(bool freeze)
@@ -40,8 +32,6 @@ namespace FlutterBinding.Flow.Layers
         {
             set_paint_bounds(new SKRect(offset_.X, offset_.Y, size_.Width, size_.Height));
         }
-        //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
-        //ORIGINAL LINE: void Paint(PaintContext& context) const override
         public override void Paint(PaintContext context)
         {
             Texture texture = context.texture_registry.GetTexture(texture_id_);
@@ -56,11 +46,6 @@ namespace FlutterBinding.Flow.Layers
         private SKSize size_ = new SKSize();
         private ulong texture_id_ = new ulong();
         private bool freeze_;
-
-        //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':
-        //  TextureLayer(const TextureLayer&) = delete;
-        //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':
-        //  TextureLayer& operator =(const TextureLayer&) = delete;
     }
 
 }

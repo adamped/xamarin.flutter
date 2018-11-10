@@ -15,8 +15,6 @@ namespace FlutterBinding.Flow.Layers
             this.isRect_ = false;
             this.clip_behavior_ = clip_behavior;
         }
-        //C++ TO C# CONVERTER TODO TASK: The implementation of the following method could not be found:
-        //  public void Dispose();
 
         public void set_path(SKPath path)
         {
@@ -24,6 +22,9 @@ namespace FlutterBinding.Flow.Layers
             path_ = path;
             isRect_ = false;
             SKRect rect = new SKRect();
+
+            // Awaiting API implementation in SkiaSharp
+
             //if (path.isRect(rect))
             //{
             //    isRect_ = true;
@@ -70,10 +71,10 @@ namespace FlutterBinding.Flow.Layers
 
         public static void DrawShadow(SKCanvas canvas, SKPath path, uint color, float elevation, bool transparentOccluder, float dpr)
         {
-            //const float kAmbientAlpha = 0.039f;
-            //const float kSpotAlpha = 0.25f;
-            //const float kLightHeight = 600F;
-            //const float kLightRadius = 800F;
+            const float kAmbientAlpha = 0.039f;
+            const float kSpotAlpha = 0.25f;
+            const float kLightHeight = 600F;
+            const float kLightRadius = 800F;
 
             //SkShadowFlags flags = transparentOccluder ? SkShadowFlags.kTransparentOccluder_ShadowFlag : SkShadowFlags.kNone_ShadowFlag;
             //SKRect bounds = path.Bounds;
@@ -108,8 +109,6 @@ namespace FlutterBinding.Flow.Layers
             }
         }
 
-        //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
-        //ORIGINAL LINE: void Paint(PaintContext& context) const override
         public override void Paint(PaintContext context)
         {
             TRACE_EVENT0("flutter", "PhysicalShapeLayer::Paint");
@@ -169,5 +168,4 @@ namespace FlutterBinding.Flow.Layers
         private SKRoundRect frameRRect_ = new SKRoundRect();
         private Clip clip_behavior_;
     }
-
 }

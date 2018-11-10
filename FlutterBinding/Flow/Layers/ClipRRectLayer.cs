@@ -14,8 +14,6 @@ namespace FlutterBinding.Flow.Layers
         {
             this.clip_behavior_ = clip_behavior;
         }
-        //C++ TO C# CONVERTER TODO TASK: The implementation of the following method could not be found:
-        //  public void Dispose();
 
         public void set_clip_rrect(SKRoundRect clip_rrect)
         {
@@ -38,8 +36,6 @@ namespace FlutterBinding.Flow.Layers
             TRACE_EVENT0("flutter", "ClipRRectLayer::Paint");
             FML_DCHECK(needs_painting());
 
-            //C++ TO C# CONVERTER TODO TASK: There is no equivalent in C# to 'static_assert':
-            //  (...) static_assert(false, "missing name for " "SkAutoCanvasRestore") save(&context.canvas, true);
             context.canvas.ClipRoundRect(clip_rrect_, antialias: clip_behavior_ != Clip.hardEdge);
             if (clip_behavior_ == Clip.antiAliasWithSaveLayer)
             {
@@ -54,11 +50,6 @@ namespace FlutterBinding.Flow.Layers
 
         private SKRoundRect clip_rrect_;
         private Clip clip_behavior_;
-
-        //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':
-        //  ClipRRectLayer(const ClipRRectLayer&) = delete;
-        //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':
-        //  ClipRRectLayer& operator =(const ClipRRectLayer&) = delete;
     }
 
 }

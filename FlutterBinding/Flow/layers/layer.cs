@@ -18,9 +18,6 @@ namespace FlutterBinding.Flow.Layers
         antiAliasWithSaveLayer
     }
 
-    //C++ TO C# CONVERTER NOTE: C# has no need of forward class declarations:
-    //class ContainerLayer;
-
     public class PrerollContext
     {
         public RasterCache raster_cache;
@@ -29,8 +26,6 @@ namespace FlutterBinding.Flow.Layers
         public SKRect child_paint_bounds = new SKRect();
 
         // The following allows us to paint in the end of subtree preroll
-        //public readonly Stopwatch frame_time;
-        //public readonly Stopwatch engine_time;
         public TextureRegistry texture_registry;
         public readonly bool checkerboard_offscreen_layers;
 
@@ -57,7 +52,7 @@ namespace FlutterBinding.Flow.Layers
 
     // Represents a single composited layer. Created on the UI thread but then
     // subquently used on the Rasterizer thread.
-    public abstract class Layer: Entry //: System.IDisposable
+    public abstract class Layer: Entry
     {
         public Layer()
         {
@@ -65,8 +60,6 @@ namespace FlutterBinding.Flow.Layers
             this.needs_system_composite_ = false;
             this.paint_bounds_ = SKRect.Empty;
         }
-        //C++ TO C# CONVERTER TODO TASK: The implementation of the following method could not be found:
-        //  public void Dispose();
 
         public virtual void Preroll(PrerollContext context, SKMatrix matrix)
         {
@@ -76,8 +69,6 @@ namespace FlutterBinding.Flow.Layers
         {
             public SKCanvas canvas;
             public ExternalViewEmbedder view_embedder;
-            //public readonly Stopwatch frame_time;
-            //public readonly Stopwatch engine_time;
             public TextureRegistry texture_registry;
             public readonly RasterCache raster_cache;
             public readonly bool checkerboard_offscreen_layers;
@@ -139,14 +130,8 @@ namespace FlutterBinding.Flow.Layers
             private readonly SKRect bounds_ = new SKRect();
         }
 
-        //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
-        //ORIGINAL LINE: virtual void Paint(PaintContext& context) const = 0;
         public abstract void Paint(PaintContext context);
 
-
-
-        //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
-        //ORIGINAL LINE: ContainerLayer* parent() const
         public ContainerLayer parent()
         {
             return parent_;
@@ -157,8 +142,6 @@ namespace FlutterBinding.Flow.Layers
             parent_ = parent;
         }
 
-        //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
-        //ORIGINAL LINE: bool needs_system_composite() const
         public bool needs_system_composite()
         {
             return needs_system_composite_;
@@ -168,8 +151,6 @@ namespace FlutterBinding.Flow.Layers
             needs_system_composite_ = value;
         }
 
-        //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
-        //ORIGINAL LINE: const SKRect& paint_bounds() const
         public SKRect paint_bounds()
         {
             return paint_bounds_;
@@ -179,13 +160,8 @@ namespace FlutterBinding.Flow.Layers
         // be assumed to have empty paint bounds (paints no content).
         public void set_paint_bounds(SKRect paint_bounds)
         {
-            //C++ TO C# CONVERTER TODO TASK: The following line was determined to be a copy assignment (rather than a reference assignment) - this should be verified and a 'CopyFrom' method should be created:
-            //ORIGINAL LINE: paint_bounds_ = paint_bounds;
             paint_bounds_ = paint_bounds;
         }
-
-        //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
-        //ORIGINAL LINE: bool needs_painting() const
         public bool needs_painting()
         {
             return !paint_bounds_.IsEmpty;
@@ -194,11 +170,6 @@ namespace FlutterBinding.Flow.Layers
         private ContainerLayer parent_;
         private bool needs_system_composite_;
         private SKRect paint_bounds_ = new SKRect();
-
-        //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':
-        //  Layer(const Layer&) = delete;
-        //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':
-        //  Layer& operator =(const Layer&) = delete;
     }
 
 }

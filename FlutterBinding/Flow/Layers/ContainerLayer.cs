@@ -11,11 +11,6 @@ namespace FlutterBinding.Flow.Layers
 
     public abstract class ContainerLayer : Layer
     {
-        public ContainerLayer()
-        {
-        }
-        //C++ TO C# CONVERTER TODO TASK: The implementation of the following method could not be found:
-        //  public void Dispose();
 
         public void Add(Layer layer)
         {
@@ -31,11 +26,6 @@ namespace FlutterBinding.Flow.Layers
             PrerollChildren(context, matrix, ref child_paint_bounds);
             set_paint_bounds(child_paint_bounds);
         }
-
-
-
-        //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
-        //ORIGINAL LINE: const ClassicVector<Layer*>& layers() const
         public List<Layer> layers()
         {
             return layers_;
@@ -45,8 +35,6 @@ namespace FlutterBinding.Flow.Layers
         {
             foreach (var layer in layers_)
             {
-                //C++ TO C# CONVERTER TODO TASK: The following line was determined to contain a copy constructor call - this should be verified and a copy constructor should be created:
-                //ORIGINAL LINE: PrerollContext child_context = *context;
                 PrerollContext child_context = context;
                 layer.Preroll(child_context, child_matrix);
 
@@ -57,8 +45,6 @@ namespace FlutterBinding.Flow.Layers
                 child_paint_bounds.Union(layer.paint_bounds());
             }
         }
-        //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
-        //ORIGINAL LINE: void PaintChildren(PaintContext& context) const
         protected void PaintChildren(PaintContext context)
         {
             FML_DCHECK(needs_painting());
@@ -75,11 +61,6 @@ namespace FlutterBinding.Flow.Layers
         }
 
         public List<Layer> layers_ = new List<Layer>();
-
-        //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':
-        //  ContainerLayer(const ContainerLayer&) = delete;
-        //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':
-        //  ContainerLayer& operator =(const ContainerLayer&) = delete;
     }
 
 }
