@@ -1,12 +1,7 @@
 ﻿using FlutterBinding.Engine;
 using FlutterBinding.UI;
-using SkiaSharp;
 using SkiaSharp.Views.UWP;
-using System.Threading.Tasks;
-using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-
-// The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
 namespace FlutterBindingSample
 {
@@ -24,17 +19,14 @@ namespace FlutterBindingSample
         protected void OnCanvasViewPaintSurface(object sender, SKPaintSurfaceEventArgs e)
         {
             var canvas = e.Surface.Canvas;
-
-
+            
             if (_hasPainted)
                 return;
 
             _hasPainted = true;
             var frame = ((Frame)Windows.UI.Xaml.Window.Current.Content);
 
-            FlutterBinding.UI.Window.Instance.physicalSize = new FlutterBinding.UI.Size(frame.ActualWidth, frame.ActualHeight);
-
-            //await Task.Delay(2000); // Ugly hack to test, that the Surface loads
+            FlutterBinding.UI.Window.Instance.physicalSize = new Size(frame.ActualWidth, frame.ActualHeight);
 
             Engine.Instance.LoadCanvas(e.Surface.Canvas);
             Engine.Instance.SetSize(frame.ActualWidth, frame.ActualHeight);
@@ -75,9 +67,6 @@ namespace FlutterBindingSample
             sceneBuilder.pop();
 
             var scene = sceneBuilder.build();
-
-            var display = Windows.Graphics.Display.DisplayInformation.GetForCurrentView();
-            var _scale = display.LogicalDpi / 96.0f;
 
             window.render(scene);
         }

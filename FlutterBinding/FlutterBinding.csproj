@@ -78,4 +78,9 @@
     <Folder Include="Txt\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Minikin\" />
+    <Folder Include="Txt\" />
+  </ItemGroup>
+
 </Project>

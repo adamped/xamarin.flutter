@@ -38,8 +38,8 @@ namespace FlutterBinding.Engine
             // ** Start Hack
             // I just wanted it outputted at this time, rather than frame dependant
 
-            // var picture = layer_tree.Flatten(new SKRect(0, 0, frame_size.Width, frame_size.Height));
-            var picture = ((PictureLayer)((ContainerLayer)layer_tree.root_layer_).layers_[0]).picture();
+            var picture = layer_tree.Flatten(new SKRect(0, 0, frame_size.Width, frame_size.Height));
+            //var picture = ((PictureLayer)((ContainerLayer)layer_tree.root_layer_).layers_[0]).picture();
             //// get the screen density for scaling
 
             //var scale = _scale;

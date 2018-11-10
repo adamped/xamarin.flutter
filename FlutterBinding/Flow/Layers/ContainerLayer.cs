@@ -28,7 +28,7 @@ namespace FlutterBinding.Flow.Layers
             TRACE_EVENT0("flutter", "ContainerLayer::Preroll");
 
             SKRect child_paint_bounds = SKRect.Empty;
-            PrerollChildren(context, matrix, child_paint_bounds);
+            PrerollChildren(context, matrix, ref child_paint_bounds);
             set_paint_bounds(child_paint_bounds);
         }
 
@@ -41,7 +41,7 @@ namespace FlutterBinding.Flow.Layers
             return layers_;
         }
 
-        protected void PrerollChildren(PrerollContext context, SKMatrix child_matrix, SKRect child_paint_bounds)
+        protected void PrerollChildren(PrerollContext context, SKMatrix child_matrix, ref SKRect child_paint_bounds)
         {
             foreach (var layer in layers_)
             {
