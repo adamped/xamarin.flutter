@@ -5,10 +5,82 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Minikin\Arrays.cs" />
+    <Compile Remove="Minikin\CmapCoverage.cs" />
+    <Compile Remove="Minikin\CmapCoverage.h.cs" />
+    <Compile Remove="Minikin\DefineConstants.cs" />
+    <Compile Remove="Minikin\Emoji.cs" />
+    <Compile Remove="Minikin\Emoji.h.cs" />
+    <Compile Remove="Minikin\FontCollection.cs" />
+    <Compile Remove="Minikin\FontCollection.h.cs" />
+    <Compile Remove="Minikin\FontFamily.cs" />
+    <Compile Remove="Minikin\FontFamily.h.cs" />
+    <Compile Remove="Minikin\FontLanguage.cs" />
+    <Compile Remove="Minikin\FontLanguageListCache.cs" />
+    <Compile Remove="Minikin\FontUtils.cs" />
+    <Compile Remove="Minikin\GlobalMembers.cs" />
+    <Compile Remove="Minikin\GraphemeBreak.cs" />
+    <Compile Remove="Minikin\GraphemeBreak.h.cs" />
+    <Compile Remove="Minikin\HbFontCache.cs" />
+    <Compile Remove="Minikin\Hyphenator.cs" />
+    <Compile Remove="Minikin\Layout.cs" />
+    <Compile Remove="Minikin\Layout.h.cs" />
+    <Compile Remove="Minikin\LayoutUtils.cs" />
+    <Compile Remove="Minikin\LineBreaker.cs" />
+    <Compile Remove="Minikin\LineBreaker.h.cs" />
+    <Compile Remove="Minikin\Measurement.cs" />
+    <Compile Remove="Minikin\Measurement.h.cs" />
+    <Compile Remove="Minikin\minikin.android.cs" />
+    <Compile Remove="Minikin\minikin.Hyphenator.cs" />
+    <Compile Remove="Minikin\minikin.SparseBitSet.cs" />
+    <Compile Remove="Minikin\MinikinFont.cs" />
+    <Compile Remove="Minikin\MinikinFont.h.cs" />
+    <Compile Remove="Minikin\MinikinInternal.cs" />
+    <Compile Remove="Minikin\SparseBitSet.cs" />
+    <Compile Remove="Minikin\SparseBitSet.h.cs" />
+    <Compile Remove="Minikin\StringFunctions.cs" />
+    <Compile Remove="Minikin\WordBreaker.cs" />
+    <Compile Remove="Minikin\WordBreaker.h.cs" />
+    <Compile Remove="Txt\asset_font_manager.cs" />
+    <Compile Remove="Txt\DefineConstants.cs" />
+    <Compile Remove="Txt\font_asset_provider.cs" />
+    <Compile Remove="Txt\font_collection.cs" />
+    <Compile Remove="Txt\font_skia.cs" />
+    <Compile Remove="Txt\font_style.cs" />
+    <Compile Remove="Txt\font_weight.cs" />
+    <Compile Remove="Txt\GlobalMembers.cs" />
+    <Compile Remove="Txt\paint_record.cs" />
+    <Compile Remove="Txt\paragraph.cs" />
+    <Compile Remove="Txt\paragraph_builder.cs" />
+    <Compile Remove="Txt\paragraph_style.cs" />
+    <Compile Remove="Txt\platform.cs" />
+    <Compile Remove="Txt\platform_android.cs" />
+    <Compile Remove="Txt\SkTextBlob.cs" />
+    <Compile Remove="Txt\styled_runs.cs" />
+    <Compile Remove="Txt\text_baseline.cs" />
+    <Compile Remove="Txt\text_decoration.cs" />
+    <Compile Remove="Txt\text_shadow.cs" />
+    <Compile Remove="Txt\text_style.cs" />
+    <Compile Remove="Txt\typeface_font_asset_provider.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="SkiaSharp" Version="1.60.3" />
     <PackageReference Include="SkiaSharp.Extended" Version="1.60.0" />
     <PackageReference Include="SkiaSharp.HarfBuzz" Version="1.60.3" />
     <PackageReference Include="SkiaSharp.Svg" Version="1.60.0" />
+    <PackageReference Include="SkiaSharp.Views" Version="1.60.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Minikin\" />
+    <Folder Include="Txt\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Minikin\" />
+    <Folder Include="Txt\" />
   </ItemGroup>
 
 </Project>

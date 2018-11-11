@@ -1,0 +1,13 @@
+﻿<Page
+    x:Class="FlutterBindingSample.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:FlutterBindingSample"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    xmlns:skia="using:SkiaSharp.Views.UWP">
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <skia:SKXamlCanvas x:Name="CanvasView" PaintSurface="OnCanvasViewPaintSurface" />
+    </Grid>
+</Page>

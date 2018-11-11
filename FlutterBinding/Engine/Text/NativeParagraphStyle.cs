@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace FlutterBinding.UI
+namespace FlutterBinding.Engine.Text
 {
-    class PictureRecorder
+    public class NativeParagraphStyle
     {
     }
 }

@@ -91,7 +91,7 @@ class ResolvedPropertyAccessorElement extends ResolvedExecutableElement {
   bool isSetter;
 }
 
-class ResolvedVariableElement {
+class ResolvedVariableElement extends ResolvedElement {
   Object constantValue;
   bool hasImplicitType;
   ResolvedFunctionElement initializer;
