@@ -1,7 +1,7 @@
-import 'package:analyzer/analyzer.dart';
 import 'package:analyzer/dart/element/element.dart';
 
-import 'naming.dart';
+import '../body/bodyTranspiler.dart';
+import '../naming.dart';
 
 class Fields {
   static String printField(FieldElement element) {
@@ -28,7 +28,7 @@ class Fields {
         if (getterNode == null)
           code.write("get;");
         else {
-          code.write("get {${printFieldBody(getterNode)}}");
+          code.write("get {${BodyTranspiler.FieldBody(element.getter)}}");
         }
       }
       // setter
@@ -37,7 +37,7 @@ class Fields {
         if (setterNode == null)
           code.write("set;");
         else {
-          code.write("set {${printFieldBody(setterNode)}}");
+          code.write("set {${BodyTranspiler.FieldBody(element.setter)}}");
         }
       }
       code.write("}");
@@ -64,7 +64,7 @@ class Fields {
 
     if (hasGetter || hasSetter) {
       code.write("{");
-// getter
+      // getter
       if (hasGetter) {
         code.write("get => ${implementedFieldName}.${name};");
       }
@@ -120,11 +120,5 @@ class Fields {
         element.isPrivate
             ? NameStyle.LeadingUnderscoreLowerCamelCase
             : NameStyle.UpperCamelCase);
-  }
-
-  static String printFieldBody(AstNode element) {
-    var bodyLines = Naming.tokenToText(element.beginToken, false).split("\n");
-    return bodyLines.map((l) => "// ${l}\n").join() +
-        "\nthrow new NotImplementedException();";
-  }
+  } 
 }

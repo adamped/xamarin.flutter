@@ -1,12 +1,17 @@
 import 'dart:io';
 
 class Config {
-  static String directoryPath = Directory('..\\flutter\\lib\\src')
+
+  // Path to the flutter src directory
+  static String flutterSourcePath = Directory('..\\flutter\\lib\\src')
       .absolute
       .path
       .replaceAll('\\AST\\..', '');
+
+  // Root namespace the transpiled namespaces will start with
   static String rootNamespace = "FlutterSDK";
 
+  // Imports that are replaced with .net system or mapping libraries
   static List<String> ignoredImports = new List<String>()
     ..add("package:typed_data/typed_buffers.dart")
     ..add("package:collection/collection.dart")

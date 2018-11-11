@@ -11,7 +11,7 @@ class Naming {
   static List<String> namespacePartsFromIdentifier(String identifier) {
     var namespacePath = identifier
         .replaceAll(
-            "file:///" + Config.directoryPath.replaceAll("\\", "/") + "/", "")
+            "file:///" + Config.flutterSourcePath.replaceAll("\\", "/") + "/", "")
         .replaceAll(".dart", "");
     var splittedPath = namespacePath
         .split('/')

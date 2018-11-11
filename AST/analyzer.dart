@@ -13,7 +13,7 @@ import 'package:analyzer/src/generated/source_io.dart';
 import 'package:analyzer/src/source/source_resource.dart';
 
 import 'config.dart';
-import 'frame.dart';
+import 'signature/frame.dart';
 import 'naming.dart';
 import 'packageResolver.dart';
 
@@ -21,8 +21,8 @@ main() async {
   // 1) Get all directories and all files
   var outputPath = Directory('..\\FlutterSDK\\src');
 
-  print("Directory: " + Config.directoryPath);
-  var contents = await dirContents(Directory(Config.directoryPath));
+  print("Directory: " + Config.flutterSourcePath);
+  var contents = await dirContents(Directory(Config.flutterSourcePath));
 
   PhysicalResourceProvider resourceProvider = PhysicalResourceProvider.INSTANCE;
   DartSdk sdk = new FolderBasedDartSdk(resourceProvider,
@@ -34,8 +34,8 @@ main() async {
     packageResolver(
         resourceProvider,
         'flutter',
-        resourceProvider.getFolder(Config.directoryPath
-            .substring(0, Config.directoryPath.lastIndexOf('\\'))))
+        resourceProvider.getFolder(Config.flutterSourcePath
+            .substring(0, Config.flutterSourcePath.lastIndexOf('\\'))))
   ];
 
   AnalysisContext context = AnalysisEngine.instance.createAnalysisContext()
@@ -87,7 +87,7 @@ Future<List<FileSystemEntity>> dirContents(Directory directory) async {
         .list(recursive: true, followLinks: false)
         .listen((FileSystemEntity entity) {
       files.add(entity);
-    });
+    }); 
 
     stream.onDone(() => completer.complete(files));
   }

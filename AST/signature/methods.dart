@@ -1,8 +1,9 @@
 import 'package:analyzer/analyzer.dart';
 import 'package:analyzer/dart/element/element.dart';
 
-import 'comments.dart';
-import 'naming.dart';
+import '../body/bodyTranspiler.dart';
+import '../comments.dart';
+import '../naming.dart';
 
 class Methods {
   static bool isSameSignature(MethodElement m1, MethodElement m2) {
@@ -32,6 +33,10 @@ class Methods {
     code.writeln("");
     Comments.appendComment(code, element);
 
+    if (name == "UpdateRenderObject") {
+      print("Found it :)");
+    }
+
     if (element.hasProtected == true) code.write("protected ");
     if (element.isPublic == true) code.write("public ");
     if (element.isPrivate == true) code.write("private ");
@@ -40,16 +45,12 @@ class Methods {
       code.write("sealed ");
     // Add virtual as default key if method is not already abstract since all methods are virtual in dart
     else if (element.hasOverride == false && element.isPrivate == false)
-      code.write("virtual ");
-
-    if (name == "addListener") {
-      print("test");
-    }
+      code.write("virtual "); 
 
     code.write(methodSignature(element));
 
     code.writeln("{");
-    code.writeln(printMethodBody(element.computeNode().body));
+    code.writeln(BodyTranspiler.MethodBody(element));
     code.writeln("}");
 
     return code.toString();
@@ -61,6 +62,10 @@ class Methods {
       MethodElement overrideMethod,
       ClassElement classElement) {
     var name = Naming.nameWithTypeParameters(element, false);
+
+    if (name == "UpdateRenderObject") {
+      print("Found it :)");
+    }
 
     var code = new StringBuffer();
     code.writeln("");
@@ -79,7 +84,7 @@ class Methods {
       code.writeln(
           "${implementedInstanceName}.${name}(${element.parameters.map((p) => Naming.getFormattedName(p.name, NameStyle.LowerCamelCase)).join(",")});");
     } else {
-      code.writeln(printMethodBody(element.computeNode().body));
+      code.writeln(BodyTranspiler.MethodBody(element));
     }
     code.writeln("}");
 
@@ -98,24 +103,19 @@ class Methods {
       var parameterName = p.name;
       parameterName =
           Naming.getFormattedName(parameterName, NameStyle.LowerCamelCase);
-      if(parameterName == "")
+      if (parameterName == "")
         parameterName = "p" + (element.parameters.indexOf(p) + 1).toString();
+
       var parameterType =
           Naming.getVariableType(p, VariableType.Parameter).split(" ").first;
       return parameterType + " " + parameterName;
     });
     var parameter = parameters == null ? "" : parameters.join(",");
 
-    if(methodName == "GetChildren"){
+    if (methodName == "GetChildren") {
       print("test");
     }
 
     return "${Naming.getReturnType(element)} ${methodName}(${parameter})";
-  }
-
-  static String printMethodBody(FunctionBody element) {
-    var bodyLines = Naming.tokenToText(element.beginToken, false).split("\n");
-    return bodyLines.map((l) => "// ${l}\n").join() +
-        "throw new NotImplementedException();";
   }
 }

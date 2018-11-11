@@ -20,6 +20,8 @@ namespace FlutterSDK
 
     public delegate void RegisterServiceExtensionCallback(string name, ServiceExtensionCallback callback);
 
+    public delegate void ElementVisitor(Element element);
+
     /// <summary>
     /// Signature for service extensions.
     /// The returned map must not contain the keys "type" or "method", as

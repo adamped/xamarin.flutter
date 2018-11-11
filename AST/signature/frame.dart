@@ -1,11 +1,11 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 
-import 'comments.dart';
-import 'config.dart';
+import '../comments.dart';
+import '../config.dart';
 import 'fields.dart';
 import 'methods.dart';
-import 'naming.dart';
+import '../naming.dart';
 
 class Frame {
   static String printNamespace(
@@ -61,7 +61,7 @@ class Frame {
       if (import.importedLibrary != null &&
           import.importedLibrary.identifier
               .replaceAll("/", "\\")
-              .contains(Config.directoryPath)) {
+              .contains(Config.flutterSourcePath)) {
         name =
             Naming.namespaceFromIdentifier(import.importedLibrary.identifier);
       }
