@@ -28,16 +28,16 @@ namespace FlutterBinding.UI
 
         /// Creates a raster image representation of the current state of the scene.
         /// This is a slow operation that is performed on a background thread.
-        public Future<Image> toImage(int width, int height)
+        public Future<SKImage> toImage(int width, int height)
         {
             if (width <= 0 || height <= 0)
                 throw new Exception("Invalid image dimensions.");
             return _futurize(
-              (_Callback<Image> callback) => _toImage(width, height, callback)
+              (_Callback<SKImage> callback) => _toImage(width, height, callback)
             );
         }
 
-        String _toImage(int width, int height, _Callback<Image> callback)
+        String _toImage(int width, int height, _Callback<SKImage> callback)
         {
             // create image and send via callback
             // only send string if an error occurs.
@@ -210,7 +210,7 @@ namespace FlutterBinding.UI
         /// rectangle using the given blend mode.
         ///
         /// See [pop] for details about the operation stack.
-        public void pushShaderMask(Shader shader, Rect maskRect, BlendMode blendMode)
+        public void pushShaderMask(SKShader shader, Rect maskRect, BlendMode blendMode)
         {
             _pushShaderMask(shader,
                             maskRect.left,
@@ -219,7 +219,7 @@ namespace FlutterBinding.UI
                             maskRect.bottom,
                             (int)blendMode);
         }
-        void _pushShaderMask(Shader shader,
+        void _pushShaderMask(SKShader shader,
                              double maskRectLeft,
                              double maskRectRight,
                              double maskRectTop,

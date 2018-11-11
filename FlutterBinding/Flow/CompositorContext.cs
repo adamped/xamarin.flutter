@@ -8,11 +8,7 @@ using static FlutterBinding.Flow.Helper;
 
 namespace FlutterBinding.Flow
 {
-
-    //C++ TO C# CONVERTER NOTE: C# has no need of forward class declarations:
-    //class LayerTree;
-
-    public class CompositorContext //: System.IDisposable
+    public class CompositorContext
     {
         public class ScopedFrame : System.IDisposable
         {
@@ -42,22 +38,16 @@ namespace FlutterBinding.Flow
                 return view_embedder_;
             }
 
-            //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
-            //ORIGINAL LINE: CompositorContext& context() const
             public CompositorContext context()
             {
                 return context_;
             }
 
-            //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
-            //ORIGINAL LINE: const SKMatrix& root_surface_transformation() const
             public SKMatrix root_surface_transformation()
             {
                 return root_surface_transformation_;
             }
 
-            //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
-            //ORIGINAL LINE: GRContext* gr_context() const
             public GRContext gr_context()
             {
                 return gr_context_;
@@ -76,18 +66,7 @@ namespace FlutterBinding.Flow
             private ExternalViewEmbedder view_embedder_;
             private readonly SKMatrix root_surface_transformation_;
             private readonly bool instrumentation_enabled_;
-
-            //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':
-            //	ScopedFrame(const ScopedFrame&) = delete;
-            //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':
-            //	ScopedFrame& operator =(const ScopedFrame&) = delete;
         }
-
-        //C++ TO C# CONVERTER TODO TASK: The implementation of the following method could not be found:
-        //  CompositorContext();
-
-        //C++ TO C# CONVERTER TODO TASK: The implementation of the following method could not be found:
-        //  public void Dispose();
 
         public virtual ScopedFrame AcquireFrame(GRContext gr_context, SKCanvas canvas, ExternalViewEmbedder view_embedder, SKMatrix root_surface_transformation, bool instrumentation_enabled)
         {
@@ -116,53 +95,16 @@ namespace FlutterBinding.Flow
             return texture_registry_;
         }
 
-        //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
-        //ORIGINAL LINE: const Counter& frame_count() const
-        public Counter frame_count()
-        {
-            return frame_count_;
-        }
-
-        //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
-        //ORIGINAL LINE: const Stopwatch& frame_time() const
-        //public Stopwatch frame_time()
-        //{
-        //    return frame_time_;
-        //}
-
-        //public Stopwatch engine_time()
-        //{
-        //    return engine_time_;
-        //}
-
         private RasterCache raster_cache_ = new RasterCache();
         private TextureRegistry texture_registry_ = new TextureRegistry();
-        private Counter frame_count_ = new Counter();
-        //private Stopwatch frame_time_ = new Stopwatch();
-        //private Stopwatch engine_time_ = new Stopwatch();
 
         private void BeginFrame(ScopedFrame frame, bool enable_instrumentation)
         {
-            //if (enable_instrumentation)
-            //{
-            //    frame_count_.Increment();
-            //    frame_time_.Start();
-            //}
         }
 
         private void EndFrame(ScopedFrame frame, bool enable_instrumentation)
         {
             raster_cache_.SweepAfterFrame();
-            //if (enable_instrumentation)
-            //{
-            //    frame_time_.Stop();
-            //}
         }
-
-        //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':
-        //  CompositorContext(const CompositorContext&) = delete;
-        //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':
-        //  CompositorContext& operator =(const CompositorContext&) = delete;
     }
-
 }

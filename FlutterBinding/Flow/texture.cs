@@ -9,18 +9,12 @@ using static FlutterBinding.Flow.Helper;
 namespace FlutterBinding.Flow
 {
 
-    public abstract class Texture //: System.IDisposable
+    public abstract class Texture
     {
         protected Texture(ulong id)
         {
-            //C++ TO C# CONVERTER TODO TASK: The following line was determined to be a copy assignment (rather than a reference assignment) - this should be verified and a 'CopyFrom' method should be created:
-            //ORIGINAL LINE: this.id_ = id;
             this.id_ = id;
         }
-
-        // Called from GPU thread.
-        //C++ TO C# CONVERTER TODO TASK: The implementation of the following method could not be found:
-        //  public void Dispose();
 
         // Called from GPU thread.
         public abstract void Paint(SKCanvas canvas, SKRect bounds, bool freeze);
@@ -41,18 +35,10 @@ namespace FlutterBinding.Flow
 
         private ulong id_ = new ulong();
 
-        //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':
-        //  Texture(const Texture&) = delete;
-        //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':
-        //  Texture& operator =(const Texture&) = delete;
     }
 
-    public class TextureRegistry //: System.IDisposable
+    public class TextureRegistry
     {
-        //C++ TO C# CONVERTER TODO TASK: The implementation of the following method could not be found:
-        //  TextureRegistry();
-        //C++ TO C# CONVERTER TODO TASK: The implementation of the following method could not be found:
-        //  public void Dispose();
 
         // Called from GPU thread.
         public void RegisterTexture(Texture texture)
@@ -70,7 +56,6 @@ namespace FlutterBinding.Flow
         public Texture GetTexture(ulong id)
         {
             var it = mapping_[id];
-            //C++ TO C# CONVERTER TODO TASK: Iterators are only converted within the context of 'while' and 'for' loops:
             return it; //: null; // This isn't right either
         }
 
@@ -93,11 +78,6 @@ namespace FlutterBinding.Flow
         }
 
         private SortedDictionary<ulong, Texture> mapping_ = new SortedDictionary<ulong, Texture>();
-
-        //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':
-        //  TextureRegistry(const TextureRegistry&) = delete;
-        //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':
-        //  TextureRegistry& operator =(const TextureRegistry&) = delete;
     }
 
 }

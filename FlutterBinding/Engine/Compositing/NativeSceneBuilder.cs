@@ -71,7 +71,7 @@ namespace FlutterBinding.Engine.Compositing
             current_layer_.Add(layer);
             current_layer_ = newLayer;
         }
-        Flow.SkiaUnrefQueue _queue = new Flow.SkiaUnrefQueue();
+        //Flow.SkiaUnrefQueue _queue = new Flow.SkiaUnrefQueue();
         public void AddPicture(double dx, double dy, SKPicture picture, int hints)
         {
             if (current_layer_ == null)
@@ -83,7 +83,7 @@ namespace FlutterBinding.Engine.Compositing
             pictureRect.Offset(offset.X, offset.Y);
             var layer = new PictureLayer();
             layer.set_offset(offset);
-            layer.set_picture(new Flow.SkiaGPUObject<SKPicture>(picture, _queue)); // UIDartState::CreateGPUObject(picture->picture()));
+            layer.set_picture(picture);
             layer.set_is_complex((hints & 1) == 1);
             layer.set_will_change((hints & 2) == 2);
             current_layer_.Add(layer);

@@ -3,7 +3,6 @@ using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using static FlutterBinding.Flow.Helper;
 using static FlutterBinding.Flow.RasterCache;
 
 // Copyright 2016 The Chromium Authors. All rights reserved.
@@ -25,28 +24,14 @@ namespace FlutterBinding.Flow
             this.logical_rect_ = new SKRect(logical_rect.Left, logical_rect.Top, logical_rect.Right, logical_rect.Bottom);
         }
 
-        //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
-        //ORIGINAL LINE: operator bool() const
-        //public static implicit operator bool(RasterCacheResult ImpliedObject)
-        //{
-        //    return (bool)ImpliedObject.image_;
-        //}
-
-        //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
-        //ORIGINAL LINE: bool is_valid() const
         public bool is_valid => image_ != null; //?? I'm not sure if this is right
-        //{
-        //    return (bool)image_;
-        //}
+       
 
         //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
         //ORIGINAL LINE: void draw(SKCanvas& canvas, const SKPaint* paint = null) const
         public void draw(SKCanvas canvas, SKPaint paint = null)
         {
-            //C++ TO C# CONVERTER TODO TASK: There is no equivalent in C# to 'static_assert':
-            //  (...) static_assert(false, "missing name for " "SkAutoCanvasRestore") auto_restore(&canvas, true);
             var bounds = RasterCache.GetDeviceBounds(logical_rect_, canvas.TotalMatrix);
-            //FML_DCHECK(bounds.Size == image_..dimensions());
             canvas.ResetMatrix();
             canvas.DrawImage(image_, bounds.Left, bounds.Top, paint);
         }
@@ -54,10 +39,7 @@ namespace FlutterBinding.Flow
         private SKImage image_;
         private SKRect logical_rect_;
     }
-
-    //C++ TO C# CONVERTER NOTE: C# has no need of forward class declarations:
-    //struct PrerollContext;
-
+    
     public class UniqueEntry : Entry
     {
         public UniqueEntry(uint value) => Value = value;
@@ -122,8 +104,6 @@ namespace FlutterBinding.Flow
             RasterCacheKey<UniqueEntry> cache_key = new RasterCacheKey<UniqueEntry>(new UniqueEntry(picture.UniqueId), transformation_matrix);
 
             Entry entry = picture_cache_.First(x => x.Equals(cache_key)).id(); // I used Linq, that aint going to be good for performance
-            //C++ TO C# CONVERTER TODO TASK: The following line was determined to be a copy assignment (rather than a reference assignment) - this should be verified and a 'CopyFrom' method should be created:
-            //ORIGINAL LINE: entry.access_count = ClampSize(entry.access_count + 1, 0, threshold_);
             entry.access_count = GlobalMembers.ClampSize(entry.access_count + 1, 0, threshold_);
             entry.used_this_frame = true;
 
@@ -135,8 +115,6 @@ namespace FlutterBinding.Flow
 
             if (!entry.image.is_valid)
             {
-                //C++ TO C# CONVERTER TODO TASK: The following line was determined to be a copy assignment (rather than a reference assignment) - this should be verified and a 'CopyFrom' method should be created:
-                //ORIGINAL LINE: entry.image = RasterizePicture(picture, context, transformation_matrix, dst_color_space, checkerboard_images_);
                 entry.image = GlobalMembers.RasterizePicture(picture, context, transformation_matrix, dst_color_space, checkerboard_images_);
             }
             return true;
@@ -146,15 +124,11 @@ namespace FlutterBinding.Flow
         {
             RasterCacheKey<Layer> cache_key = new RasterCacheKey<Layer>(layer, ctm);
             Entry entry = layer_cache_.First(x=>x == cache_key).id(); // I used Linq, that aint going to be good for performance
-            //C++ TO C# CONVERTER TODO TASK: The following line was determined to be a copy assignment (rather than a reference assignment) - this should be verified and a 'CopyFrom' method should be created:
-            //ORIGINAL LINE: entry.access_count = ClampSize(entry.access_count + 1, 0, threshold_);
+         
             entry.access_count = GlobalMembers.ClampSize(entry.access_count + 1, 0, threshold_);
             entry.used_this_frame = true;
             if (!entry.image.is_valid)
             {
-                //C++ TO C# CONVERTER TODO TASK: Only lambda expressions having all locals passed by reference can be converted to C#:
-                //ORIGINAL LINE: entry.image = Rasterize(context->gr_context, ctm, context->dst_color_space, checkerboard_images_, layer->paint_bounds(), [layer, context](SKCanvas* canvas)
-                //C++ TO C# CONVERTER TODO TASK: The following line was determined to be a copy assignment (rather than a reference assignment) - this should be verified and a 'CopyFrom' method should be created:
                 entry.image = GlobalMembers.Rasterize(context.gr_context, ctm, context.dst_color_space, checkerboard_images_, layer.paint_bounds(), (SKCanvas canvas) =>
                 {
                     Layer.PaintContext paintContext = new Layer.PaintContext(canvas, null, context.texture_registry, context.raster_cache, context.checkerboard_offscreen_layers);
@@ -163,16 +137,13 @@ namespace FlutterBinding.Flow
             }
         }
 
-        //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
-        //ORIGINAL LINE: RasterCacheResult Get(const SKPicture& picture, const SKMatrix& ctm) const
         public RasterCacheResult Get(SKPicture picture, SKMatrix ctm)
         {
             var cache_key = new RasterCacheKey<UniqueEntry>(new UniqueEntry(picture.UniqueId), ctm);
             var it = picture_cache_.First(x => x.Equals(cache_key));
             return it == picture_cache_.Last() ? new RasterCacheResult() : new RasterCacheResult(); // This aint right;
         }
-        //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
-        //ORIGINAL LINE: RasterCacheResult Get(Layer* layer, const SKMatrix& ctm) const
+        
         public RasterCacheResult Get(Layer layer, SKMatrix ctm)
         {
             //RasterCacheKey<Layer> cache_key = new RasterCacheKey<Layer>(layer, ctm);
@@ -213,8 +184,6 @@ namespace FlutterBinding.Flow
             public RasterCacheResult image = new RasterCacheResult();
         }
 
-        //C++ TO C# CONVERTER TODO TASK: The original C++ template specifier was replaced with a C# generic specifier, which may not produce the same behavior:
-        //ORIGINAL LINE: template <class Cache, class Iterator>
         private static void SweepOneCacheAfterFrame<Cache>(List<RasterCacheKey<Cache>> cache) where Cache : Entry
         {
             var dead = new List<RasterCacheKey<Cache>>();
@@ -240,11 +209,6 @@ namespace FlutterBinding.Flow
         private List<RasterCacheKey<Layer>> layer_cache_ = new List<RasterCacheKey<Layer>>(); // new LayerRasterCacheKey.Map<Entry>();
         private bool checkerboard_images_;
         private RasterCache weak_factory_;
-
-        //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':
-        //  RasterCache(const RasterCache&) = delete;
-        //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':
-        //  RasterCache& operator =(const RasterCache&) = delete;
     }
 
 }

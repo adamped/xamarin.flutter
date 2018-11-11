@@ -10,10 +10,6 @@ namespace FlutterBinding.Flow.Layers
 
     public class ShaderMaskLayer : ContainerLayer
     {
-        //C++ TO C# CONVERTER TODO TASK: The implementation of the following method could not be found:
-        //  ShaderMaskLayer();
-        //C++ TO C# CONVERTER TODO TASK: The implementation of the following method could not be found:
-        //  public void Dispose();
 
         public void set_shader(SKShader shader)
         {
@@ -22,8 +18,6 @@ namespace FlutterBinding.Flow.Layers
 
         public void set_mask_rect(SKRect mask_rect)
         {
-            //C++ TO C# CONVERTER TODO TASK: The following line was determined to be a copy assignment (rather than a reference assignment) - this should be verified and a 'CopyFrom' method should be created:
-            //ORIGINAL LINE: mask_rect_ = mask_rect;
             mask_rect_ = mask_rect;
         }
 
@@ -31,9 +25,6 @@ namespace FlutterBinding.Flow.Layers
         {
             blend_mode_ = blend_mode;
         }
-
-        //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
-        //ORIGINAL LINE: void Paint(PaintContext& context) const override
         public override void Paint(PaintContext context)
         {
             TRACE_EVENT0("flutter", "ShaderMaskLayer::Paint");
@@ -52,11 +43,6 @@ namespace FlutterBinding.Flow.Layers
         private SKShader shader_;
         private SKRect mask_rect_;
         private SKBlendMode blend_mode_;
-
-        //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':
-        //  ShaderMaskLayer(const ShaderMaskLayer&) = delete;
-        //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':
-        //  ShaderMaskLayer& operator =(const ShaderMaskLayer&) = delete;
     }
 
 }

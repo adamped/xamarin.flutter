@@ -40,7 +40,7 @@ namespace FlutterBinding.Engine.Compositing
 
         public string ToImage(int width,
                               int height,
-                              _Callback<Image> raw_image_callback)
+                              _Callback<SKImage> raw_image_callback)
         {
 
             if (raw_image_callback == null)

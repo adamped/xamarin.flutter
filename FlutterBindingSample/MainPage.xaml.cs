@@ -15,15 +15,10 @@ namespace FlutterBindingSample
             this.InitializeComponent();
         }
 
-        bool _hasPainted = false;
         protected void OnCanvasViewPaintSurface(object sender, SKPaintSurfaceEventArgs e)
         {
             var canvas = e.Surface.Canvas;
-            
-            if (_hasPainted)
-                return;
 
-            _hasPainted = true;
             var frame = ((Frame)Windows.UI.Xaml.Window.Current.Content);
 
             FlutterBinding.UI.Window.Instance.physicalSize = new Size(frame.ActualWidth, frame.ActualHeight);

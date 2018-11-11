@@ -8,19 +8,7 @@ using static FlutterBinding.UI.Painting;
 namespace FlutterBinding.UI
 {
     public static class Hooks
-    {
-        // I don't see why we need this methods
-        //static String _decodeUTF8(ByteData message)
-        //{
-        //    return message != null ? utf8.decoder.convert(message.buffer.asUint8List()) : null;
-        //}
-
-        //static dynamic _decodeJSON(String message)
-        //{
-        //    return message != null ? json.decode(message) : null;
-        //}
-
-        //@pragma('vm:entry-point')
+    {      
         static void _updateWindowMetrics(double devicePixelRatio,
                                   double width,
                                   double height,
@@ -53,10 +41,8 @@ namespace FlutterBinding.UI
 
         static String _localeClosure() => Window.Instance.locale.toString();
 
-        //@pragma('vm:entry-point')
         static _LocaleClosure _getLocaleClosure() => _localeClosure;
 
-        //@pragma('vm:entry-point')
         static void _updateLocales(List<String> locales)
         {
             const int stringsPerLocale = 4;
@@ -70,7 +56,6 @@ namespace FlutterBinding.UI
             _invoke(Window.Instance.onLocaleChanged, Window.Instance._onLocaleChangedZone);
         }
 
-        //@pragma('vm:entry-point')
         static void _updateUserSettingsData(String jsonData)
         {
             Dictionary<String, Object> data = JsonConvert.DeserializeObject<Dictionary<String, Object>>(jsonData);
@@ -89,14 +74,12 @@ namespace FlutterBinding.UI
             Window.Instance.alwaysUse24HourFormat = alwaysUse24HourFormat;
         }
 
-        ////@pragma('vm:entry-point')
         static void _updateSemanticsEnabled(bool enabled)
         {
             Window.Instance.semanticsEnabled = enabled;
             _invoke(Window.Instance.onSemanticsEnabledChanged, Window.Instance._onSemanticsEnabledChangedZone);
         }
 
-        //@pragma('vm:entry-point')
         static void _updateAccessibilityFeatures(int values)
         {
             AccessibilityFeatures newFeatures = new AccessibilityFeatures(values);
@@ -106,7 +89,6 @@ namespace FlutterBinding.UI
             _invoke(Window.Instance.onAccessibilityFeaturesChanged, Window.Instance._onAccessibilityFlagsChangedZone);
         }
 
-        //@pragma('vm:entry-point')
         static void _dispatchPlatformMessage(String name, ByteData data, int responseId)
         {
             if (Window.Instance.onPlatformMessage != null)
@@ -127,14 +109,12 @@ namespace FlutterBinding.UI
             }
         }
 
-        //@pragma('vm:entry-point')
         static void _dispatchPointerDataPacket(ByteData packet)
         {
             if (Window.Instance.onPointerDataPacket != null)
                 _invoke1<PointerDataPacket>((d) => Window.Instance.onPointerDataPacket(d), Window.Instance._onPointerDataPacketZone, _unpackPointerDataPacket(packet));
         }
 
-        //@pragma('vm:entry-point')
         static void _dispatchSemanticsAction(int id, int action, ByteData args)
         {
             _invoke3<int, SemanticsAction, ByteData>(
@@ -145,13 +125,11 @@ namespace FlutterBinding.UI
               args);
         }
 
-        //@pragma('vm:entry-point')
         static void _beginFrame(int microseconds)
         {
             _invoke1<Duration>((d) => Window.Instance.onBeginFrame(d), Window.Instance._onBeginFrameZone, new Duration(microseconds: microseconds));
         }
 
-        //@pragma('vm:entry-point')
         static void _drawFrame()
         {
             _invoke(Window.Instance.onDrawFrame, Window.Instance._onDrawFrameZone);
@@ -180,9 +158,7 @@ namespace FlutterBinding.UI
         {
             if (callback == null)
                 return;
-
-            //assert(zone != null);
-
+            
             if (identical(zone, Zone.current))
             {
                 callback(arg);
@@ -198,9 +174,7 @@ namespace FlutterBinding.UI
         {
             if (callback == null)
                 return;
-
-            //assert(zone != null);
-
+            
             if (identical(zone, Zone.current))
             {
                 callback(arg1, arg2);
@@ -216,8 +190,6 @@ namespace FlutterBinding.UI
         {
             if (callback == null)
                 return;
-
-            //assert(zone != null);
 
             if (identical(zone, Zone.current))
             {
@@ -243,7 +215,6 @@ namespace FlutterBinding.UI
             const int kStride = 8; // Its an 8 const anyway - Int64List.bytesPerElement;
             const int kBytesPerPointerData = _kPointerDataFieldCount * kStride;
             int length = packet.lengthInBytes / kBytesPerPointerData;
-            //assert(length * kBytesPerPointerData == packet.lengthInBytes);
             List<PointerData> data = new List<PointerData>(length);
             for (int i = 0; i < length; ++i)
             {
@@ -269,7 +240,6 @@ namespace FlutterBinding.UI
                   orientation: packet.getFloat64(kStride * offset++, (int)_kFakeHostEndian),
                   tilt: packet.getFloat64(kStride * offset++, (int)_kFakeHostEndian)
                 );
-                //assert(offset == (i + 1) * _kPointerDataFieldCount);
             }
             return new PointerDataPacket(data: data);
         }

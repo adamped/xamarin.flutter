@@ -8,7 +8,7 @@ using static FlutterBinding.Flow.Helper;
 namespace FlutterBinding.Flow.Layers
 {
 
-    public class LayerTree //: System.IDisposable
+    public class LayerTree
     {
         public LayerTree()
         {
@@ -18,14 +18,11 @@ namespace FlutterBinding.Flow.Layers
             this.checkerboard_offscreen_layers_ = false;
         }
 
-        //C++ TO C# CONVERTER TODO TASK: The implementation of the following method could not be found:
-        //  public void Dispose();
-
         public void Preroll(CompositorContext.ScopedFrame frame, bool ignore_raster_cache = false)
         {
             TRACE_EVENT0("flutter", "LayerTree::Preroll");
             
-            //frame.canvas().imageInfo().colorSpace()
+            //TODO: frame.canvas().imageInfo().colorSpace()
             SKColorSpace color_space = frame.canvas() != null ? SKImageInfo.Empty.ColorSpace : null;
             frame.context().raster_cache().SetCheckboardCacheImages(checkerboard_raster_cache_images_);
             PrerollContext context = ignore_raster_cache ? null :new PrerollContext(frame.context().raster_cache(), frame.gr_context(), color_space, SKRect.Empty, frame.context().texture_registry(), checkerboard_offscreen_layers_);
@@ -33,10 +30,6 @@ namespace FlutterBinding.Flow.Layers
             root_layer_.Preroll(context, frame.root_surface_transformation());
         }
 
-
-
-        //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
-        //ORIGINAL LINE: void Paint(CompositorContext::ScopedFrame& frame, bool ignore_raster_cache = false) const
         public void Paint(CompositorContext.ScopedFrame frame, bool ignore_raster_cache = false)
         {
             TRACE_EVENT0("flutter", "LayerTree::Paint");
@@ -60,7 +53,6 @@ namespace FlutterBinding.Flow.Layers
                 return null;
             }
 
-           // Stopwatch unused_stopwatch = new Stopwatch();
             TextureRegistry unused_texture_registry = new TextureRegistry();
             SKMatrix root_surface_transformation = new SKMatrix();
             // No root surface transformation. So assume identity.
@@ -82,20 +74,14 @@ namespace FlutterBinding.Flow.Layers
                 }
             }
 
-            return recorder.EndRecording(); // FinishRecordingAsPicture();
+            return recorder.EndRecording();
         }
-
-        //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
-        //ORIGINAL LINE: Layer* root_layer() const
-        //public Layer root_layer;
 
         public void set_root_layer(Layer root_layer)
         {
             root_layer_ = root_layer;
         }
 
-        //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
-        //ORIGINAL LINE: const SKSizeI& frame_size() const
         public SKSizeI frame_size()
         {
             return frame_size_;
@@ -103,24 +89,8 @@ namespace FlutterBinding.Flow.Layers
 
         public void set_frame_size(SKSizeI frame_size)
         {
-            //C++ TO C# CONVERTER TODO TASK: The following line was determined to be a copy assignment (rather than a reference assignment) - this should be verified and a 'CopyFrom' method should be created:
-            //ORIGINAL LINE: frame_size_ = frame_size;
             frame_size_ = frame_size;
         }
-
-        //public void set_construction_time(fml.TimeDelta delta)
-        //{
-        //    //C++ TO C# CONVERTER TODO TASK: The following line was determined to be a copy assignment (rather than a reference assignment) - this should be verified and a 'CopyFrom' method should be created:
-        //    //ORIGINAL LINE: construction_time_ = delta;
-        //    construction_time_.CopyFrom(delta);
-        //}
-
-        //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
-        //ORIGINAL LINE: const fml::TimeDelta& construction_time() const
-        //public fml.TimeDelta construction_time()
-        //{
-        //    return construction_time_;
-        //}
 
         // The number of frame intervals missed after which the compositor must
         // trace the rasterized picture to a trace file. Specify 0 to disable all
@@ -129,9 +99,6 @@ namespace FlutterBinding.Flow.Layers
         {
             rasterizer_tracing_threshold_ = interval;
         }
-
-        //C++ TO C# CONVERTER WARNING: 'const' methods are not available in C#:
-        //ORIGINAL LINE: uint rasterizer_tracing_threshold() const
         public uint rasterizer_tracing_threshold()
         {
             return rasterizer_tracing_threshold_;
@@ -149,15 +116,8 @@ namespace FlutterBinding.Flow.Layers
 
         private SKSizeI frame_size_ = new SKSizeI(); // Physical pixels.
         public Layer root_layer_;
-        //private fml.TimeDelta construction_time_ = new fml.TimeDelta();
         private uint rasterizer_tracing_threshold_;
         private bool checkerboard_raster_cache_images_;
         private bool checkerboard_offscreen_layers_;
-
-        //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':
-        //  LayerTree(const LayerTree&) = delete;
-        //C++ TO C# CONVERTER TODO TASK: C# has no equivalent to ' = delete':
-        //  LayerTree& operator =(const LayerTree&) = delete;
     }
-
 }
