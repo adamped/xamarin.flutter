@@ -1,5 +1,6 @@
 import 'dart:mirrors';
 
+import 'package:analyzer/analyzer.dart';
 import 'package:analyzer/dart/ast/token.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:analyzer/dart/element/element.dart';
@@ -32,6 +33,20 @@ class Naming {
     var name = element.name;
     name = getFormattedName(name, NameStyle.UpperCamelCase);
     if (isInterface) name = "I" + name;
+    var typeArguments = new List<String>();
+    for (var argument in element.typeArguments) {
+      typeArguments.add(getDartTypeName(argument));
+    }
+    if (typeArguments.length > 0) {
+      name += "<${typeArguments.join(",")}>";
+    }
+    return name;
+  }
+
+  static String interfaceTypeName(
+      InterfaceType element) {
+    var name = element.name;
+    name = getFormattedName(name, NameStyle.UpperCamelCase);
     var typeArguments = new List<String>();
     for (var argument in element.typeArguments) {
       typeArguments.add(getDartTypeName(argument));
@@ -78,8 +93,28 @@ class Naming {
   }
 
   static String getReturnType(FunctionTypedElement element) {
-    var returnType = element.returnType.displayName;
-    return getFormattedTypeName(returnType);
+    var returnType = element.returnType;
+    var returnName = returnType.displayName;
+    var test = element.computeNode();
+    if(returnType is InterfaceType){
+      returnName = interfaceTypeName(returnType);
+    }
+    else if(test is MethodDeclaration){
+      if(test.returnType is TypeName){
+          var t = test.returnType as TypeName;
+          returnName = t.name.name;
+      }
+    }
+
+    GenericTypeAliasElement t;
+    if (returnName == ">") {
+      print("test");
+    }
+    if(returnName.contains("→")){
+      print("Found unexpected");
+    }
+
+    return getFormattedTypeName(returnName);
   }
 
   static String tokenToText(Token token, bool backwards) {
@@ -118,10 +153,10 @@ class Naming {
       switch (type) {
         case VariableType.Field:
           typeName =
-              tokenToText(element.computeNode().beginToken.previous, true);
+              tokenToText(element.computeNode().beginToken.previous, true).split(" ").first;
           break;
         case VariableType.Parameter:
-          typeName = tokenToText(element.computeNode().beginToken, false);
+          typeName = tokenToText(element.computeNode().beginToken, false).split(" ").first;
           break;
       }
     }
@@ -132,15 +167,9 @@ class Naming {
     String typeName = "object";
 
     if (element.type is InterfaceType) {
-      typeName = element.type.displayName;
-    } else if (element.type is TypeParameterType) {
-      typeName = element.type.displayName;
-    } else {
-      typeName = element.displayName;
-    }
-    if (typeName == ">") {
-      print("test");
-    }
+      typeName = interfaceTypeName(element.type as InterfaceType);
+    }  
+    typeName = element.type.displayName; 
     return getFormattedTypeName(typeName);
   }
 
@@ -150,6 +179,7 @@ class Naming {
       case "bool":
       case "int":
       case "object":
+      case "double":
       case "string":
         return typeName.toLowerCase();
       case "dynamic":
@@ -216,7 +246,7 @@ class Naming {
 
   static String escapeFixedWords(String word) {
     var lowerName = word.toLowerCase();
-    if (["event", "object", "delegate", "byte", "fixed"].any((x) => lowerName == x))
+    if (["event", "object", "delegate", "byte", "fixed", "checked"].any((x) => lowerName == x))
       return "@" + word;
     else
       return word;

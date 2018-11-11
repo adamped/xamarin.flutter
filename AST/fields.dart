@@ -15,8 +15,7 @@ class Fields {
       code.write("virtual ");
 
     // type + name
-    code.write(
-        "${Naming.getVariableType(element, VariableType.Field)} ${getFieldName(element)} ");
+    code.write(printTypeAndName(element));
 
     var hasGetter = element.getter != null;
     var hasSetter = element.setter != null;
@@ -54,16 +53,11 @@ class Fields {
 
     if (element.hasProtected == true) code.write("protected ");
     if (element.isPublic == true) code.write("public ");
-    code.write("virtual ");
-
-    if (element.type.displayName == "Animation<T>") {
-      print("test");
-    }
+    code.write("virtual "); 
 
     // type + name
-    var type = Naming.getVariableType(element, VariableType.Field);
+    code.write(printTypeAndName(element));
     var name = getFieldName(element);
-    code.write("${type} ${name} ");
 
     var hasGetter = element.getter != null;
     var hasSetter = element.setter != null;
@@ -89,8 +83,7 @@ class Fields {
     var code = new StringBuffer();
 
     // type + name
-    code.write(
-        "${Naming.getVariableType(element, VariableType.Field)} ${getFieldName(element)} ");
+    code.write(printTypeAndName(element));
 
     var hasGetter = element.getter != null;
     var hasSetter = element.setter != null;
@@ -110,6 +103,15 @@ class Fields {
       code.write(";");
 
     return code.toString();
+  }
+
+  static String printTypeAndName(FieldElement element) {
+    var type = Naming.getVariableType(element, VariableType.Field);
+    if(type.contains("override")){
+      print("tes");
+    }
+    var name = getFieldName(element);
+    return "${type} ${name}";
   }
 
   static String getFieldName(FieldElement element) {

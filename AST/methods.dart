@@ -105,6 +105,11 @@ class Methods {
       return parameterType + " " + parameterName;
     });
     var parameter = parameters == null ? "" : parameters.join(",");
+
+    if(methodName == "GetChildren"){
+      print("test");
+    }
+
     return "${Naming.getReturnType(element)} ${methodName}(${parameter})";
   }
 
