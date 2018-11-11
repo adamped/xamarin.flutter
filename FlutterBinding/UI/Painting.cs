@@ -140,18 +140,18 @@ namespace FlutterBinding.UI
         ///
         /// The returned future can complete with an error if the image decoding has
         /// failed.
-        public Task<Codec> instantiateImageCodec(List<int> list,
+        public Task<SKCodec> instantiateImageCodec(List<int> list,
             double decodedCacheRatioCap = double.PositiveInfinity)
         {
             return _futurize(
-              (_Callback<Codec> callback) => _instantiateImageCodec(list, callback, null, decodedCacheRatioCap));
+              (_Callback<SKCodec> callback) => _instantiateImageCodec(list, callback, null, decodedCacheRatioCap));
         }
 
         /// Instantiates a [Codec] object for an image binary data.
         ///
         /// Returns an error message if the instantiation has failed, null otherwise.
-        String _instantiateImageCodec(List<int> list, _Callback<Codec> callback, _ImageInfo imageInfo, double decodedCacheRatioCap)
-            => string.Empty; // native 'instantiateImageCodec';
+        String _instantiateImageCodec(List<int> list, _Callback<SKCodec> callback, _ImageInfo imageInfo, double decodedCacheRatioCap)
+            => NativeCodec.InstantiateImageCodec(list, callback, imageInfo, decodedCacheRatioCap);
 
         /// Loads a single image frame from a byte array into an [Image] object.
         ///
@@ -165,9 +165,9 @@ namespace FlutterBinding.UI
         async Task _decodeImageFromListAsync(List<int> list,
                                            ImageDecoderCallback callback)
         {
-            Codec codec = await instantiateImageCodec(list);
-            FrameInfo frameInfo = await codec.getNextFrame();
-            callback(frameInfo.image);
+            SKCodec codec = await instantiateImageCodec(list);
+            SKCodecFrameInfo frameInfo = codec.FrameInfo[0]; // TODO: .getNextFrame();
+            callback(frameInfo.GetImage(codec));
         }
 
         /// Convert an array of pixel values into an [Image] object.
@@ -195,11 +195,10 @@ namespace FlutterBinding.UI
           int rowBytes = 0, double decodedCacheRatioCap = double.PositiveInfinity)
         {
             _ImageInfo imageInfo = new _ImageInfo(width, height, (int)format, rowBytes);
-            Future<Codec> codecFuture = _futurize(
-              (_Callback<Codec> cb) => _instantiateImageCodec(pixels, cb, imageInfo, decodedCacheRatioCap)
+            Future<SKCodec> codecFuture = _futurize(
+              (_Callback<SKCodec> cb) => _instantiateImageCodec(pixels, cb, imageInfo, decodedCacheRatioCap)
             );
-            codecFuture.ContinueWith(async (Task<Codec> codec) => await codec.Result.getNextFrame())
-                    .ContinueWith((Task<Task<FrameInfo>> frameInfo) => callback(frameInfo.Result.Result.image));
+            codecFuture.ContinueWith(async (Task<SKCodec> codec) => callback(codec.Result.FrameInfo[0].GetImage(codec.Result)));
         }
 
     }
@@ -1192,8 +1191,7 @@ namespace FlutterBinding.UI
         ///  * [antiAlias], which is much faster, and has similar clipping results.
         antiAliasWithSaveLayer,
     }
-
-
+    
 
     /// A description of the style to use when drawing on a [Canvas].
     ///
@@ -1393,7 +1391,6 @@ namespace FlutterBinding.UI
             }
             set
             {
-                //assert(value != null);
                 int encoded = (int)value;
                 _data.setInt32(_kStrokeCapOffset, encoded, (int)_kFakeHostEndian);
             }
@@ -1594,8 +1591,6 @@ namespace FlutterBinding.UI
                 }
                 else
                 {
-                    //assert(value._color != null);
-                    //assert(value._blendMode != null);
                     _data.setInt32(_kColorFilterOffset, 1, (int)_kFakeHostEndian);
                     _data.setInt32(_kColorFilterColorOffset, (int)value._color.value, (int)_kFakeHostEndian);
                     _data.setInt32(_kColorFilterBlendModeOffset, (int)value._blendMode, (int)_kFakeHostEndian);
@@ -1751,144 +1746,15 @@ namespace FlutterBinding.UI
                 this.rowBytes = rowBytes.Value;
         }
 
-        // //@pragma('vm:entry-point', 'get')
         int width;
-        // //@pragma('vm:entry-point', 'get')
         int height;
-        // //@pragma('vm:entry-point', 'get')
         int format;
-        // //@pragma('vm:entry-point', 'get')
         int rowBytes;
     }
-
-    /// Opaque handle to raw decoded image data (pixels).
-    ///
-    /// To obtain an [Image] object, use [instantiateImageCodec].
-    ///
-    /// To draw an [Image], use one of the methods on the [Canvas] class, such as
-    /// [Canvas.drawImage].
-    public class Image : NativeFieldWrapperClass2
-    {
-        /// This class is created by the engine, and should not be instantiated
-        /// or extended directly.
-        ///
-        /// To obtain an [Image] object, use [instantiateImageCodec].
-        // //@pragma('vm:entry-point')
-        private Image() { }
-
-        /// The number of image pixels along the image's horizontal axis.
-        public int width => 0; // native 'Image_width';
-
-        /// The number of image pixels along the image's vertical axis.
-        public int height => 0; // native 'Image_height';
-
-        /// Converts the [Image] object into a byte array.
-        ///
-        /// The [format] argument specifies the format in which the bytes will be
-        /// returned.
-        ///
-        /// Returns a future that completes with the binary image data or an error
-        /// if encoding fails.
-        Task<ByteData> toByteData(ImageByteFormat format = ImageByteFormat.rawRgba)
-        {
-            return _futurize((_Callback<ByteData> callback) =>
-            {
-                _toByteData((int)format, (List<int> encoded) =>
-                {
-                    callback(ByteData.asByteData(encoded));
-                });
-            });
-        }
-
-        /// Returns an error message on failure, null on success.
-        String _toByteData(int format, _Callback<List<int>> callback)
-        {
-            // native 'Image_toByteData';
-            return string.Empty; // Tmp to resolve build
-        }
-
-        /// Release the resources used by this object. The object is no longer usable
-        /// after this method is called.
-        public void dispose()
-        {
-            // native 'Image_dispose';
-        }
-
-        public String toString() => $"[{width}\u00D7{height}]";
-    }
-
+    
     /// Callback signature for [decodeImageFromList].
-    public delegate void ImageDecoderCallback(Image result);
-
-    /// Information for a single frame of an animation.
-    ///
-    /// To obtain an instance of the [FrameInfo] interface, see
-    /// [Codec.getNextFrame].
-    public class FrameInfo : NativeFieldWrapperClass2
-    {
-        /// This class is created by the engine, and should not be instantiated
-        /// or extended directly.
-        ///
-        /// To obtain an instance of the [FrameInfo] interface, see
-        /// [Codec.getNextFrame].
-        // //@pragma('vm:entry-point')
-        private FrameInfo() { }
-
-        /// The duration this frame should be shown.
-        public Duration duration => new Duration(milliseconds: _durationMillis);
-        int _durationMillis => 0; // native 'FrameInfo_durationMillis';
-
-        /// The [Image] object for this frame.
-        public Image image => null; // native 'FrameInfo_image';
-    }
-
-    /// A handle to an image codec.
-    public class Codec : NativeFieldWrapperClass2
-    {
-        /// This class is created by the engine, and should not be instantiated
-        /// or extended directly.
-        ///
-        /// To obtain an instance of the [Codec] interface, see
-        /// [instantiateImageCodec].
-        // //@pragma('vm:entry-point')
-        private Codec() { }
-
-        /// Number of frames in this image.
-        public int frameCount => 0; // native 'Codec_frameCount';
-
-        /// Number of times to repeat the animation.
-        ///
-        /// * 0 when the animation should be played once.
-        /// * -1 for infinity repetitions.
-        public int repetitionCount => 0; // native 'Codec_repetitionCount';
-
-        /// Fetches the next animation frame.
-        ///
-        /// Wraps back to the first frame after returning the last frame.
-        ///
-        /// The returned future can complete with an error if the decoding has failed.
-        public Task<FrameInfo> getNextFrame()
-        {
-            return _futurize<FrameInfo>((f) => _getNextFrame(f));
-        }
-
-        /// Returns an error message on failure, null on success.
-        String _getNextFrame(_Callback<FrameInfo> callback)
-        {
-            // native 'Codec_getNextFrame';
-            return string.Empty; // Tmp to resolve build
-        }
-
-        /// Release the resources used by this object. The object is no longer usable
-        /// after this method is called.
-        public void dispose()
-        {
-            // native 'Codec_dispose';
-        }
-    }
-
-
-
+    public delegate void ImageDecoderCallback(SKImage result);
+    
     /// Determines the winding rule that decides how the interior of a [Path] is
     /// calculated.
     ///
@@ -1971,16 +1837,6 @@ namespace FlutterBinding.UI
         reverseDifference,
     }
 
-    // I remove this, because it was just a handle to NativeEngineLayer anyway
-    /// A handle for the framework to hold and retain an engine layer across frames.
-    //public class EngineLayer
-    //{
-    //    /// This class is created by the engine, and should not be instantiated
-    //    /// or extended directly.
-    //    // //@pragma('vm:entry-point')
-    //    EngineLayer(): base(null) { }
-    //}
-
     /// A complex, one-dimensional subset of a plane.
     ///
     /// A path consists of a number of subpaths, and a _current point_.
@@ -1998,14 +1854,13 @@ namespace FlutterBinding.UI
     ///
     /// Paths can be drawn on canvases using [Canvas.drawPath], and can
     /// used to create clip regions using [Canvas.clipPath].
-    public class Path : NativeFieldWrapperClass2
+    public class Path : NativePath
     {
         /// Create a new empty [Path] object.
-        // //@pragma('vm:entry-point')
         public Path() { _constructor(); }
         void _constructor()
         {
-            // native 'Path_constructor';
+            // [DONE] native 'Path_constructor';
         }
 
         /// Creates a copy of another [Path].
@@ -2018,8 +1873,7 @@ namespace FlutterBinding.UI
         }
         Path _clone()
         {
-            // native 'Path_clone';
-            return null; // Tmp to resolve build
+            return (Path)this.MemberwiseClone();
         }
 
         /// Determines how the interior of this path is calculated.
@@ -2033,38 +1887,37 @@ namespace FlutterBinding.UI
 
         int _getFillType()
         {
-            // native 'Path_getFillType';
-            return 0; // Tmp to resolve build
+            return (int)this.FillType;
         }
         void _setFillType(int fillType)
         {
-            // native 'Path_setFillType';
+            this.FillType = (SKPathFillType)fillType;
         }
 
         /// Starts a new subpath at the given coordinate.
         public void moveTo(double x, double y)
         {
-            // native 'Path_moveTo';
+            this.MoveTo((float)x, (float)y);
         }
 
         /// Starts a new subpath at the given offset from the current point.
         public void relativeMoveTo(double dx, double dy)
         {
-            // native 'Path_relativeMoveTo';
+            this.RMoveTo((float)dx, (float)dy);
         }
 
         /// Adds a straight line segment from the current point to the given
         /// point.
         public void lineTo(double x, double y)
         {
-            // native 'Path_lineTo';
+            this.LineTo((float)x, (float)y);
         }
 
         /// Adds a straight line segment from the current point to the point
         /// at the given offset from the current point.
         public void relativeLineTo(double dx, double dy)
         {
-            // native 'Path_relativeLineTo';
+            this.RLineTo((float)dx, (float)dy);
         }
 
         /// Adds a quadratic bezier segment that curves from the current
@@ -2072,7 +1925,7 @@ namespace FlutterBinding.UI
         /// (x1,y1).
         public void quadraticBezierTo(double x1, double y1, double x2, double y2)
         {
-            // native 'Path_quadraticBezierTo';
+            this.QuadTo((float)x1, (float)y1, (float)x2, (float)y2);
         }
 
         /// Adds a quadratic bezier segment that curves from the current
@@ -2081,7 +1934,7 @@ namespace FlutterBinding.UI
         /// point.
         public void relativeQuadraticBezierTo(double x1, double y1, double x2, double y2)
         {
-            // native 'Path_relativeQuadraticBezierTo';
+            this.RQuadTo((float)x1, (float)y1, (float)x2, (float)y2);
         }
 
         /// Adds a cubic bezier segment that curves from the current point
@@ -2089,7 +1942,7 @@ namespace FlutterBinding.UI
         /// (x2,y2).
         public void cubicTo(double x1, double y1, double x2, double y2, double x3, double y3)
         {
-            // native 'Path_cubicTo';
+            this.CubicTo((float)x1, (float)y1, (float)x2, (float)y2, (float)x3, (float)y3);
         }
 
         /// Adds a cubic bezier segment that curves from the current point
@@ -2098,7 +1951,7 @@ namespace FlutterBinding.UI
         /// current point.
         public void relativeCubicTo(double x1, double y1, double x2, double y2, double x3, double y3)
         {
-            // native 'Path_relativeCubicTo';
+            this.RCubicTo((float)x1, (float)y1, (float)x2, (float)y2, (float)x3, (float)y3);
         }
 
         /// Adds a bezier segment that curves from the current point to the
@@ -2108,7 +1961,7 @@ namespace FlutterBinding.UI
         /// less than 1, it is an ellipse.
         public void conicTo(double x1, double y1, double x2, double y2, double w)
         {
-            // native 'Path_conicTo';
+            this.ConicTo((float)x1, (float)y1, (float)x2, (float)y2, (float)w);
         }
 
         /// Adds a bezier segment that curves from the current point to the
@@ -2119,7 +1972,7 @@ namespace FlutterBinding.UI
         /// is less than 1, it is an ellipse.
         public void relativeConicTo(double x1, double y1, double x2, double y2, double w)
         {
-            // native 'Path_relativeConicTo';
+            this.RConicTo((float)x1, (float)y1, (float)x2, (float)y2, (float)w);
         }
 
         /// If the `forceMoveTo` argument is false, adds a straight line
@@ -2140,13 +1993,12 @@ namespace FlutterBinding.UI
         /// current point and ends at the start of the arc.
         public void arcTo(Rect rect, double startAngle, double sweepAngle, bool forceMoveTo)
         {
-            //assert(_rectIsValid(rect));
             _arcTo(rect.left, rect.top, rect.right, rect.bottom, startAngle, sweepAngle, forceMoveTo);
         }
         void _arcTo(double left, double top, double right, double bottom,
                     double startAngle, double sweepAngle, bool forceMoveTo)
         {
-            // native 'Path_arcTo';
+            this.ArcTo(new SKRect((float)left, (float)top, (float)right, (float)bottom), (float)startAngle, (float)sweepAngle, forceMoveTo);
         }
 
         /// Appends up to four conic curves weighted to describe an oval of `radius`
@@ -2178,7 +2030,12 @@ namespace FlutterBinding.UI
                          double radiusY, double rotation, bool largeArc,
                          bool clockwise)
         {
-            // native 'Path_arcToPoint';
+            var arcSize = largeArc ? SKPathArcSize.Large : SKPathArcSize.Small;
+
+            var direction = clockwise ? SKPathDirection.Clockwise : SKPathDirection.CounterClockwise;
+
+            this.ArcTo((float)radiusX, (float)radiusY, (float)rotation, arcSize, direction, (float)arcEndX,
+                        (float)arcEndY);
         }
 
 
@@ -2213,7 +2070,13 @@ namespace FlutterBinding.UI
                                  double radiusY, double rotation,
                                  bool largeArc, bool clockwise)
         {
-            // native 'Path_relativeArcToPoint';
+
+            var arcSize = largeArc ? SKPathArcSize.Large : SKPathArcSize.Small;
+
+            var direction = clockwise ? SKPathDirection.Clockwise : SKPathDirection.CounterClockwise;
+
+            this.RArcTo((float)radiusX, (float)radiusY, (float)rotation, arcSize, direction, (float)arcEndX,
+                        (float)arcEndY);
         }
 
         /// Adds a new subpath that consists of four lines that outline the
@@ -2225,7 +2088,7 @@ namespace FlutterBinding.UI
         }
         void _addRect(double left, double top, double right, double bottom)
         {
-            // native 'Path_addRect';
+            this.AddRect(new SKRect((float)left, (float)top, (float)right, (float)bottom));
         }
 
         /// Adds a new subpath that consists of a curve that forms the
@@ -2240,7 +2103,7 @@ namespace FlutterBinding.UI
         }
         void _addOval(double left, double top, double right, double bottom)
         {
-            // native 'Path_addOval';
+            this.AddOval(new SKRect((float)left, (float)top, (float)right, (float)bottom));
         }
 
         /// Adds a new subpath with one arc segment that consists of the arc
@@ -2259,7 +2122,7 @@ namespace FlutterBinding.UI
         void _addArc(double left, double top, double right, double bottom,
                      double startAngle, double sweepAngle)
         {
-            // native 'Path_addArc';
+            this.AddArc(new SKRect((float)left, (float)top, (float)right, (float)bottom), (float)startAngle, (float)sweepAngle);
         }
 
         /// Adds a new subpath with a sequence of line segments that connect the given
@@ -2272,11 +2135,14 @@ namespace FlutterBinding.UI
         public void addPolygon(List<Offset> points, bool close)
         {
             //assert(points != null);
-            _addPolygon(_encodePointList(points), close);
+            _addPolygon(points, close);
         }
-        void _addPolygon(List<double> points, bool close)
+        void _addPolygon(List<Offset> points, bool close)
         {
-            // native 'Path_addPolygon';
+            var list = new List<SKPoint>();
+            foreach (var point in points)
+                list.Add(new SKPoint((float)point.dx, (float)point.dy));
+            this.AddPoly(list.ToArray(), close);
         }
 
         /// Adds a new subpath that consists of the straight lines and
@@ -2285,12 +2151,10 @@ namespace FlutterBinding.UI
         public void addRRect(RRect rrect)
         {
             //assert(_rrectIsValid(rrect));
-            _addRRect(rrect._value);
+            //_addRRect(rrect._value);
+            this.AddRoundedRect(new SKRect((float)rrect.left, (float)rrect.top, (float)rrect.right, (float)rrect.bottom), (float)rrect.tlRadiusX, (float)rrect.tlRadiusY);
         }
-        void _addRRect(List<double> rrect)
-        {
-            // native 'Path_addRRect';
-        }
+        
 
         /// Adds a new subpath that consists of the given `path` offset by the given
         /// `offset`.
@@ -2314,11 +2178,14 @@ namespace FlutterBinding.UI
         }
         void _addPath(Path path, double dx, double dy)
         {
-            // native 'Path_addPath';
+            this.AddPath(path, (float)dx, (float)dy);
         }
         void _addPathWithMatrix(Path path, double dx, double dy, List<float> matrix)
         {
-            // native 'Path_addPathWithMatrix';
+            var skMatrix = Matrix.ToSkMatrix(matrix);
+            skMatrix.TransX += (float)dx;
+            skMatrix.TransY += (float)dy;
+            this.AddPath(path, ref skMatrix);
         }
 
         /// Adds the given path to this path by extending the current segment of this
@@ -2343,18 +2210,22 @@ namespace FlutterBinding.UI
         }
         void _extendWithPath(Path path, double dx, double dy)
         {
-            // native 'Path_extendWithPath';
+            this.AddPath(path, (float)dx, (float)dy, SKPathAddMode.Extend);
         }
 
         void _extendWithPathAndMatrix(Path path, double dx, double dy, List<float> matrix)
-        { // native 'Path_extendWithPathAndMatrix';
+        {
+            var skMatrix = Matrix.ToSkMatrix(matrix);
+            skMatrix.TransX += (float)dx;
+            skMatrix.TransY += (float)dy;
+            this.AddPath(path, ref skMatrix, SKPathAddMode.Extend);
         }
 
         /// Closes the last subpath, as if a straight line had been drawn
         /// from the current point to the first point of the subpath.
         public void close()
         {
-            // native 'Path_close';
+           this.Close();
         }
 
         /// Clears the [Path] object of all subpaths, returning it to the
@@ -2362,7 +2233,7 @@ namespace FlutterBinding.UI
         /// reset to the origin.
         public void reset()
         {
-            // native 'Path_reset';
+            this.Reset();
         }
 
         /// Tests to see if the given point is within the path. (That is, whether the
@@ -2379,8 +2250,7 @@ namespace FlutterBinding.UI
         }
         bool _contains(double x, double y)
         {
-            // native 'Path_contains';
-            return true; // Tmp to resolve build
+            return this.Contains((float)x, (float)y);
         }
 
         /// Returns a copy of the path with all the segments of every
@@ -2392,8 +2262,9 @@ namespace FlutterBinding.UI
         }
         Path _shift(double dx, double dy)
         {
-            // native 'Path_shift';
-            return null; // Tmp to resolve build
+            var path = this._clone();
+            path.Offset((float)dx, (float)dy);
+            return path;
         }
 
         /// Returns a copy of the path with all the segments of every
@@ -2405,8 +2276,9 @@ namespace FlutterBinding.UI
         }
         Path _transform(List<float> matrix4)
         {
-            // native 'Path_transform';
-            return null; // Tmp to resolve build
+            var path = this._clone();
+            this.Transform(Matrix.ToSkMatrix(matrix4));
+            return path;
         }
 
         /// Computes the bounding rectangle for this path.
@@ -2431,8 +2303,15 @@ namespace FlutterBinding.UI
         }
         List<float> _getBounds()
         {
-            // native 'Path_getBounds';
-            return null; // Tmp to resolve build
+            var skRect = new SKRect();
+            this.GetBounds(out skRect);
+            return new List<float>()
+            {
+                skRect.Left,
+                skRect.Top, 
+                skRect.Right, 
+                skRect.Bottom
+            };
         }
 
         /// Combines the two paths according to the manner specified by the given
@@ -2446,16 +2325,11 @@ namespace FlutterBinding.UI
             //assert(path1 != null);
             //assert(path2 != null);
             Path path = new Path();
-            if (path._op(path1, path2, (int)operation))
+            if (path1.Op(path2, (SKPathOp)operation, path))
             {
                 return path;
             }
             throw new StateError("Path.combine() failed.  This may be due an invalid path; in particular, check for NaN values.");
-        }
-        bool _op(Path path1, Path path2, int operation)
-        {
-            // native 'Path_op';
-            return true; // Tmp to resolve build
         }
 
         /// Creates a [PathMetrics] object for this path.
@@ -3151,7 +3025,7 @@ namespace FlutterBinding.UI
         /// matrix to apply to the effect. All the arguments are required and must not
         /// be null.
         // //@pragma('vm:entry-point')
-        public ImageShader(Image image, TileMode tmx, TileMode tmy, List<double> matrix4)
+        public ImageShader(SKImage image, TileMode tmx, TileMode tmy, List<double> matrix4)
         {
             //assert(image != null), // image is checked on the engine side
             //assert(tmx != null),
@@ -3167,7 +3041,7 @@ namespace FlutterBinding.UI
             // native 'ImageShader_constructor';
         }
 
-        void _initWithImage(Image image, int tmx, int tmy, List<double> matrix4)
+        void _initWithImage(SKImage image, int tmx, int tmy, List<double> matrix4)
         {
             // native 'ImageShader_initWithImage';
         }
@@ -3348,7 +3222,6 @@ namespace FlutterBinding.UI
         ///
         /// To end the recording, call [PictureRecorder.endRecording] on the
         /// given recorder.
-        // //@pragma('vm:entry-point')
         public Canvas(PictureRecorder recorder, Rect cullRect = null): base(new SKBitmap()) //: //assert(recorder != null)
         {
             if (recorder.isRecording)
@@ -3505,7 +3378,7 @@ namespace FlutterBinding.UI
         }
         void _saveLayerWithoutBounds(List<Object> paintObjects, ByteData paintData)
         {
-            // native 'Canvas_saveLayerWithoutBounds';
+            // native 'Canvas_saveLayerWithoutBounds';            
         }
 
         void _saveLayer(double left,
@@ -3527,7 +3400,8 @@ namespace FlutterBinding.UI
         /// cause the new layer to be composited into the previous layer.
         public void restore()
         {
-            // native 'Canvas_restore';
+            // [DONE] native 'Canvas_restore';
+            this.Restore();
         }
 
         /// Returns the number of items on the save stack, including the
@@ -3849,14 +3723,14 @@ namespace FlutterBinding.UI
 
         /// Draws the given [Image] into the canvas with its top-left corner at the
         /// given [Offset]. The image is composited into the canvas using the given [Paint].
-        void drawImage(Image image, Offset p, Paint paint)
+        void drawImage(SKImage image, Offset p, Paint paint)
         {
             //assert(image != null); // image is checked on the engine side
             //assert(_offsetIsValid(p));
             //assert(paint != null);
             _drawImage(image, p.dx, p.dy, paint._objects, paint._data);
         }
-        void _drawImage(Image image,
+        void _drawImage(SKImage image,
                         double x,
                         double y,
                         List<Object> paintObjects,
@@ -3874,7 +3748,7 @@ namespace FlutterBinding.UI
         /// Multiple calls to this method with different arguments (from the same
         /// image) can be batched into a single call to [drawAtlas] to improve
         /// performance.
-        void drawImageRect(Image image, Rect src, Rect dst, Paint paint)
+        void drawImageRect(SKImage image, Rect src, Rect dst, Paint paint)
         {
             //assert(image != null); // image is checked on the engine side
             //assert(_rectIsValid(src));
@@ -3892,7 +3766,7 @@ namespace FlutterBinding.UI
                            paint._objects,
                            paint._data);
         }
-        void _drawImageRect(Image image,
+        void _drawImageRect(SKImage image,
                             double srcLeft,
                             double srcTop,
                             double srcRight,
@@ -3920,7 +3794,7 @@ namespace FlutterBinding.UI
         /// five regions are drawn by stretching them to fit such that they exactly
         /// cover the destination rectangle while maintaining their relative
         /// positions.
-        public void drawImageNine(Image image, Rect center, Rect dst, Paint paint)
+        public void drawImageNine(SKImage image, Rect center, Rect dst, Paint paint)
         {
             //assert(image != null); // image is checked on the engine side
             //assert(_rectIsValid(center));
@@ -3938,7 +3812,7 @@ namespace FlutterBinding.UI
                            paint._objects,
                            paint._data);
         }
-        void _drawImageNine(Image image,
+        void _drawImageNine(SKImage image,
                             double centerLeft,
                             double centerTop,
                             double centerRight,
@@ -4055,7 +3929,7 @@ namespace FlutterBinding.UI
         //
         //  * [drawRawAtlas], which takes its arguments as typed data lists rather
         //    than objects.
-        void drawAtlas(Image atlas,
+        void drawAtlas(SKImage atlas,
                        List<RSTransform> transforms,
                        List<Rect> rects,
                        List<Color> colors,
@@ -4122,7 +3996,7 @@ namespace FlutterBinding.UI
         //
         //  * [drawAtlas], which takes its arguments as objects rather than typed
         //    data lists.
-        public void drawRawAtlas(Image atlas,
+        public void drawRawAtlas(SKImage atlas,
                           List<double> rstTransforms,
                           List<double> rects,
                           List<uint> colors,
@@ -4153,7 +4027,7 @@ namespace FlutterBinding.UI
 
         void _drawAtlas(List<Object> paintObjects,
                         ByteData paintData,
-                        Image atlas,
+                        SKImage atlas,
                         List<double> rstTransforms,
                         List<double> rects,
                         List<uint> colors,
@@ -4185,65 +4059,12 @@ namespace FlutterBinding.UI
         }
     }
 
-    /// An object representing a sequence of recorded graphical operations.
-    ///
-    /// To create a [Picture], use a [PictureRecorder].
-    ///
-    /// A [Picture] can be placed in a [Scene] using a [SceneBuilder], via
-    /// the [SceneBuilder.addPicture] method. A [Picture] can also be
-    /// drawn into a [Canvas], using the [Canvas.drawPicture] method.
-    //public class SKPicture// : SkiaSharp.SKPicture
-    //{
-    //    /// This class is created by the engine, and should not be instantiated
-    //    /// or extended directly.
-    //    ///
-    //    /// To create a [Picture], use a [PictureRecorder].
-    //    // //@pragma('vm:entry-point')
-    //    //private Picture() { }
-
-    //    /// Creates an image from this picture.
-    //    ///
-    //    /// The picture is rasterized using the number of pixels specified by the
-    //    /// given width and height.
-    //    ///
-    //    /// Although the image is returned synchronously, the picture is actually
-    //    /// rasterized the first time the image is drawn and then cached.
-    //    public Image toImage(int width, int height)
-    //    {
-    //        // native 'Picture_toImage';
-    //        return null; // Tmp to resolve build
-    //    }
-
-    //    /// Release the resources used by this object. The object is no longer usable
-    //    /// after this method is called.
-    //    public void dispose()
-    //    {
-    //        // native 'Picture_dispose';
-    //    }
-
-    //    /// Returns the approximate number of bytes allocated for this object.
-    //    ///
-    //    /// The actual size of this picture may be larger, particularly if it contains
-    //    /// references to image or other large objects.
-    //    public int approximateBytesUsed => 0; // native 'Picture_GetAllocationSize';
-    //}
-
     /// Records a [Picture] containing a sequence of graphical operations.
     ///
     /// To begin recording, construct a [Canvas] to record the commands.
     /// To end recording, use the [PictureRecorder.endRecording] method.
     public class PictureRecorder : NativePictureRecorder
-    {
-        /// Creates a new idle PictureRecorder. To associate it with a
-        /// [Canvas] and begin recording, pass this [PictureRecorder] to the
-        /// [Canvas] constructor.
-        // //@pragma('vm:entry-point')
-        public PictureRecorder() { _constructor(); }
-        void _constructor()
-        {
-            
-            // native 'PictureRecorder_constructor';
-        }
+    {        
         /// Whether this object is currently recording commands.
         ///
         /// Specifically, this returns true if a [Canvas] object has been
@@ -4256,7 +4077,6 @@ namespace FlutterBinding.UI
             get
             {
                 return this.RecordingCanvas != null;
-                // native 'PictureRecorder_isRecording';
             }
         }
         /// Finishes recording graphical operations.
@@ -4268,8 +4088,7 @@ namespace FlutterBinding.UI
         /// Returns null if the PictureRecorder is not associated with a canvas.
         public SKPicture endRecording()
         {
-            return this.EndRecording();
-            // [DONE] native 'PictureRecorder_endRecording';           
+            return this.EndRecording();          
         }
     }
 
@@ -4519,46 +4338,4 @@ namespace FlutterBinding.UI
     /// Return value should be null on success, and a string error message on
     /// failure.
     public delegate String _Callbacker<T>(_Callback<T> callback);
-
-    /// Converts a method that receives a value-returning callback to a method that
-    /// returns a Future.
-    ///
-    /// Return a [String] to cause an [Exception] to be synchronously thrown with
-    /// that string as a message.
-    ///
-    /// If the callback is called with null, the future completes with an error.
-    ///
-    /// Example usage:
-    ///
-    /// ```dart
-    /// typedef IntCallback = void Function(int result);
-    ///
-    /// String _doSomethingAndCallback(IntCallback callback) {
-    ///   new Timer(new Duration(seconds: 1), () { callback(1); });
-    /// }
-    ///
-    /// Task<int> doSomething() {
-    ///   return _futurize(_doSomethingAndCallback);
-    /// }
-    /// ```
-
-    // ADDED THIS TO NativeFieldWrapperClass2.cs
-
-    //Task<T> _futurize<T>(_Callbacker<T> callbacker)
-    //{
-    //    Completer<T> completer = new Completer<T>.sync();
-    //    String error = callbacker((T t) => {
-    //        if (t == null)
-    //        {
-    //            completer.completeError(new Exception("operation failed"));
-    //        }
-    //        else
-    //        {
-    //            completer.complete(t);
-    //        }
-    //    });
-    //    if (error != null)
-    //        throw new Exception(error);
-    //    return completer.future;
-    //}
 }

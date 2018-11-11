@@ -1,5 +1,6 @@
 ﻿using SkiaSharp;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace FlutterBinding.Engine.Painting
 {
@@ -13,6 +14,12 @@ namespace FlutterBinding.Engine.Painting
                                                                     3, 7, 15,
                                                                     // clang-format on
                                                                 };
+
+        public static SKMatrix ToSkMatrix(List<float> matrix4)
+        {
+            return ToSkMatrix(matrix4.Cast<double>().ToList());
+        }
+
         public static SKMatrix ToSkMatrix(List<double> matrix4)
         {
             SKMatrix sk_matrix = new SKMatrix();
