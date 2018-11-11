@@ -1,6 +1,6 @@
 import 'package:analyzer/dart/element/element.dart';
 
-import '../body/bodyTranspiler.dart';
+import '../implementation/implementation.dart';
 import '../naming.dart';
 
 class Fields {
@@ -28,7 +28,7 @@ class Fields {
         if (getterNode == null)
           code.write("get;");
         else {
-          code.write("get {${BodyTranspiler.FieldBody(element.getter)}}");
+          code.write("get {${Implementation.FieldBody(element.getter)}}");
         }
       }
       // setter
@@ -37,7 +37,7 @@ class Fields {
         if (setterNode == null)
           code.write("set;");
         else {
-          code.write("set {${BodyTranspiler.FieldBody(element.setter)}}");
+          code.write("set {${Implementation.FieldBody(element.setter)}}");
         }
       }
       code.write("}");

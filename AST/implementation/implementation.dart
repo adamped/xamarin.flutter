@@ -3,7 +3,7 @@ import 'package:analyzer/dart/element/element.dart';
 import '../naming.dart';
 
 /// Provides methods to transpile the body of elements
-class BodyTranspiler {
+class Implementation {
   static String MethodBody(MethodElement element) {
     var body = element.computeNode().body;
     var bodyLines = Naming.tokenToText(body.beginToken, false).split("\n");

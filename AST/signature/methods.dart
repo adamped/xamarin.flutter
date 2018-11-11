@@ -1,7 +1,6 @@
-import 'package:analyzer/analyzer.dart';
 import 'package:analyzer/dart/element/element.dart';
 
-import '../body/bodyTranspiler.dart';
+import '../implementation/implementation.dart';
 import '../comments.dart';
 import '../naming.dart';
 
@@ -50,7 +49,7 @@ class Methods {
     code.write(methodSignature(element));
 
     code.writeln("{");
-    code.writeln(BodyTranspiler.MethodBody(element));
+    code.writeln(Implementation.MethodBody(element));
     code.writeln("}");
 
     return code.toString();
@@ -84,7 +83,7 @@ class Methods {
       code.writeln(
           "${implementedInstanceName}.${name}(${element.parameters.map((p) => Naming.getFormattedName(p.name, NameStyle.LowerCamelCase)).join(",")});");
     } else {
-      code.writeln(BodyTranspiler.MethodBody(element));
+      code.writeln(Implementation.MethodBody(element));
     }
     code.writeln("}");
 
