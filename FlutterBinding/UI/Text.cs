@@ -832,12 +832,12 @@ namespace FlutterBinding.UI
         /// The amount of horizontal space this paragraph occupies.
         ///
         /// Valid only after [layout] has been called.
-        public double width => 0.0; // native 'Paragraph_width';
+        public double width => this.Width;
 
         /// The amount of vertical space this paragraph occupies.
         ///
         /// Valid only after [layout] has been called.
-        public double height => 0.0; // native 'Paragraph_height';
+        public double height => this.Height;
 
         /// The minimum width that this paragraph could be without failing to paint
         /// its contents within itself.
