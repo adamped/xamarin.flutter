@@ -26,7 +26,7 @@ main() async {
 
   PhysicalResourceProvider resourceProvider = PhysicalResourceProvider.INSTANCE;
   DartSdk sdk = new FolderBasedDartSdk(resourceProvider,
-      resourceProvider.getFolder('C:\\Program Files\\Dart\\dart-sdk'));
+      resourceProvider.getFolder(Config.DartSdkPath));
 
   var resolvers = [
     new DartUriResolver(sdk),
