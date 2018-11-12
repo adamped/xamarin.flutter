@@ -1,8 +1,36 @@
-﻿using System;
+﻿using FlutterSDK.Animation;
+using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using FlutterSDK.Widgets;
 
 namespace FlutterSDK
 {
     // Instead of changing up code, here I have implemented a number of common things, to tie their approach to .NET
+
+    public delegate void AnimationStatusListener(AnimationStatus status);
+
+    public delegate bool RoutePredicate(Route<object> route);
+
+    public delegate Task<bool> WillPopCallback();
+
+    public delegate void TickerCallback(TimeSpan elapsed);
+
+    public delegate void DataColumnSortCallback(int columnIndex, bool ascending);
+
+    public delegate void RegisterServiceExtensionCallback(string name, ServiceExtensionCallback callback);
+
+    public delegate void ElementVisitor(Element element);
+
+    /// <summary>
+    /// Signature for service extensions.
+    /// The returned map must not contain the keys "type" or "method", as
+    /// they will be replaced before the value is sent to the client. The
+    /// "type" key will be set to the string `_extensionType` to indicate
+    /// that this is a return value from a service extension, and the
+    /// "method" key will be set to the full name of the method.
+    /// </summary>
+    public delegate Task<Dictionary<string, object>> ServiceExtensionCallback(Dictionary<string, string> parameters);
 
     public enum TextDirection
     {
@@ -15,6 +43,10 @@ namespace FlutterSDK
         left
     }
 
+    public class Matrix4 // TODO
+    {
+
+    }
 
     public class Function
     { }
@@ -45,7 +77,6 @@ namespace FlutterSDK
 
         //}
     }
-
 
     public class Null // todo
     { }
