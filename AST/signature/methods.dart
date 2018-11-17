@@ -69,10 +69,8 @@ class Methods {
 
     code.write(methodSignature(baseMethod));
 
-    code.writeln("{");
     code.writeln(Implementation.MethodBody(element));
-    code.writeln("}");
-
+    
     return code.toString();
   }
 

@@ -9,7 +9,7 @@ class Implementation {
   static String MethodBody(MethodElement element) {
     var body = element.computeNode().body;
     if (body is EmptyFunctionBody) {
-      return ";"; // No code;
+      return '{}'; // No code;
     } else if (body is BlockFunctionBody) {
       return processBlockFunction(body);
     } else if (body is ExpressionFunctionBody) {
@@ -48,7 +48,6 @@ class Implementation {
   static String processEntity(SyntacticEntity entity) {
     if (entity is BeginToken) {
       return entity.lexeme;
-      ;
     } else if (entity is KeywordToken) {
       return entity.lexeme +
           " "; //TODO: might need to do some keyword switching.
@@ -56,13 +55,49 @@ class Implementation {
       return entity.lexeme;
     } else if (entity is SimpleIdentifier) {
       return processSimpleIdentifier(entity);
+    } else if (entity is ThisExpression) {
+      return entity.toString();
     } else if (entity is NullLiteral) {
+      return entity.toString();
+    } else if (entity is DoubleLiteral) {
+      return entity.toString();
+    } else if (entity is BooleanLiteral) {
+      return entity.toString();
+    } else if (entity is IntegerLiteral) {
+      return entity.toString();
+    } else if (entity is SimpleStringLiteral) {
       return entity.toString();
     } else if (entity is ArgumentList) {
       return entity.toString();
+    } else if (entity is MapLiteral) {
+      return entity.toString();
+    } else if (entity is PrefixedIdentifier) {
+      return entity.toString();
+    } else if (entity is PrefixExpression) {
+      return entity.toString();
+    } else if (entity is AdjacentStrings) {
+      return entity.toString();
     } else if (entity is MethodInvocation) {
       return processMethodInvocation(entity);
+    } else if (entity is FunctionExpression) {
+      return entity.toString();
+    } else if (entity is ParenthesizedExpression) {
+      return entity.toString();
+    } else if (entity is IndexExpression) {
+      return entity.toString();
+    } else if (entity is BinaryExpression) {
+      return entity.toString();
+    } else if (entity is AwaitExpression) {
+      return entity.toString();
+    } else if (entity is ConditionalExpression) {
+      return entity.toString();
     } else if (entity is StringInterpolation) {
+      return entity.toString();
+    } else if (entity is InstanceCreationExpression) {
+      return entity.toString();
+    } else if (entity is PropertyAccess) {
+      return entity.toString();
+    } else if (entity is AssignmentExpression) {
       return entity.toString();
     } else if (entity is AssertStatement) {
       return ""; // I just ignore assert statements at the moment
@@ -74,13 +109,21 @@ class Implementation {
       return entity.toString();
     } else if (entity is IfStatement) {
       return entity.toString();
+    } else if (entity is IsExpression) {
+      return entity.toString();
+    } else if (entity is CascadeExpression) {
+      return entity.toString();
     } else if (entity is ExpressionStatement) {
+      return entity.toString();
+    } else if (entity is SuperExpression) {
       return entity.toString();
     } else if (entity is WhileStatement) {
       return entity.toString();
     } else if (entity is ForEachStatement) {
       return entity.toString();
     } else if (entity is ForStatement) {
+      return entity.toString();
+    } else if (entity is ListLiteral) {
       return entity.toString();
     } else if (entity is FunctionDeclarationStatement) {
       return entity.toString();
@@ -121,11 +164,11 @@ class Implementation {
     var csharp = "";
     if (identifier.staticElement is ParameterElement) // e.g. child
     {
-      csharp += identifier.name + " ";
+      csharp += identifier.name;
     } else if (identifier.staticElement
         is MethodElement) // e.g animate // Can't seem to get MethodMember
     {
-      csharp += identifier.name + " ";
+      csharp += Naming.upperCamelCase(identifier.name);
     } else if (identifier.staticElement is LocalVariableElement) {
       csharp += identifier.name + " ";
     } else {
