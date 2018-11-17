@@ -103,7 +103,6 @@ class Methods {
     } else {
       code.writeln(Implementation.MethodBody(overrideMethod));
     }
-    code.writeln("}");
 
     return code.toString();
   }

@@ -9,7 +9,7 @@ class Implementation {
   static String MethodBody(MethodElement element) {
     var body = element.computeNode().body;
     if (body is EmptyFunctionBody) {
-      return ""; // No code;
+      return ";"; // No code;
     } else if (body is BlockFunctionBody) {
       return processBlockFunction(body);
     } else if (body is ExpressionFunctionBody) {
@@ -23,7 +23,7 @@ class Implementation {
   }
 
   static String processExpressionFunction(ExpressionFunctionBody body) {
-    // TODO: Will most likely use processBlockFunction
+    // TODO: Will most likely use processBlockFunction but add a => to it
     return "\n";
   }
 
@@ -47,13 +47,27 @@ class Implementation {
 
   static String processEntity(SyntacticEntity entity) {
     if (entity is BeginToken) {
-      return "";
+      return entity.lexeme;
+      ;
+    } else if (entity is KeywordToken) {
+      return entity.lexeme +
+          " "; //TODO: might need to do some keyword switching.
     } else if (entity is SimpleToken) {
+      return entity.lexeme;
+    } else if (entity is SimpleIdentifier) {
+      return processSimpleIdentifier(entity);
+    } else if (entity is NullLiteral) {
+      return entity.toString();
+    } else if (entity is ArgumentList) {
+      return entity.toString();
+    } else if (entity is MethodInvocation) {
+      return processMethodInvocation(entity);
+    } else if (entity is StringInterpolation) {
       return entity.toString();
     } else if (entity is AssertStatement) {
       return ""; // I just ignore assert statements at the moment
     } else if (entity is ReturnStatement) {
-      return entity.toString();
+      return processReturnStatement(entity);
     } else if (entity is VariableDeclarationStatement) {
       return entity.toString();
     } else if (entity is SwitchStatement) {
@@ -85,6 +99,39 @@ class Implementation {
     } else {
       return entity.toString();
     }
+  }
+
+  static String processReturnStatement(ReturnStatement statement) {
+    var csharp = "";
+    for (var entity in statement.childEntities) {
+      csharp += processEntity(entity);
+    }
+    return csharp;
+  }
+
+  static String processMethodInvocation(MethodInvocation invocation) {
+    var csharp = "";
+    for (var entity in invocation.childEntities) {
+      csharp += processEntity(entity);
+    }
+    return csharp;
+  }
+
+  static String processSimpleIdentifier(SimpleIdentifier identifier) {
+    var csharp = "";
+    if (identifier.staticElement is ParameterElement) // e.g. child
+    {
+      csharp += identifier.name + " ";
+    } else if (identifier.staticElement
+        is MethodElement) // e.g animate // Can't seem to get MethodMember
+    {
+      csharp += identifier.name + " ";
+    } else if (identifier.staticElement is LocalVariableElement) {
+      csharp += identifier.name + " ";
+    } else {
+      csharp += identifier.name + " ";
+    }
+    return csharp;
   }
 
   static String FieldBody(PropertyAccessorElement element) {
