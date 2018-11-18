@@ -107,8 +107,12 @@ class Implementation {
       return ""; // I just ignore assert statements at the moment
     } else if (entity is ReturnStatement) {
       return processReturnStatement(entity);
-    } else if (entity is VariableDeclarationStatement) {
+    } else if (entity is VariableDeclaration) {
       return entity.toString();
+    } else if (entity is VariableDeclarationStatement) {
+      return processVariableDeclarationStatement(entity);
+    } else if (entity is VariableDeclarationList) {
+      return processVariableDeclarationList(entity);
     } else if (entity is SwitchStatement) {
       return processSwitchStatement(entity);
     } else if (entity is SwitchCase) {
@@ -147,6 +151,8 @@ class Implementation {
       return entity.toString();
     } else if (entity is YieldStatement) {
       return entity.toString();
+    } else if (entity is TypeName) {
+      return processTypeName(entity);
     } else if (entity is Block) {
       var raw = "";
       for (var item in entity.childEntities) {
@@ -312,10 +318,46 @@ class Implementation {
     return '"${literal.stringValue}"';
   }
 
+  static String processVariableDeclarationStatement(
+      VariableDeclarationStatement statement) {
+    var csharp = "";
+
+    for (var entity in statement.childEntities) {
+      csharp += processEntity(entity);
+    }
+
+    return csharp;
+  }
+
+  static String processVariableDeclarationList(VariableDeclarationList list) {
+    var csharp = "";
+
+    var type = "";
+    var count = 0;
+    for (var entity in list.childEntities) {
+      if (entity is TypeName)
+        type = processEntity(entity);
+      else {
+        if (count > 0)
+          csharp += ',';
+        else
+          csharp += ' ';
+        csharp += processEntity(entity);
+        count++;
+      }
+    }
+
+    return "$type $csharp = default($type)";
+  }
+
+  static String processTypeName(TypeName name) {
+    return Naming.getFormattedTypeName(name.toString());
+  }
+
   static String FieldBody(PropertyAccessorElement element) {
     var body = element.computeNode();
     var bodyLines = Naming.tokenToText(body.beginToken, false).split("\n");
-    var rawBody = bodyLines.map((l) => "// ${l}\n").join();
+    var rawBody = bodyLines.map((l) => "${l}\n").join();
 
     // Transpile logic comes here
     var transpiledBody = rawBody + "throw new NotImplementedException();";
