@@ -66,16 +66,18 @@ class Implementation {
     } else if (entity is IntegerLiteral) {
       return entity.toString();
     } else if (entity is SimpleStringLiteral) {
-      return entity.toString();
+      return processSimpleStringLiteral(entity);
     } else if (entity is ArgumentList) {
       return entity.toString();
     } else if (entity is MapLiteral) {
       return entity.toString();
     } else if (entity is PrefixedIdentifier) {
-      return entity.toString();
+      return processPrefixedIdentifier(entity);
     } else if (entity is PrefixExpression) {
       return entity.toString();
     } else if (entity is AdjacentStrings) {
+      return entity.toString();
+    } else if (entity is Label) {
       return entity.toString();
     } else if (entity is MethodInvocation) {
       return processMethodInvocation(entity);
@@ -100,7 +102,7 @@ class Implementation {
     } else if (entity is PropertyAccess) {
       return entity.toString();
     } else if (entity is AssignmentExpression) {
-      return entity.toString();
+      return processAssignmentExpression(entity);
     } else if (entity is AssertStatement) {
       return ""; // I just ignore assert statements at the moment
     } else if (entity is ReturnStatement) {
@@ -108,7 +110,15 @@ class Implementation {
     } else if (entity is VariableDeclarationStatement) {
       return entity.toString();
     } else if (entity is SwitchStatement) {
+      return processSwitchStatement(entity);
+    } else if (entity is SwitchCase) {
+      return processSwitchCase(entity);
+    } else if (entity is BreakStatement) {
       return entity.toString();
+    } else if (entity is SwitchDefault) {
+      return processSwitchDefault(entity);
+    } else if (entity is ContinueStatement) {
+      return processContinueStatement(entity);
     } else if (entity is IfStatement) {
       return entity.toString();
     } else if (entity is IsExpression) {
@@ -116,8 +126,10 @@ class Implementation {
     } else if (entity is CascadeExpression) {
       return entity.toString();
     } else if (entity is ExpressionStatement) {
-      return entity.toString();
+      return processExpressionStatement(entity);
     } else if (entity is SuperExpression) {
+      return entity.toString();
+    } else if (entity is ThrowExpression) {
       return entity.toString();
     } else if (entity is WhileStatement) {
       return entity.toString();
@@ -170,17 +182,38 @@ class Implementation {
     } else if (identifier.staticElement
         is MethodElement) // e.g animate // Can't seem to get MethodMember
     {
-      csharp += Naming.upperCamelCase(identifier.name);
-    } else if (identifier.staticElement is FunctionElement)
-    {
-      csharp += Naming.upperCamelCase(identifier.name);
-    } 
-    else if (identifier.staticElement is LocalVariableElement) {
-      csharp += identifier.name + " ";
+      csharp += processMethodElement(identifier.staticElement);
+    } else if (identifier.staticElement is FunctionElement) {
+      csharp += processFunctionElement(identifier.staticElement);
+    } else if (identifier.staticElement is LocalVariableElement) {
+      csharp += identifier.name;
+    } else if (identifier.staticElement is PropertyAccessorElement) {
+      csharp += processPropertyAccessorElement(identifier.staticElement);
     } else {
-      csharp += identifier.name + " ";
+      csharp += identifier.name;
     }
     return csharp;
+  }
+
+  static String processPrefixedIdentifier(PrefixedIdentifier identifier) {
+    var csharp = "";
+    for (var entity in identifier.childEntities) {
+      csharp += processEntity(entity);
+    }
+    return csharp;
+  }
+
+  static String processMethodElement(MethodElement element) {
+    return Naming.upperCamelCase(element.name);
+  }
+
+  static String processFunctionElement(FunctionElement element) {
+    return Naming.upperCamelCase(element.name);
+  }
+
+  static String processPropertyAccessorElement(
+      PropertyAccessorElement element) {
+    return Naming.upperCamelCase(element.name);
   }
 
   static String processStringInterpolation(StringInterpolation interpolation) {
@@ -192,10 +225,13 @@ class Implementation {
       else if (entity is InterpolationString)
         csharp += entity.value;
       else if (entity is InterpolationExpression) {
-        for (var entity in entity.childEntities) {
-          if (entity is MethodInvocation)
-            csharp += '{' + processMethodInvocation(entity) + '}';
+        var stringValue = '{';
+        for (var item in entity.childEntities) {
+          if (!(item is BeginToken) &&
+              item.toString() != '}' &&
+              item.toString() != '\$') stringValue += processEntity(item);
         }
+        csharp += stringValue + '}';
       } else
         csharp += '{' + processEntity(entity) + '}';
     }
@@ -210,6 +246,70 @@ class Implementation {
       csharp += entity.toString();
     }
     return csharp;
+  }
+
+  static String processSwitchStatement(SwitchStatement statement) {
+    var csharp = "";
+
+    for (var entity in statement.childEntities) {
+      csharp += processEntity(entity);
+    }
+
+    return csharp;
+  }
+
+  static String processSwitchCase(SwitchCase switchCase) {
+    var csharp = "";
+
+    for (var entity in switchCase.childEntities) {
+      csharp += processEntity(entity);
+    }
+
+    return csharp;
+  }
+
+  static String processSwitchDefault(SwitchDefault switchDefault) {
+    var csharp = "";
+
+    for (var entity in switchDefault.childEntities) {
+      csharp += processEntity(entity);
+    }
+
+    return csharp;
+  }
+
+  static String processContinueStatement(ContinueStatement statement) {
+    var csharp = "";
+
+    for (var entity in statement.childEntities) {
+      csharp += processEntity(entity);
+    }
+
+    return csharp;
+  }
+
+  static String processExpressionStatement(ExpressionStatement statement) {
+    var csharp = "";
+
+    for (var entity in statement.childEntities) {
+      csharp += processEntity(entity);
+    }
+
+    return csharp;
+  }
+
+  static String processAssignmentExpression(AssignmentExpression expression) {
+    var csharp = "";
+
+    for (var entity in expression.childEntities) {
+      csharp += processEntity(entity);
+    }
+
+    return csharp;
+  }
+
+  static String processSimpleStringLiteral(SimpleStringLiteral literal) {
+    return '"${literal.stringValue}"';
   }
 
   static String FieldBody(PropertyAccessorElement element) {

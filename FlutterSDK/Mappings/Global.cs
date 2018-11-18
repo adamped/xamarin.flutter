@@ -272,8 +272,7 @@ namespace FlutterSDK
 
     public static class Global
     {
-        public static string runtimeType = "runtimeType";
-
+        
         public static string DescribeIdentity(object obj)
         {
             return $"{obj.GetType()}#{obj.GetHashCode()}";
