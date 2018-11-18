@@ -30,4 +30,13 @@ class Config {
     ..add("dart:isolate")
     ..add("package:vector_math/vector_math_64.dart")
     ..add("package:typed_data/typed_buffers.dart;");
+
+  // Imports that will get added to every class
+  static List<String> defaultImports = new List<String>()
+    ..add("System")
+    ..add("FlutterSDK")
+    ..add("FlutterBinding.UI")
+    ..add("System.Collections.Generic")
+    ..add("FlutterBinding.Engine.Painting")
+    ..add("FlutterBinding.Mapping");
 }
