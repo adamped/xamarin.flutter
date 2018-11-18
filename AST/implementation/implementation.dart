@@ -92,7 +92,9 @@ class Implementation {
     } else if (entity is ConditionalExpression) {
       return entity.toString();
     } else if (entity is StringInterpolation) {
-      return entity.toString();
+      return processStringInterpolation(entity);
+    } else if (entity is InterpolationExpression) {
+      return processInterpolationExpression(entity);
     } else if (entity is InstanceCreationExpression) {
       return entity.toString();
     } else if (entity is PropertyAccess) {
@@ -169,10 +171,43 @@ class Implementation {
         is MethodElement) // e.g animate // Can't seem to get MethodMember
     {
       csharp += Naming.upperCamelCase(identifier.name);
-    } else if (identifier.staticElement is LocalVariableElement) {
+    } else if (identifier.staticElement is FunctionElement)
+    {
+      csharp += Naming.upperCamelCase(identifier.name);
+    } 
+    else if (identifier.staticElement is LocalVariableElement) {
       csharp += identifier.name + " ";
     } else {
       csharp += identifier.name + " ";
+    }
+    return csharp;
+  }
+
+  static String processStringInterpolation(StringInterpolation interpolation) {
+    var csharp = '\$"';
+
+    for (var entity in interpolation.childEntities) {
+      if (entity is StringLiteral)
+        csharp += entity.stringValue;
+      else if (entity is InterpolationString)
+        csharp += entity.value;
+      else if (entity is InterpolationExpression) {
+        for (var entity in entity.childEntities) {
+          if (entity is MethodInvocation)
+            csharp += '{' + processMethodInvocation(entity) + '}';
+        }
+      } else
+        csharp += '{' + processEntity(entity) + '}';
+    }
+
+    return csharp + '"';
+  }
+
+  static String processInterpolationExpression(
+      InterpolationExpression expression) {
+    var csharp = "";
+    for (var entity in expression.childEntities) {
+      csharp += entity.toString();
     }
     return csharp;
   }
