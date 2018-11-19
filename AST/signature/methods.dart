@@ -97,7 +97,7 @@ class Methods {
     if (overrideMethod == null) {
       if (element.returnType.displayName != "void") code.write("return ");
       code.writeln(
-          "${implementedInstanceName}.${name}(${element.parameters.map((p) => Naming.getFormattedName(p.name, NameStyle.LowerCamelCase)).join(",")});");
+          "{${implementedInstanceName}.${name}(${element.parameters.map((p) => Naming.getFormattedName(p.name, NameStyle.LowerCamelCase)).join(",")});}");
     } else {
       code.writeln(Implementation.MethodBody(overrideMethod));
     }

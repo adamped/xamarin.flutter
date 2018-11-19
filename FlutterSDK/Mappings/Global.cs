@@ -289,7 +289,7 @@ namespace FlutterSDK
 
         public static string toStringAsFixed(this double? d, int value) => d.Value.ToString($"N{value}");
 
-        public static double? clamp(this double? d, double? lower, double? upper)
+        public static double Clamp(this double d, double lower, double upper)
         {
             if (d < lower)
                 return lower;

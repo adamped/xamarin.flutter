@@ -49,8 +49,7 @@ class Implementation {
     if (entity is BeginToken) {
       return entity.lexeme;
     } else if (entity is KeywordToken) {
-      return entity.lexeme +
-          " "; //TODO: might need to do some keyword switching.
+      return processToken(entity);
     } else if (entity is SimpleToken) {
       return entity.lexeme;
     } else if (entity is SimpleIdentifier) {
@@ -73,6 +72,8 @@ class Implementation {
       return entity.toString();
     } else if (entity is PrefixedIdentifier) {
       return processPrefixedIdentifier(entity);
+    } else if (entity is DeclaredIdentifier) {
+      return entity.toString();
     } else if (entity is PrefixExpression) {
       return entity.toString();
     } else if (entity is AdjacentStrings) {
@@ -92,7 +93,7 @@ class Implementation {
     } else if (entity is AwaitExpression) {
       return entity.toString();
     } else if (entity is ConditionalExpression) {
-      return entity.toString();
+      return processConditionalExpression(entity);
     } else if (entity is StringInterpolation) {
       return processStringInterpolation(entity);
     } else if (entity is InterpolationExpression) {
@@ -124,7 +125,7 @@ class Implementation {
     } else if (entity is ContinueStatement) {
       return processContinueStatement(entity);
     } else if (entity is IfStatement) {
-      return entity.toString();
+      return processIfStatement(entity);
     } else if (entity is IsExpression) {
       return entity.toString();
     } else if (entity is CascadeExpression) {
@@ -132,15 +133,15 @@ class Implementation {
     } else if (entity is ExpressionStatement) {
       return processExpressionStatement(entity);
     } else if (entity is SuperExpression) {
-      return entity.toString();
+      return processSuperExpression(entity);
     } else if (entity is ThrowExpression) {
       return entity.toString();
     } else if (entity is WhileStatement) {
-      return entity.toString();
+      return processWhileStatement(entity);
     } else if (entity is ForEachStatement) {
-      return entity.toString();
+      return processForEachStatement(entity);
     } else if (entity is ForStatement) {
-      return entity.toString();
+      return processForStatement(entity);
     } else if (entity is ListLiteral) {
       return entity.toString();
     } else if (entity is FunctionDeclarationStatement) {
@@ -150,6 +151,8 @@ class Implementation {
     } else if (entity is DoStatement) {
       return entity.toString();
     } else if (entity is YieldStatement) {
+      return entity.toString();
+    } else if (entity is PostfixExpression) {
       return entity.toString();
     } else if (entity is TypeName) {
       return processTypeName(entity);
@@ -162,6 +165,59 @@ class Implementation {
     } else {
       return entity.toString();
     }
+  }
+
+  static String processToken(KeywordToken keyword) {
+    var newKeyword = keyword.keyword.lexeme;
+
+    if (newKeyword == "super") return "base";
+    if (newKeyword == "final")
+      return ""; // Rarely an equivalence of const in this flutter scenario.
+    return newKeyword + " ";
+  }
+
+  static String processSuperExpression(SuperExpression expression) {
+    var csharp = "";
+    for (var entity in expression.childEntities) {
+      csharp += processEntity(entity);
+    }
+    return csharp;
+  }
+
+  static String processIfStatement(IfStatement statement) {
+    return statement.toString(); //TODO: need to process out
+  }
+
+  static String processForStatement(ForStatement statement) {
+    var csharp = "";
+    for (var entity in statement.childEntities) {
+      csharp += processEntity(entity);
+    }
+    return csharp;
+  }
+
+  static String processWhileStatement(WhileStatement statement) {
+    var csharp = "";
+    for (var entity in statement.childEntities) {
+      csharp += processEntity(entity);
+    }
+    return csharp;
+  }
+
+  static String processDoStatement(DoStatement statement) {
+    var csharp = "";
+    for (var entity in statement.childEntities) {
+      csharp += processEntity(entity);
+    }
+    return csharp;
+  }
+
+  static String processForEachStatement(ForEachStatement statement) {
+    var csharp = "";
+    for (var entity in statement.childEntities) {
+      csharp += processEntity(entity);
+    }
+    return csharp;
   }
 
   static String processReturnStatement(ReturnStatement statement) {
@@ -210,16 +266,16 @@ class Implementation {
   }
 
   static String processMethodElement(MethodElement element) {
-    return Naming.upperCamelCase(element.name);
+    return Naming.upperCamelCase(element.displayName);
   }
 
   static String processFunctionElement(FunctionElement element) {
-    return Naming.upperCamelCase(element.name);
+    return Naming.upperCamelCase(element.displayName);
   }
 
   static String processPropertyAccessorElement(
       PropertyAccessorElement element) {
-    return Naming.upperCamelCase(element.name);
+    return Naming.upperCamelCase(element.displayName);
   }
 
   static String processStringInterpolation(StringInterpolation interpolation) {
@@ -304,9 +360,18 @@ class Implementation {
     return csharp;
   }
 
+  static String processConditionalExpression(ConditionalExpression expression) {
+    var csharp = "";
+    for (var entity in expression.childEntities) {
+      csharp += processEntity(entity);
+    }
+
+    return csharp;
+  }
+
   static String processAssignmentExpression(AssignmentExpression expression) {
     var csharp = "";
-
+    // expression.childEntities[1].lexeme == ??=
     for (var entity in expression.childEntities) {
       csharp += processEntity(entity);
     }
@@ -333,21 +398,18 @@ class Implementation {
     var csharp = "";
 
     var type = "";
-    var count = 0;
     for (var entity in list.childEntities) {
       if (entity is TypeName)
         type = processEntity(entity);
       else {
-        if (count > 0)
-          csharp += ',';
-        else
-          csharp += ' ';
-        csharp += processEntity(entity);
-        count++;
+        csharp += ' ' + processEntity(entity);
       }
     }
 
-    return "$type $csharp = default($type)";
+    if (csharp.contains('='))
+      return "$type $csharp";
+    else
+      return "$type $csharp = default($type)";
   }
 
   static String processTypeName(TypeName name) {
