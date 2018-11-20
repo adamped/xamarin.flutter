@@ -283,11 +283,16 @@ namespace FlutterSDK
             // We do nothing at the moment
         }
 
-        public static double? toDouble(this int i) => Convert.ToDouble(i);
+        public static double ToDouble(this int i) => Convert.ToDouble(i);
 
-        public static double? truncateToDouble(this double? d) => System.Math.Truncate(d.Value);
+        public static double TruncateToDouble(this double d) => Math.Truncate(d);
 
-        public static string toStringAsFixed(this double? d, int value) => d.Value.ToString($"N{value}");
+        public static string ToStringAsFixed(this double d, int value) => d.ToString($"N{value}");
+
+        public static double InMicroseconds(this TimeSpan timespan)
+        {
+            return timespan.TotalMilliseconds * 1000;
+        }
 
         public static double Clamp(this double d, double lower, double upper)
         {
@@ -300,12 +305,12 @@ namespace FlutterSDK
             return d;
         }
 
-        public static bool isFinite(this double? d)
+        public static bool IsFinite(this double? d)
         {
             return !double.IsInfinity(d.Value);
         }
 
-        public static double? abs(this double? d)
+        public static double Abs(this double d)
         {
             return (double)Math.Abs(Convert.ToDecimal(d));
         }
