@@ -103,7 +103,9 @@ class Implementation {
     } else if (entity is InterpolationExpression) {
       return processInterpolationExpression(entity);
     } else if (entity is InstanceCreationExpression) {
-      return entity.toString();
+      return processInstanceCreationExpression(entity);
+    } else if (entity is ConstructorName) {
+      return processConstructorName(entity);
     } else if (entity is PropertyAccess) {
       return entity.toString();
     } else if (entity is AssignmentExpression) {
@@ -113,7 +115,7 @@ class Implementation {
     } else if (entity is ReturnStatement) {
       return processReturnStatement(entity);
     } else if (entity is VariableDeclaration) {
-      return entity.toString();
+      return processVariableDeclaration(entity);
     } else if (entity is VariableDeclarationStatement) {
       return processVariableDeclarationStatement(entity);
     } else if (entity is VariableDeclarationList) {
@@ -184,6 +186,14 @@ class Implementation {
     return newKeyword + " ";
   }
 
+  static String processVariableDeclaration(VariableDeclaration declaration) {
+    var csharp = "";
+    for (var entity in declaration.childEntities) {
+      csharp += processEntity(entity);
+    }
+    return csharp;
+  }
+
   static String processSuperExpression(SuperExpression expression) {
     var csharp = "";
     for (var entity in expression.childEntities) {
@@ -207,6 +217,26 @@ class Implementation {
       ParenthesizedExpression expression) {
     var csharp = "";
     for (var entity in expression.childEntities) {
+      csharp += processEntity(entity);
+    }
+    return csharp;
+  }
+
+  static String processInstanceCreationExpression(
+      InstanceCreationExpression expression) {
+    var csharp = "";
+    for (var entity in expression.childEntities) {
+      csharp += processEntity(entity);
+    }
+    // TODO: No such thing as named constructors in C#
+    // Will need to look at Static Method calls without the new.
+    if (!csharp.startsWith('new ')) csharp = 'new ' + csharp;
+    return csharp;
+  }
+
+  static String processConstructorName(ConstructorName name) {
+    var csharp = "";
+    for (var entity in name.childEntities) {
       csharp += processEntity(entity);
     }
     return csharp;
