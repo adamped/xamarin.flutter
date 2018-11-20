@@ -8,6 +8,7 @@ import '../naming.dart';
 class Implementation {
   static String MethodBody(MethodElement element) {
     var body = element.computeNode().body;
+
     if (body is EmptyFunctionBody) {
       return '{}'; // No code;
     } else if (body is BlockFunctionBody) {
@@ -23,8 +24,11 @@ class Implementation {
   }
 
   static String processExpressionFunction(ExpressionFunctionBody body) {
-    // TODO: Will most likely use processBlockFunction but add a => to it
-    return "\n";
+    var rawBody = "";
+    for (var child in body.childEntities) {
+      rawBody += processEntity(child);
+    }
+    return rawBody;
   }
 
   static String processBlockFunction(BlockFunctionBody body) {
@@ -67,7 +71,7 @@ class Implementation {
     } else if (entity is SimpleStringLiteral) {
       return processSimpleStringLiteral(entity);
     } else if (entity is ArgumentList) {
-      return entity.toString();
+      return processArgumentList(entity);
     } else if (entity is MapLiteral) {
       return entity.toString();
     } else if (entity is PrefixedIdentifier) {
@@ -85,11 +89,11 @@ class Implementation {
     } else if (entity is FunctionExpression) {
       return entity.toString();
     } else if (entity is ParenthesizedExpression) {
-      return entity.toString();
+      return processParenthesizedExpression(entity);
     } else if (entity is IndexExpression) {
       return entity.toString();
     } else if (entity is BinaryExpression) {
-      return entity.toString();
+      return processBinaryExpression(entity);
     } else if (entity is AwaitExpression) {
       return entity.toString();
     } else if (entity is ConditionalExpression) {
@@ -154,6 +158,10 @@ class Implementation {
       return entity.toString();
     } else if (entity is PostfixExpression) {
       return entity.toString();
+    } else if (entity is AsExpression) {
+      return entity.toString();
+    } else if (entity is NamedExpression) {
+      return entity.toString();
     } else if (entity is TypeName) {
       return processTypeName(entity);
     } else if (entity is Block) {
@@ -184,8 +192,38 @@ class Implementation {
     return csharp;
   }
 
+  static String processArgumentList(ArgumentList list) {
+    var csharp = "";
+    for (var entity in list.childEntities) {
+      if (csharp.endsWith(', ') && entity.toString() == ')')
+        csharp = csharp.substring(0, csharp.length - 2);
+      csharp += processEntity(entity);
+      if (entity.toString() != '(' && entity.toString() != ')') csharp += ', ';
+    }
+    return csharp;
+  }
+
+  static String processParenthesizedExpression(
+      ParenthesizedExpression expression) {
+    var csharp = "";
+    for (var entity in expression.childEntities) {
+      csharp += processEntity(entity);
+    }
+    return csharp;
+  }
+
+  static String processBinaryExpression(BinaryExpression expression) {
+    var csharp = "";
+    for (var entity in expression.childEntities) {
+      csharp += processEntity(entity);
+    }
+    return csharp;
+  }
+
   static String processIfStatement(IfStatement statement) {
-    return statement.toString(); //TODO: need to process out
+    var csharp = "";
+    for (var entity in statement.childEntities) csharp += processEntity(entity);
+    return csharp;
   }
 
   static String processForStatement(ForStatement statement) {
