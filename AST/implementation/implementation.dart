@@ -59,43 +59,43 @@ class Implementation {
     } else if (entity is SimpleIdentifier) {
       return processSimpleIdentifier(entity);
     } else if (entity is ThisExpression) {
-      return entity.toString();
+      return processThisExpression(entity);
     } else if (entity is NullLiteral) {
-      return entity.toString();
+      return processNullLiteral(entity);
     } else if (entity is DoubleLiteral) {
-      return entity.toString();
+      return processDoubleLiteral(entity);
     } else if (entity is BooleanLiteral) {
-      return entity.toString();
+      return processBooleanLiteral(entity);
     } else if (entity is IntegerLiteral) {
-      return entity.toString();
+      return processIntegerLiteral(entity);
     } else if (entity is SimpleStringLiteral) {
       return processSimpleStringLiteral(entity);
     } else if (entity is ArgumentList) {
       return processArgumentList(entity);
     } else if (entity is MapLiteral) {
-      return entity.toString();
+      return processMapLiteral(entity);
     } else if (entity is PrefixedIdentifier) {
       return processPrefixedIdentifier(entity);
     } else if (entity is DeclaredIdentifier) {
-      return entity.toString();
+      return processDeclaredIdentifier(entity);
     } else if (entity is PrefixExpression) {
-      return entity.toString();
+      return processPrefixExpression(entity);
     } else if (entity is AdjacentStrings) {
-      return entity.toString();
+      return processAdjacentString(entity);
     } else if (entity is Label) {
-      return entity.toString();
+      return processLabel(entity);
     } else if (entity is MethodInvocation) {
       return processMethodInvocation(entity);
     } else if (entity is FunctionExpression) {
-      return entity.toString();
+      return processFunctionExpression(entity);
     } else if (entity is ParenthesizedExpression) {
       return processParenthesizedExpression(entity);
     } else if (entity is IndexExpression) {
-      return entity.toString();
+      return processIndexExpression(entity);
     } else if (entity is BinaryExpression) {
       return processBinaryExpression(entity);
     } else if (entity is AwaitExpression) {
-      return entity.toString();
+      return processAwaitExpression(entity);
     } else if (entity is ConditionalExpression) {
       return processConditionalExpression(entity);
     } else if (entity is StringInterpolation) {
@@ -107,7 +107,7 @@ class Implementation {
     } else if (entity is ConstructorName) {
       return processConstructorName(entity);
     } else if (entity is PropertyAccess) {
-      return entity.toString();
+      return processPropertyAccess(entity);
     } else if (entity is AssignmentExpression) {
       return processAssignmentExpression(entity);
     } else if (entity is AssertStatement) {
@@ -133,15 +133,15 @@ class Implementation {
     } else if (entity is IfStatement) {
       return processIfStatement(entity);
     } else if (entity is IsExpression) {
-      return entity.toString();
+      return processIsExpression(entity);
     } else if (entity is CascadeExpression) {
-      return entity.toString();
+      return processCascadeExpression(entity);
     } else if (entity is ExpressionStatement) {
       return processExpressionStatement(entity);
     } else if (entity is SuperExpression) {
       return processSuperExpression(entity);
     } else if (entity is ThrowExpression) {
-      return entity.toString();
+      return processThrowExpression(entity);
     } else if (entity is WhileStatement) {
       return processWhileStatement(entity);
     } else if (entity is ForEachStatement) {
@@ -149,32 +149,273 @@ class Implementation {
     } else if (entity is ForStatement) {
       return processForStatement(entity);
     } else if (entity is ListLiteral) {
-      return entity.toString();
+      return processListLiteral(entity);
+    } else if (entity is FormalParameterList) {
+      return processFormalParameterList(entity);
+    } else if (entity is TypeArgumentList) {
+      return processTypeArgumentList(entity);
+    } else if (entity is SimpleFormalParameter) {
+      return processSimpleFormalParameter(entity);
     } else if (entity is FunctionDeclarationStatement) {
-      return entity.toString();
+      return processFunctionDeclarationStatement(entity);
     } else if (entity is TryStatement) {
-      return entity.toString();
+      return processTryStatement(entity);
+    } else if (entity is CatchClause) {
+      return processCatchClause(entity);
     } else if (entity is DoStatement) {
-      return entity.toString();
+      return processDoStatement(entity);
     } else if (entity is YieldStatement) {
-      return entity.toString();
+      return processYieldStatement(entity);
     } else if (entity is PostfixExpression) {
-      return entity.toString();
+      return processPostfixExpression(entity);
     } else if (entity is AsExpression) {
-      return entity.toString();
+      return processAsExpression(entity);
     } else if (entity is NamedExpression) {
-      return entity.toString();
+      return processNamedExpression(entity);
     } else if (entity is TypeName) {
       return processTypeName(entity);
     } else if (entity is Block) {
-      var raw = "";
-      for (var item in entity.childEntities) {
-        raw += processEntity(item) + "\n";
-      }
-      return raw;
+      return processBlock(entity);
+    } else if (entity is BlockFunctionBody) {
+      return processBlockFunctionBody(entity);
+    } else if (entity is ExpressionFunctionBody) {
+      return processExpressionFunctionBody(entity);
+    } else if (entity is FunctionExpressionInvocation) {
+      return processFunctionExpressionInvocation(entity);
+    } else if (entity is FunctionDeclaration) {
+      return processFunctionDeclaration(entity);
+    } else if (entity is MapLiteralEntry) {
+      return processMapLiteralEntry(entity);
     } else {
+      // This should never be hit. If it is, it means you aren't correctly processing something.
       return entity.toString();
     }
+  }
+
+  static String processPropertyAccess(PropertyAccess access) {
+    var csharp = "";
+    for (var entity in access.childEntities) {
+      csharp += processEntity(entity);
+    }
+    return csharp;
+  }
+
+  static String processMapLiteralEntry(MapLiteralEntry entry) {
+    var csharp = "";
+    for (var entity in entry.childEntities) {
+      csharp += processEntity(entity);
+    }
+    return csharp;
+  }
+
+  static String processFunctionDeclaration(FunctionDeclaration declaration) {
+    var csharp = "";
+    for (var entity in declaration.childEntities) {
+      csharp += processEntity(entity);
+    }
+    return csharp;
+  }
+
+  static String processFunctionExpressionInvocation(
+      FunctionExpressionInvocation invocation) {
+    var csharp = "";
+    for (var entity in invocation.childEntities) {
+      csharp += processEntity(entity);
+    }
+    return csharp;
+  }
+
+  static String processExpressionFunctionBody(ExpressionFunctionBody body) {
+    var csharp = "";
+    for (var entity in body.childEntities) {
+      csharp += processEntity(entity);
+    }
+    return csharp;
+  }
+
+  static String processTypeArgumentList(TypeArgumentList list) {
+    var csharp = "";
+    for (var entity in list.childEntities) {
+      csharp += processEntity(entity);
+    }
+    return csharp;
+  }
+
+  static String processBlockFunctionBody(BlockFunctionBody body) {
+    var csharp = "";
+    for (var entity in body.childEntities) {
+      csharp += processEntity(entity);
+    }
+    return csharp;
+  }
+
+  static String processSimpleFormalParameter(SimpleFormalParameter parameter) {
+    var csharp = "";
+    for (var entity in parameter.childEntities) {
+      csharp += processEntity(entity);
+    }
+    return csharp;
+  }
+
+  static String processFormalParameterList(FormalParameterList list) {
+    var csharp = "";
+    for (var entity in list.childEntities) {
+      csharp += processEntity(entity);
+    }
+    return csharp;
+  }
+
+  static String processCatchClause(CatchClause clause) {
+    var csharp = "";
+    for (var entity in clause.childEntities) {
+      csharp += processEntity(entity);
+    }
+    return csharp;
+  }
+
+  static String processAdjacentString(AdjacentStrings string) {
+    var csharp = "";
+    for (var entity in string.childEntities) {
+      csharp += processEntity(entity);
+    }
+    return csharp;
+  }
+
+  static String processDeclaredIdentifier(DeclaredIdentifier identifier) {
+    var csharp = "";
+    for (var entity in identifier.childEntities) {
+      csharp += processEntity(entity);
+    }
+    return csharp;
+  }
+
+  static String processMapLiteral(MapLiteral literal) {
+    var csharp = "";
+    for (var entity in literal.childEntities) {
+      csharp += processEntity(entity);
+    }
+    return csharp;
+  }
+
+  static String processLabel(Label label) {
+    var csharp = "";
+    for (var entity in label.childEntities) {
+      csharp += processEntity(entity);
+    }
+    return csharp;
+  }
+
+  static String processPrefixExpression(PrefixExpression expression) {
+    var csharp = "";
+    for (var entity in expression.childEntities) {
+      csharp += processEntity(entity);
+    }
+    return csharp;
+  }
+
+  static String processFunctionExpression(FunctionExpression expression) {
+    var csharp = "";
+    for (var entity in expression.childEntities) {
+      csharp += processEntity(entity);
+    }
+    return csharp;
+  }
+
+  static String processIndexExpression(IndexExpression expression) {
+    var csharp = "";
+    for (var entity in expression.childEntities) {
+      csharp += processEntity(entity);
+    }
+    return csharp;
+  }
+
+  static String processIsExpression(IsExpression expression) {
+    var csharp = "";
+    for (var entity in expression.childEntities) {
+      csharp += processEntity(entity);
+    }
+    return csharp;
+  }
+
+  static String processCascadeExpression(CascadeExpression expression) {
+    var csharp = "";
+    for (var entity in expression.childEntities) {
+      csharp += processEntity(entity);
+    }
+    return csharp;
+  }
+
+  static String processThrowExpression(ThrowExpression expression) {
+    var csharp = "";
+    for (var entity in expression.childEntities) {
+      csharp += processEntity(entity);
+    }
+    return csharp;
+  }
+
+  static String processListLiteral(ListLiteral literal) {
+    var csharp = "";
+    for (var entity in literal.childEntities) {
+      csharp += processEntity(entity);
+    }
+    return csharp;
+  }
+
+  static String processFunctionDeclarationStatement(
+      FunctionDeclarationStatement statement) {
+    var csharp = "";
+    for (var entity in statement.childEntities) {
+      csharp += processEntity(entity);
+    }
+    return csharp;
+  }
+
+  static String processTryStatement(TryStatement statement) {
+    var csharp = "";
+    for (var entity in statement.childEntities) {
+      csharp += processEntity(entity);
+    }
+    return csharp;
+  }
+
+  static String processYieldStatement(YieldStatement statement) {
+    var csharp = "";
+    for (var entity in statement.childEntities) {
+      csharp += processEntity(entity);
+    }
+    return csharp;
+  }
+
+  static String processPostfixExpression(PostfixExpression expression) {
+    var csharp = "";
+    for (var entity in expression.childEntities) {
+      csharp += processEntity(entity);
+    }
+    return csharp;
+  }
+
+  static String processAsExpression(AsExpression expression) {
+    var csharp = "";
+    for (var entity in expression.childEntities) {
+      csharp += processEntity(entity);
+    }
+    return csharp;
+  }
+
+  static String processNamedExpression(NamedExpression expression) {
+    var csharp = "";
+    for (var entity in expression.childEntities) {
+      csharp += processEntity(entity);
+    }
+    return csharp;
+  }
+
+  static String processBlock(Block block) {
+    var csharp = "";
+    for (var item in block.childEntities) {
+      csharp += processEntity(item) + "\n";
+    }
+    return csharp;
   }
 
   static String processToken(KeywordToken keyword) {
@@ -197,6 +438,54 @@ class Implementation {
   static String processSuperExpression(SuperExpression expression) {
     var csharp = "";
     for (var entity in expression.childEntities) {
+      csharp += processEntity(entity);
+    }
+    return csharp;
+  }
+
+  static String processAwaitExpression(AwaitExpression expression) {
+    var csharp = "";
+    for (var entity in expression.childEntities) {
+      csharp += processEntity(entity);
+    }
+    return csharp;
+  }
+
+  static String processThisExpression(ThisExpression expression) {
+    var csharp = "";
+    for (var entity in expression.childEntities) {
+      csharp += processEntity(entity);
+    }
+    return csharp;
+  }
+
+  static String processNullLiteral(NullLiteral literal) {
+    var csharp = "";
+    for (var entity in literal.childEntities) {
+      csharp += processEntity(entity);
+    }
+    return csharp;
+  }
+
+  static String processDoubleLiteral(DoubleLiteral literal) {
+    var csharp = "";
+    for (var entity in literal.childEntities) {
+      csharp += processEntity(entity);
+    }
+    return csharp;
+  }
+
+  static String processBooleanLiteral(BooleanLiteral literal) {
+    var csharp = "";
+    for (var entity in literal.childEntities) {
+      csharp += processEntity(entity);
+    }
+    return csharp;
+  }
+
+  static String processIntegerLiteral(IntegerLiteral literal) {
+    var csharp = "";
+    for (var entity in literal.childEntities) {
       csharp += processEntity(entity);
     }
     return csharp;
