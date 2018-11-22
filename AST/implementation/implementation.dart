@@ -342,7 +342,10 @@ class Implementation {
   static String processCascadeExpression(CascadeExpression expression) {
     var csharp = "";
     for (var entity in expression.childEntities) {
-      csharp += processEntity(entity);
+      // If SimpleIdentifier, then it isn't creating anything or a new assignment
+      // its just a variable, and we can ignore it, because the cascades will
+      // put it in front anyway.
+      if (!(entity is SimpleIdentifier)) csharp += processEntity(entity);
     }
     return csharp;
   }
@@ -589,9 +592,20 @@ class Implementation {
 
   static String processMethodInvocation(MethodInvocation invocation) {
     var csharp = "";
-    for (var entity in invocation.childEntities) {
-      csharp += processEntity(entity);
+
+    if (invocation.isCascaded) {
+      csharp += '; '; // Close out previous statement.
+      csharp +=
+          processEntity(invocation.parent.childEntities.toList()[0]) + '.';
+      for (var entity in invocation.childEntities) {
+        if (entity.toString() != '..') csharp += processEntity(entity);
+      }
+    } else {
+      for (var entity in invocation.childEntities) {
+        csharp += processEntity(entity);
+      }
     }
+
     return csharp;
   }
 
