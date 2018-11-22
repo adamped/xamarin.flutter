@@ -211,7 +211,7 @@ class Implementation {
   static String processFunctionDeclaration(FunctionDeclaration declaration) {
     var csharp = "";
     for (var entity in declaration.childEntities) {
-      csharp += processEntity(entity);
+      csharp += processEntity(entity) + ' ';
     }
     return csharp;
   }
@@ -317,6 +317,8 @@ class Implementation {
     var csharp = "";
     for (var entity in expression.childEntities) {
       csharp += processEntity(entity);
+      // TODO: need to find a way when it's only a function expression not an actual method
+      if (entity is FormalParameterList) csharp += ' => ';
     }
     return csharp;
   }
@@ -330,7 +332,7 @@ class Implementation {
   }
 
   static String processIsExpression(IsExpression expression) {
-    var csharp = "";
+    var csharp = ' ';
     for (var entity in expression.childEntities) {
       csharp += processEntity(entity);
     }
@@ -632,7 +634,12 @@ class Implementation {
 
   static String processPropertyAccessorElement(
       PropertyAccessorElement element) {
-    return Naming.upperCamelCase(element.displayName);
+    var name = element.displayName;
+
+    if (name == "inMicroseconds") return "InMicroseconds()";
+    if (name == 'runtimeType') return 'GetType()';
+
+    return Naming.upperCamelCase(name);
   }
 
   static String processStringInterpolation(StringInterpolation interpolation) {
@@ -728,9 +735,23 @@ class Implementation {
 
   static String processAssignmentExpression(AssignmentExpression expression) {
     var csharp = "";
-    // expression.childEntities[1].lexeme == ??=
-    for (var entity in expression.childEntities) {
-      csharp += processEntity(entity);
+    var list = expression.childEntities.toList();
+    if (list.length != 3)
+      throw new AssertionError('Should always have 3 parts');
+
+    var nullCheckAssignment = false;
+    var token = list[1] as SimpleToken;
+    if (token != null && token.lexeme == '??=') nullCheckAssignment = true;
+
+    if (nullCheckAssignment) {
+      var variable = processEntity(list[0]);
+      csharp += variable + ' = (' + variable + ' == null ';
+      csharp += '? ' + processEntity(list[2]) + ' ';
+      csharp += ': ' + variable + ' )';
+    } else {
+      for (var entity in expression.childEntities) {
+        csharp += processEntity(entity);
+      }
     }
 
     return csharp;

@@ -148,6 +148,10 @@ namespace FlutterSDK
     public class ByteData //TODO
     { }
 
+    public class Future
+    { }
+
+
     public class Future<T> //TODO
     {
         // public TickerFuture complete() { return new TickerFuture(); }
@@ -195,32 +199,6 @@ namespace FlutterSDK
         public string toString()
         {
             return _value;
-        }
-    }
-
-    public static class math
-    {
-        public static double? sin(double? one)
-        {
-            return System.Math.Sin(one.Value);
-        }
-        public static double? cos(double? one)
-        {
-            return System.Math.Cos(one.Value);
-        }
-        public static double? max(double? first, double? second) => Math.Max(first.Value, second.Value);
-        public static double? min(double? first, double? second) => Math.Min(first.Value, second.Value);
-        public static double? sqrt(double? value) => Math.Sqrt(value.Value);
-
-        public static double pi => 3.1415926535897932;
-        public static double e => 2.718281828459045;
-        public static double? pow(double? one, double? two)
-        {
-            return System.Math.Pow(one.Value, two.Value);
-        }
-        public static double? log(double? d)
-        {
-            return System.Math.Log(d.Value);
         }
     }
 
