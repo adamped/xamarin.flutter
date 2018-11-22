@@ -262,6 +262,7 @@ namespace FlutterSDK
         }
 
         public static double ToDouble(this int i) => Convert.ToDouble(i);
+        public static double ToDouble(this double d) => d;
 
         public static double TruncateToDouble(this double d) => Math.Truncate(d);
 
