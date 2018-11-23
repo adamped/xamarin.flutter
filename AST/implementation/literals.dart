@@ -51,7 +51,9 @@ class Literals {
   }
 
   static String processSimpleStringLiteral(SimpleStringLiteral literal) {
-    return '"${literal.stringValue}"';
+    var stringValue = literal.toString();
+    stringValue = stringValue.substring(1, stringValue.length - 1);
+    return '"${stringValue}"';
   }
 
   static String processListLiteral(ListLiteral literal) {

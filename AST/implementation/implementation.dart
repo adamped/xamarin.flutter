@@ -59,12 +59,12 @@ class Implementation {
     return rawBody + "\n";
   }
 
-  static String processEntity(SyntacticEntity entity) {
+  static String processEntity(SyntacticEntity entity) {   
     if (entity is BeginToken) {
       return entity.lexeme;
     } else if (entity is KeywordToken) {
       return processToken(entity);
-    } else if (entity is SimpleToken) {
+    } else if (entity is SimpleToken) {    
       return entity.lexeme;
     } else if (entity is SimpleIdentifier) {
       return processSimpleIdentifier(entity);
