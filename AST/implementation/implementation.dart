@@ -3,6 +3,10 @@ import 'package:analyzer/dart/ast/syntactic_entity.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:front_end/src/scanner/token.dart';
 import '../naming.dart';
+import 'loops.dart';
+import 'exceptions.dart';
+import 'literals.dart';
+import 'conditionals.dart';
 
 /// Provides methods to transpile the body of elements
 class Implementation {
@@ -10,7 +14,13 @@ class Implementation {
     var body = element.computeNode().body;
 
     if (body is EmptyFunctionBody) {
-      return '{}'; // No code;
+      var parent = body.parent;
+      if (parent is MethodDeclaration &&
+          parent.returnType != null &&
+          parent.returnType.toString() != 'void')
+        return '{ \nreturn default(${processEntity(parent.returnType)}); \n}';
+      else
+        return '{ \n}'; // No code;
     } else if (body is BlockFunctionBody) {
       return processBlockFunction(body);
     } else if (body is ExpressionFunctionBody) {
@@ -61,19 +71,19 @@ class Implementation {
     } else if (entity is ThisExpression) {
       return processThisExpression(entity);
     } else if (entity is NullLiteral) {
-      return processNullLiteral(entity);
+      return Literals.processNullLiteral(entity);
     } else if (entity is DoubleLiteral) {
-      return processDoubleLiteral(entity);
+      return Literals.processDoubleLiteral(entity);
     } else if (entity is BooleanLiteral) {
-      return processBooleanLiteral(entity);
+      return Literals.processBooleanLiteral(entity);
     } else if (entity is IntegerLiteral) {
-      return processIntegerLiteral(entity);
+      return Literals.processIntegerLiteral(entity);
     } else if (entity is SimpleStringLiteral) {
-      return processSimpleStringLiteral(entity);
+      return Literals.processSimpleStringLiteral(entity);
     } else if (entity is ArgumentList) {
       return processArgumentList(entity);
     } else if (entity is MapLiteral) {
-      return processMapLiteral(entity);
+      return Literals.processMapLiteral(entity);
     } else if (entity is PrefixedIdentifier) {
       return processPrefixedIdentifier(entity);
     } else if (entity is DeclaredIdentifier) {
@@ -97,7 +107,7 @@ class Implementation {
     } else if (entity is AwaitExpression) {
       return processAwaitExpression(entity);
     } else if (entity is ConditionalExpression) {
-      return processConditionalExpression(entity);
+      return Conditionals.processConditionalExpression(entity);
     } else if (entity is StringInterpolation) {
       return processStringInterpolation(entity);
     } else if (entity is InterpolationExpression) {
@@ -121,17 +131,17 @@ class Implementation {
     } else if (entity is VariableDeclarationList) {
       return processVariableDeclarationList(entity);
     } else if (entity is SwitchStatement) {
-      return processSwitchStatement(entity);
+      return Conditionals.processSwitchStatement(entity);
     } else if (entity is SwitchCase) {
-      return processSwitchCase(entity);
+      return Conditionals.processSwitchCase(entity);
     } else if (entity is BreakStatement) {
       return entity.toString();
     } else if (entity is SwitchDefault) {
-      return processSwitchDefault(entity);
+      return Conditionals.processSwitchDefault(entity);
     } else if (entity is ContinueStatement) {
-      return processContinueStatement(entity);
+      return Conditionals.processContinueStatement(entity);
     } else if (entity is IfStatement) {
-      return processIfStatement(entity);
+      return Conditionals.processIfStatement(entity);
     } else if (entity is IsExpression) {
       return processIsExpression(entity);
     } else if (entity is CascadeExpression) {
@@ -141,15 +151,15 @@ class Implementation {
     } else if (entity is SuperExpression) {
       return processSuperExpression(entity);
     } else if (entity is ThrowExpression) {
-      return processThrowExpression(entity);
+      return Exceptions.processThrowExpression(entity);
     } else if (entity is WhileStatement) {
-      return processWhileStatement(entity);
+      return Loops.processWhileStatement(entity);
     } else if (entity is ForEachStatement) {
-      return processForEachStatement(entity);
+      return Loops.processForEachStatement(entity);
     } else if (entity is ForStatement) {
-      return processForStatement(entity);
+      return Loops.processForStatement(entity);
     } else if (entity is ListLiteral) {
-      return processListLiteral(entity);
+      return Literals.processListLiteral(entity);
     } else if (entity is FormalParameterList) {
       return processFormalParameterList(entity);
     } else if (entity is TypeArgumentList) {
@@ -159,11 +169,11 @@ class Implementation {
     } else if (entity is FunctionDeclarationStatement) {
       return processFunctionDeclarationStatement(entity);
     } else if (entity is TryStatement) {
-      return processTryStatement(entity);
+      return Exceptions.processTryStatement(entity);
     } else if (entity is CatchClause) {
-      return processCatchClause(entity);
+      return Exceptions.processCatchClause(entity);
     } else if (entity is DoStatement) {
-      return processDoStatement(entity);
+      return Loops.processDoStatement(entity);
     } else if (entity is YieldStatement) {
       return processYieldStatement(entity);
     } else if (entity is PostfixExpression) {
@@ -185,7 +195,7 @@ class Implementation {
     } else if (entity is FunctionDeclaration) {
       return processFunctionDeclaration(entity);
     } else if (entity is MapLiteralEntry) {
-      return processMapLiteralEntry(entity);
+      return Literals.processMapLiteralEntry(entity);
     } else {
       // This should never be hit. If it is, it means you aren't correctly processing something.
       return entity.toString();
@@ -195,14 +205,6 @@ class Implementation {
   static String processPropertyAccess(PropertyAccess access) {
     var csharp = "";
     for (var entity in access.childEntities) {
-      csharp += processEntity(entity);
-    }
-    return csharp;
-  }
-
-  static String processMapLiteralEntry(MapLiteralEntry entry) {
-    var csharp = "";
-    for (var entity in entry.childEntities) {
       csharp += processEntity(entity);
     }
     return csharp;
@@ -234,11 +236,20 @@ class Implementation {
   }
 
   static String processTypeArgumentList(TypeArgumentList list) {
-    var csharp = "";
-    for (var entity in list.childEntities) {
-      csharp += processEntity(entity);
-    }
-    return csharp;
+    if (list.childEntities.length < 2)
+      throw new AssertionError(
+          'There should always be brackets around the arguments');
+
+    var csharp = list.childEntities
+        .where((f) => f is TypeName)
+        .map((f) => processEntity(f))
+        .join(',');
+
+    var entities = list.childEntities.toList();
+
+    var first = entities[0];
+    var end = entities.last;
+    return '$first$csharp$end';
   }
 
   static String processBlockFunctionBody(BlockFunctionBody body) {
@@ -250,25 +261,20 @@ class Implementation {
   }
 
   static String processSimpleFormalParameter(SimpleFormalParameter parameter) {
-    var csharp = "";
-    for (var entity in parameter.childEntities) {
-      csharp += processEntity(entity);
-    }
-    return csharp;
+    return parameter.childEntities.map((f) => processEntity(f)).join(' ');
   }
 
   static String processFormalParameterList(FormalParameterList list) {
     var csharp = "";
+    var hasParameter = false;
     for (var entity in list.childEntities) {
+      if (entity.toString() == ')' && hasParameter == true)
+        csharp = csharp.substring(0, csharp.length - 2);
       csharp += processEntity(entity);
-    }
-    return csharp;
-  }
-
-  static String processCatchClause(CatchClause clause) {
-    var csharp = "";
-    for (var entity in clause.childEntities) {
-      csharp += processEntity(entity);
+      if (entity is SimpleFormalParameter) {
+        csharp += ', ';
+        hasParameter = true;
+      }
     }
     return csharp;
   }
@@ -284,14 +290,6 @@ class Implementation {
   static String processDeclaredIdentifier(DeclaredIdentifier identifier) {
     var csharp = "";
     for (var entity in identifier.childEntities) {
-      csharp += processEntity(entity);
-    }
-    return csharp;
-  }
-
-  static String processMapLiteral(MapLiteral literal) {
-    var csharp = "";
-    for (var entity in literal.childEntities) {
       csharp += processEntity(entity);
     }
     return csharp;
@@ -350,32 +348,8 @@ class Implementation {
     return csharp;
   }
 
-  static String processThrowExpression(ThrowExpression expression) {
-    var csharp = "";
-    for (var entity in expression.childEntities) {
-      csharp += processEntity(entity);
-    }
-    return csharp;
-  }
-
-  static String processListLiteral(ListLiteral literal) {
-    var csharp = "";
-    for (var entity in literal.childEntities) {
-      csharp += processEntity(entity);
-    }
-    return csharp;
-  }
-
   static String processFunctionDeclarationStatement(
       FunctionDeclarationStatement statement) {
-    var csharp = "";
-    for (var entity in statement.childEntities) {
-      csharp += processEntity(entity);
-    }
-    return csharp;
-  }
-
-  static String processTryStatement(TryStatement statement) {
     var csharp = "";
     for (var entity in statement.childEntities) {
       csharp += processEntity(entity);
@@ -464,38 +438,6 @@ class Implementation {
     return csharp;
   }
 
-  static String processNullLiteral(NullLiteral literal) {
-    var csharp = "";
-    for (var entity in literal.childEntities) {
-      csharp += processEntity(entity);
-    }
-    return csharp;
-  }
-
-  static String processDoubleLiteral(DoubleLiteral literal) {
-    var csharp = "";
-    for (var entity in literal.childEntities) {
-      csharp += processEntity(entity);
-    }
-    return csharp;
-  }
-
-  static String processBooleanLiteral(BooleanLiteral literal) {
-    var csharp = "";
-    for (var entity in literal.childEntities) {
-      csharp += processEntity(entity);
-    }
-    return csharp;
-  }
-
-  static String processIntegerLiteral(IntegerLiteral literal) {
-    var csharp = "";
-    for (var entity in literal.childEntities) {
-      csharp += processEntity(entity);
-    }
-    return csharp;
-  }
-
   static String processArgumentList(ArgumentList list) {
     var csharp = "";
     for (var entity in list.childEntities) {
@@ -539,44 +481,6 @@ class Implementation {
   static String processBinaryExpression(BinaryExpression expression) {
     var csharp = "";
     for (var entity in expression.childEntities) {
-      csharp += processEntity(entity);
-    }
-    return csharp;
-  }
-
-  static String processIfStatement(IfStatement statement) {
-    var csharp = "";
-    for (var entity in statement.childEntities) csharp += processEntity(entity);
-    return csharp;
-  }
-
-  static String processForStatement(ForStatement statement) {
-    var csharp = "";
-    for (var entity in statement.childEntities) {
-      csharp += processEntity(entity);
-    }
-    return csharp;
-  }
-
-  static String processWhileStatement(WhileStatement statement) {
-    var csharp = "";
-    for (var entity in statement.childEntities) {
-      csharp += processEntity(entity);
-    }
-    return csharp;
-  }
-
-  static String processDoStatement(DoStatement statement) {
-    var csharp = "";
-    for (var entity in statement.childEntities) {
-      csharp += processEntity(entity);
-    }
-    return csharp;
-  }
-
-  static String processForEachStatement(ForEachStatement statement) {
-    var csharp = "";
-    for (var entity in statement.childEntities) {
       csharp += processEntity(entity);
     }
     return csharp;
@@ -651,6 +555,7 @@ class Implementation {
     var name = element.displayName;
 
     if (name == "inMicroseconds") return "InMicroseconds()";
+    if (name == "isFinite") return "IsFinite()";
     if (name == 'runtimeType') return 'GetType()';
 
     return Naming.upperCamelCase(name);
@@ -688,59 +593,10 @@ class Implementation {
     return csharp;
   }
 
-  static String processSwitchStatement(SwitchStatement statement) {
-    var csharp = "";
-
-    for (var entity in statement.childEntities) {
-      csharp += processEntity(entity);
-    }
-
-    return csharp;
-  }
-
-  static String processSwitchCase(SwitchCase switchCase) {
-    var csharp = "";
-
-    for (var entity in switchCase.childEntities) {
-      csharp += processEntity(entity);
-    }
-
-    return csharp;
-  }
-
-  static String processSwitchDefault(SwitchDefault switchDefault) {
-    var csharp = "";
-
-    for (var entity in switchDefault.childEntities) {
-      csharp += processEntity(entity);
-    }
-
-    return csharp;
-  }
-
-  static String processContinueStatement(ContinueStatement statement) {
-    var csharp = "";
-
-    for (var entity in statement.childEntities) {
-      csharp += processEntity(entity);
-    }
-
-    return csharp;
-  }
-
   static String processExpressionStatement(ExpressionStatement statement) {
     var csharp = "";
 
     for (var entity in statement.childEntities) {
-      csharp += processEntity(entity);
-    }
-
-    return csharp;
-  }
-
-  static String processConditionalExpression(ConditionalExpression expression) {
-    var csharp = "";
-    for (var entity in expression.childEntities) {
       csharp += processEntity(entity);
     }
 
@@ -769,10 +625,6 @@ class Implementation {
     }
 
     return csharp;
-  }
-
-  static String processSimpleStringLiteral(SimpleStringLiteral literal) {
-    return '"${literal.stringValue}"';
   }
 
   static String processVariableDeclarationStatement(

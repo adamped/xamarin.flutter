@@ -250,15 +250,41 @@ namespace FlutterSDK
 
     public static class Global
     {
-        
+        public static bool Identical(object main, object other)
+         => main == other;
+
         public static string DescribeIdentity(object obj)
         {
             return $"{obj.GetType()}#{obj.GetHashCode()}";
         }
 
-        public static void assert(object obj)
+        public static string ShortHash(object obj)
         {
-            // We do nothing at the moment
+            return obj.GetHashCode().ToUnsigned(20).ToRadixString(16).PadLeft(5, '0');
+        }
+
+        public static int ToUnsigned(this int value, int bits)
+        {
+            return value >> bits;
+        }
+
+        public static string ToRadixString(this int value, int radix)
+        {
+            var digits = "0123456789abcdefghijklmnopqrstuvwxyz";
+
+            radix = Math.Abs(radix);
+            if (radix > digits.Length || radix < 2)
+                throw new ArgumentOutOfRangeException("radix", radix, string.Format("Radix has to be > 2 and < {0}", digits.Length));
+
+            string result = string.Empty;
+            int quotient = Math.Abs(value);
+            while (0 < quotient)
+            {
+                int temp = quotient % radix;
+                result = digits[temp] + result;
+                quotient /= radix;
+            }
+            return result;
         }
 
         public static double ToDouble(this int i) => Convert.ToDouble(i);
@@ -284,9 +310,9 @@ namespace FlutterSDK
             return d;
         }
 
-        public static bool IsFinite(this double? d)
+        public static bool IsFinite(this double d)
         {
-            return !double.IsInfinity(d.Value);
+            return !double.IsInfinity(d);
         }
 
         public static double Abs(this double d)
