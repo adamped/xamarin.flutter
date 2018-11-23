@@ -72,10 +72,7 @@ namespace FlutterSDK
 
     public class Timeline
     {
-        //public void timeSync<T>(string label, Action task, _TaskEntry<T> flow)
-        //{
-
-        //}
+       
     }
 
     public class Null // todo
@@ -148,15 +145,14 @@ namespace FlutterSDK
     public class ByteData //TODO
     { }
 
-    public class Future
-    { }
-
-
-    public class Future<T> //TODO
+    public class Future: Task
     {
-        // public TickerFuture complete() { return new TickerFuture(); }
+        public Future(Action action) : base(action) { }
+    }
 
-        public Stream<T> asStream() { return new Stream<T>(); }
+    public class Future<T>: Task<T>
+    {
+        public Future(Func<T> func) : base(func) { }
     }
 
     public class HashSet<T> : System.Collections.Generic.HashSet<T>
@@ -289,6 +285,8 @@ namespace FlutterSDK
 
         public static double ToDouble(this int i) => Convert.ToDouble(i);
         public static double ToDouble(this double d) => d;
+
+        public static string Join(this List<string> list, string separator) => string.Join(separator, list.ToArray());
 
         public static double TruncateToDouble(this double d) => Math.Truncate(d);
 

@@ -1,8 +1,4 @@
 import 'package:analyzer/dart/ast/ast.dart';
-import 'package:analyzer/dart/ast/syntactic_entity.dart';
-import 'package:analyzer/dart/element/element.dart';
-import 'package:front_end/src/scanner/token.dart';
-import '../naming.dart';
 import 'implementation.dart';
 
 class Exceptions {

@@ -238,7 +238,7 @@ class Implementation {
   static String processTypeArgumentList(TypeArgumentList list) {
     if (list.childEntities.length < 2)
       throw new AssertionError(
-          'There should always be brackets around the arguments');
+          'There should always be brackets around the arguments.');
 
     var csharp = list.childEntities
         .where((f) => f is TypeName)
@@ -330,9 +330,9 @@ class Implementation {
   }
 
   static String processIsExpression(IsExpression expression) {
-    var csharp = ' ';
+    var csharp = '';
     for (var entity in expression.childEntities) {
-      csharp += processEntity(entity);
+      csharp += processEntity(entity) + ' ';
     }
     return csharp;
   }
@@ -401,8 +401,13 @@ class Implementation {
     var newKeyword = keyword.keyword.lexeme;
 
     if (newKeyword == "super") return "base";
-    if (newKeyword == "final")
-      return ""; // Rarely an equivalence of const in this flutter scenario.
+    if (newKeyword == "final" || newKeyword == 'const')
+      return ""; // Rarely an equivalence of final or const inside a method, because flutter has compiled consts, whereas C# does not.
+
+    if (newKeyword == 'is') newKeyword = ' ' + newKeyword;
+    if (newKeyword == 'as') newKeyword = ' ' + newKeyword;
+    if (newKeyword == 'in') newKeyword = ' ' + newKeyword;
+
     return newKeyword + " ";
   }
 
@@ -498,7 +503,6 @@ class Implementation {
     var csharp = "";
 
     if (invocation.isCascaded) {
-      csharp += '; '; // Close out previous statement.
       csharp +=
           processEntity(invocation.parent.childEntities.toList()[0]) + '.';
       for (var entity in invocation.childEntities) {
@@ -529,7 +533,7 @@ class Implementation {
     } else if (identifier.staticElement is PropertyAccessorElement) {
       csharp += processPropertyAccessorElement(identifier.staticElement);
     } else {
-      csharp += identifier.name;
+      csharp += Naming.upperCamelCase(identifier.name);
     }
     return csharp;
   }
@@ -543,7 +547,14 @@ class Implementation {
   }
 
   static String processMethodElement(MethodElement element) {
-    return Naming.upperCamelCase(element.displayName);
+    var name = element.displayName;
+
+    if (name == "toUpperCase") return "ToUpper";
+    if (name == "toLowerCase") return "ToLower";
+    if (name == "trimRight") return "TrimEnd";
+    if (name == "trimLeft") return "TrimStart";
+
+    return Naming.upperCamelCase(name);
   }
 
   static String processFunctionElement(FunctionElement element) {
