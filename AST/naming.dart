@@ -13,7 +13,9 @@ class Naming {
         .replaceAll(
             "file:///" + Config.flutterSourcePath.replaceAll("\\", "/") + "/",
             "")
-        .replaceAll(".dart", "");
+        .replaceAll(".dart", "")
+        .replaceAll("package:flutter/src/", "");
+
     var splittedPath = namespacePath
         .split('/')
         .map<String>((part) => getFormattedName(part, NameStyle.UpperCamelCase))
@@ -105,7 +107,19 @@ class Naming {
       }
     }
 
-    return getFormattedTypeName(returnName);
+    var formattedName = getFormattedTypeName(returnName);
+    
+    if (!(returnType is TypeParameterType) && returnType.element != null) {
+      var library = returnType.element.library;
+      if (library != null &&
+          !Config.ignoredImports.contains(library.identifier) && 
+          !["bool", "double", "object", "void", "string", "T"].contains(formattedName)) {
+        var namespace = namespaceFromIdentifier(library.identifier);
+        formattedName = namespace + "." + formattedName;
+      }
+    } 
+
+    return formattedName;
   }
 
   static String tokenToText(Token token, bool backwards) {
@@ -131,7 +145,19 @@ class Naming {
     } else if (type is TypeParameterType) {
       typeName = type.displayName;
     }
-    return getFormattedTypeName(typeName);
+    var formattedName = getFormattedTypeName(typeName);
+
+    if (!(type is TypeParameterType) && type.element != null) {
+      var library = type.element.library;
+      if (library != null &&
+          !Config.ignoredImports.contains(library.identifier) &&
+          formattedName != "object") {
+        var namespace = namespaceFromIdentifier(library.identifier);
+        formattedName = namespace + "." + formattedName;
+      }
+    } 
+
+    return formattedName;
   }
 
   static String getVariableType(VariableElement element, VariableType type) {
@@ -155,7 +181,15 @@ class Naming {
           break;
       }
     }
-    return getFormattedTypeName(typeName);
+    var formattedName = getFormattedTypeName(typeName);
+    var library = element.type.element.library;
+    if (!( element.type is TypeParameterType) &&  library != null &&
+        !Config.ignoredImports.contains(library.identifier) &&
+        formattedName != "object") {
+      var namespace = namespaceFromIdentifier(library.identifier);
+      formattedName = namespace + "." + formattedName;
+    }
+    return formattedName;
   }
 
   static String getTypeParameterName(TypeParameterElement element) {
@@ -177,8 +211,10 @@ class Naming {
       formattedName = formattedName.replaceAll("Set", "HashSet");
     if (formattedName.startsWith("Map"))
       formattedName = formattedName.replaceAll("Map", "Dictionary");
-      
+
     switch (formattedName.toLowerCase()) {
+      case "httpclientresponse":
+        return "HttpResponseMessage";
       case "shader":
         return "SKShader";
       case "enginelayer":
@@ -261,8 +297,13 @@ class Naming {
       return word;
   }
 
-  static String DefaultClassName(CompilationUnitElement element){
-    var name = element.library.identifier.replaceAll(".dart", "").replaceAll(".g", "").split("/").last + "DefaultClass";
+  static String DefaultClassName(CompilationUnitElement element) {
+    var name = element.library.identifier
+            .replaceAll(".dart", "")
+            .replaceAll(".g", "")
+            .split("/")
+            .last +
+        "DefaultClass";
     return getFormattedName(name, NameStyle.UpperCamelCase);
   }
 }

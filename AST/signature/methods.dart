@@ -158,6 +158,10 @@ class Methods {
       if (p.hasRequired) {
         parameterSignature = "[NotNull] " + parameterSignature;
       }
+
+      if(p.isOptional){
+        parameterSignature += " = default(${parameterType})";
+      }
       return parameterSignature;
     });
     return parameters == null ? "" : parameters.join(",");

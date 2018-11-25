@@ -62,9 +62,7 @@ class Frame {
     return imports.map((import) => "using ${import};").join("\n");
   }
 
-  static void AddImport(LibraryElement import, List<String> allImports) {
-    // Skip dart:core, we import System instead.
-    if (import != null && import.displayName == "dart.core") return;
+  static void AddImport(LibraryElement import, List<String> allImports) { 
     var name = import.identifier;
 
     // Skip imports that should get ignored
