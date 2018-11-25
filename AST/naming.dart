@@ -1,5 +1,3 @@
-import 'dart:mirrors';
-
 import 'package:analyzer/analyzer.dart';
 import 'package:analyzer/dart/ast/token.dart';
 import 'package:analyzer/dart/element/type.dart';
@@ -232,7 +230,7 @@ class Naming {
         return "TimeSpan";
       case "future<void>":
       case "future<null>":
-        return "Task";
+        return "Future";
       default:
         formattedName =
             getFormattedName(formattedName, NameStyle.UpperCamelCase);

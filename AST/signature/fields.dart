@@ -1,6 +1,4 @@
 import 'package:analyzer/dart/element/element.dart';
-import 'package:analyzer/dart/element/type.dart';
-
 import '../implementation/implementation.dart';
 import '../naming.dart';
 
