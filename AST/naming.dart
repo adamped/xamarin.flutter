@@ -11,8 +11,11 @@ class Naming {
   static List<String> namespacePartsFromIdentifier(String identifier) {
     var namespacePath = identifier
         .replaceAll(
-            "file:///" + Config.flutterSourcePath.replaceAll("\\", "/") + "/", "")
-        .replaceAll(".dart", "");
+            "file:///" + Config.flutterSourcePath.replaceAll("\\", "/") + "/",
+            "")
+        .replaceAll(".dart", "")
+        .replaceAll("package:flutter/src/", "");
+
     var splittedPath = namespacePath
         .split('/')
         .map<String>((part) => getFormattedName(part, NameStyle.UpperCamelCase))
@@ -24,7 +27,7 @@ class Naming {
     var parts = namespacePartsFromIdentifier(identifier);
 
     //Dont include the filename in the namespace
-    parts.removeLast();
+    //parts.removeLast();
     return Config.rootNamespace + "." + parts.join(".");
   }
 
@@ -43,8 +46,7 @@ class Naming {
     return name;
   }
 
-  static String interfaceTypeName(
-      InterfaceType element) {
+  static String interfaceTypeName(InterfaceType element) {
     var name = element.name;
     name = getFormattedName(name, NameStyle.UpperCamelCase);
     var typeArguments = new List<String>();
@@ -96,31 +98,34 @@ class Naming {
     var returnType = element.returnType;
     var returnName = returnType.displayName;
     var test = element.computeNode();
-    if(returnType is InterfaceType){
+    if (returnType is InterfaceType) {
       returnName = interfaceTypeName(returnType);
-    }
-    else if(test is MethodDeclaration){
-      if(test.returnType is TypeName){
-          var t = test.returnType as TypeName;
-          returnName = t.name.name;
+    } else if (test is MethodDeclaration) {
+      if (test.returnType is TypeName) {
+        var t = test.returnType as TypeName;
+        returnName = t.name.name;
       }
     }
 
-    GenericTypeAliasElement t;
-    if (returnName == ">") {
-      print("test");
-    }
-    if(returnName.contains("→")){
-      print("Found unexpected");
-    }
+    var formattedName = getFormattedTypeName(returnName);
+    
+    if (!(returnType is TypeParameterType) && returnType.element != null) {
+      var library = returnType.element.library;
+      if (library != null &&
+          !Config.ignoredImports.contains(library.identifier) && 
+          !["bool", "double", "object", "void", "string", "T"].contains(formattedName)) {
+        var namespace = namespaceFromIdentifier(library.identifier);
+        formattedName = namespace + "." + formattedName;
+      }
+    } 
 
-    return getFormattedTypeName(returnName);
+    return formattedName;
   }
 
   static String tokenToText(Token token, bool backwards) {
     if (token.isEof == true ||
         token.keyword != null ||
-        token.isKeywordOrIdentifier == false) return "";
+        (token.isKeywordOrIdentifier == false && backwards)) return "";
 
     var text = token.lexeme;
     if (backwards) {
@@ -140,7 +145,19 @@ class Naming {
     } else if (type is TypeParameterType) {
       typeName = type.displayName;
     }
-    return getFormattedTypeName(typeName);
+    var formattedName = getFormattedTypeName(typeName);
+
+    if (!(type is TypeParameterType) && type.element != null) {
+      var library = type.element.library;
+      if (library != null &&
+          !Config.ignoredImports.contains(library.identifier) &&
+          formattedName != "object") {
+        var namespace = namespaceFromIdentifier(library.identifier);
+        formattedName = namespace + "." + formattedName;
+      }
+    } 
+
+    return formattedName;
   }
 
   static String getVariableType(VariableElement element, VariableType type) {
@@ -153,14 +170,26 @@ class Naming {
       switch (type) {
         case VariableType.Field:
           typeName =
-              tokenToText(element.computeNode().beginToken.previous, true).split(" ").first;
+              tokenToText(element.computeNode().beginToken.previous, true)
+                  .split(" ")
+                  .first;
           break;
         case VariableType.Parameter:
-          typeName = tokenToText(element.computeNode().beginToken, false).split(" ").first;
+          typeName = tokenToText(element.computeNode().endToken.previous, true)
+              .split(" ")
+              .last;
           break;
       }
     }
-    return getFormattedTypeName(typeName);
+    var formattedName = getFormattedTypeName(typeName);
+    var library = element.type.element.library;
+    if (!( element.type is TypeParameterType) &&  library != null &&
+        !Config.ignoredImports.contains(library.identifier) &&
+        formattedName != "object") {
+      var namespace = namespaceFromIdentifier(library.identifier);
+      formattedName = namespace + "." + formattedName;
+    }
+    return formattedName;
   }
 
   static String getTypeParameterName(TypeParameterElement element) {
@@ -168,20 +197,35 @@ class Naming {
 
     if (element.type is InterfaceType) {
       typeName = interfaceTypeName(element.type as InterfaceType);
-    }  
-    typeName = element.type.displayName; 
+    }
+    typeName = element.type.displayName;
     return getFormattedTypeName(typeName);
   }
 
   static String getFormattedTypeName(String typeName) {
-    switch (typeName.toLowerCase()) {
+    var formattedName = typeName;
+    if (formattedName.startsWith("ui."))
+      formattedName = formattedName.replaceAll("ui.", "");
+
+    if (formattedName.startsWith("Set"))
+      formattedName = formattedName.replaceAll("Set", "HashSet");
+    if (formattedName.startsWith("Map"))
+      formattedName = formattedName.replaceAll("Map", "Dictionary");
+
+    switch (formattedName.toLowerCase()) {
+      case "httpclientresponse":
+        return "HttpResponseMessage";
+      case "shader":
+        return "SKShader";
+      case "enginelayer":
+        return "NativeEngineLayer";
       case "void":
       case "bool":
       case "int":
       case "object":
       case "double":
       case "string":
-        return typeName.toLowerCase();
+        return formattedName.toLowerCase();
       case "dynamic":
         return "object";
       case "duration":
@@ -190,8 +234,8 @@ class Naming {
       case "future<null>":
         return "Task";
       default:
-        var formattedName =
-            getFormattedName(typeName, NameStyle.UpperCamelCase);
+        formattedName =
+            getFormattedName(formattedName, NameStyle.UpperCamelCase);
         if (formattedName == "")
           return "object";
         else
@@ -246,10 +290,21 @@ class Naming {
 
   static String escapeFixedWords(String word) {
     var lowerName = word.toLowerCase();
-    if (["event", "object", "delegate", "byte", "fixed", "checked"].any((x) => lowerName == x))
+    if (["event", "object", "delegate", "byte", "fixed", "checked"]
+        .any((x) => lowerName == x))
       return "@" + word;
     else
       return word;
+  }
+
+  static String DefaultClassName(CompilationUnitElement element) {
+    var name = element.library.identifier
+            .replaceAll(".dart", "")
+            .replaceAll(".g", "")
+            .split("/")
+            .last +
+        "DefaultClass";
+    return getFormattedName(name, NameStyle.UpperCamelCase);
   }
 }
 

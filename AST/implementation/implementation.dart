@@ -23,4 +23,9 @@ class Implementation {
     var transpiledBody = rawBody + "throw new NotImplementedException();";  
     return transpiledBody;
   }
+
+   static String FunctionBody(FunctionElement element) {
+    // TODO
+    return "throw new NotImplementedException();";  
+  }
 }
