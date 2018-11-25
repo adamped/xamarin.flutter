@@ -1,8 +1,7 @@
-﻿using FlutterSDK.Animation;
+﻿using FlutterSDK.Animation.Animation;
+using FlutterSDK.Widgets.Navigator;
 using System;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using FlutterSDK.Widgets;
 
 namespace FlutterSDK
 {
@@ -72,10 +71,7 @@ namespace FlutterSDK
 
     public class Timeline
     {
-        //public void timeSync<T>(string label, Action task, _TaskEntry<T> flow)
-        //{
 
-        //}
     }
 
     public class Null // todo
@@ -148,11 +144,14 @@ namespace FlutterSDK
     public class ByteData //TODO
     { }
 
-    public class Future<T> //TODO
+    public class Future : Task
     {
-        // public TickerFuture complete() { return new TickerFuture(); }
+        public Future(Action action) : base(action) { }
+    }
 
-        public Stream<T> asStream() { return new Stream<T>(); }
+    public class Future<T> : Task<T>
+    {
+        public Future(Func<T> func) : base(func) { }
     }
 
     public class HashSet<T> : System.Collections.Generic.HashSet<T>
@@ -165,24 +164,6 @@ namespace FlutterSDK
 
             return h;
         }
-    }
-
-    public class Paint
-    {
-        public Color color { get; set; }
-    }
-
-    public class Canvas
-    {
-        public void drawRRect(RRect rect)
-        {
-
-        }
-    }
-
-    public class RRect
-    {
-
     }
 
     public class Timer
@@ -202,45 +183,6 @@ namespace FlutterSDK
     }
 
 
-    public class ui
-    {
-
-        public class Window
-        {
-            public object onBeginFrame { get; set; }
-            public object onDrawFrame { get; set; }
-        }
-
-        public static Window window { get; set; }
-
-
-        public class Picture
-        {
-
-        }
-
-        public class PictureRecorder //TODO
-        {
-            public Picture endRecording() { return null; }
-        }
-
-        public class PointerData //TODO
-        {
-            public double? physicalX { get; set; }
-            public double? physicalY { get; set; }
-        }
-
-
-        public static double? lerpDouble(num a, num b, double? t)
-        {
-            if (a == null && b == null)
-                return null;
-            a = a ?? 0.0;
-            b = b ?? 0.0;
-            return a + (b - a) * t;
-        }
-    }
-
     public class StringBuffer // Similar to System.Text.StringBuilder
     {
         private string _value = "";
@@ -252,32 +194,6 @@ namespace FlutterSDK
         public string toString()
         {
             return _value;
-        }
-    }
-
-    public static class math
-    {
-        public static double? sin(double? one)
-        {
-            return System.Math.Sin(one.Value);
-        }
-        public static double? cos(double? one)
-        {
-            return System.Math.Cos(one.Value);
-        }
-        public static double? max(double? first, double? second) => Math.Max(first.Value, second.Value);
-        public static double? min(double? first, double? second) => Math.Min(first.Value, second.Value);
-        public static double? sqrt(double? value) => Math.Sqrt(value.Value);
-
-        public static double pi => 3.1415926535897932;
-        public static double e => 2.718281828459045;
-        public static double? pow(double? one, double? two)
-        {
-            return System.Math.Pow(one.Value, two.Value);
-        }
-        public static double? log(double? d)
-        {
-            return System.Math.Log(d.Value);
         }
     }
 
@@ -329,25 +245,58 @@ namespace FlutterSDK
 
     public static class Global
     {
-        public static string runtimeType = "runtimeType";
+        public static bool Identical(object main, object other)
+         => main == other;
 
-        public static string describeIdentity(object something)
+        public static string DescribeIdentity(object obj)
         {
-            return "describeIdentity";
+            return $"{obj.GetType()}#{obj.GetHashCode()}";
         }
 
-        public static void assert(object obj)
+        public static string ShortHash(object obj)
         {
-            // We do nothing at the moment
+            return obj.GetHashCode().ToUnsigned(20).ToRadixString(16).PadLeft(5, '0');
         }
 
-        public static double? toDouble(this int i) => Convert.ToDouble(i);
+        public static int ToUnsigned(this int value, int bits)
+        {
+            return value >> bits;
+        }
 
-        public static double? truncateToDouble(this double? d) => System.Math.Truncate(d.Value);
+        public static string ToRadixString(this int value, int radix)
+        {
+            var digits = "0123456789abcdefghijklmnopqrstuvwxyz";
 
-        public static string toStringAsFixed(this double? d, int value) => d.Value.ToString($"N{value}");
+            radix = Math.Abs(radix);
+            if (radix > digits.Length || radix < 2)
+                throw new ArgumentOutOfRangeException("radix", radix, string.Format("Radix has to be > 2 and < {0}", digits.Length));
 
-        public static double? clamp(this double? d, double? lower, double? upper)
+            string result = string.Empty;
+            int quotient = Math.Abs(value);
+            while (0 < quotient)
+            {
+                int temp = quotient % radix;
+                result = digits[temp] + result;
+                quotient /= radix;
+            }
+            return result;
+        }
+
+        public static double ToDouble(this int i) => Convert.ToDouble(i);
+        public static double ToDouble(this double d) => d;
+
+        public static string Join(this List<string> list, string separator) => string.Join(separator, list.ToArray());
+
+        public static double TruncateToDouble(this double d) => Math.Truncate(d);
+
+        public static string ToStringAsFixed(this double d, int value) => d.ToString($"N{value}");
+
+        public static double InMicroseconds(this TimeSpan timespan)
+        {
+            return timespan.TotalMilliseconds * 1000;
+        }
+
+        public static double Clamp(this double d, double lower, double upper)
         {
             if (d < lower)
                 return lower;
@@ -358,12 +307,12 @@ namespace FlutterSDK
             return d;
         }
 
-        public static bool isFinite(this double? d)
+        public static bool IsFinite(this double d)
         {
-            return !double.IsInfinity(d.Value);
+            return !double.IsInfinity(d);
         }
 
-        public static double? abs(this double? d)
+        public static double Abs(this double d)
         {
             return (double)Math.Abs(Convert.ToDecimal(d));
         }
