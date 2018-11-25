@@ -6,7 +6,6 @@ import 'classes.dart';
 import '../naming.dart';
 import 'delegates.dart';
 import 'functions.dart';
-import 'methods.dart';
 
 class Frame {
   static String printNamespace(

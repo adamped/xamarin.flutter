@@ -1,6 +1,4 @@
 import 'package:analyzer/dart/element/element.dart';
-import 'package:analyzer/dart/element/type.dart';
-
 import '../implementation/implementation.dart';
 import '../comments.dart';
 import '../naming.dart';
@@ -93,7 +91,6 @@ class Methods {
 
     code.write(methodSignature(baseMethod));
 
-    code.writeln("{");
     if (overrideMethod == null) {
       if (element.returnType.displayName != "void") code.write("return ");
       code.writeln(
