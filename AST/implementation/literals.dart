@@ -53,11 +53,15 @@ class Literals {
   static String processSimpleStringLiteral(SimpleStringLiteral literal) {
     var stringValue = literal.toString();
     stringValue = stringValue.substring(1, stringValue.length - 1);
-    return '"${stringValue}"';
+
+    if (stringValue.length == 1 || (stringValue.startsWith('\\') && stringValue.length == 2))
+      return "'$stringValue'";
+    else
+      return '"$stringValue"';
   }
 
   static String processListLiteral(ListLiteral literal) {
-    var csharp = "";
+    var csharp = '';
     for (var entity in literal.childEntities) {
       csharp += Implementation.processEntity(entity);
     }
