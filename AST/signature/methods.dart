@@ -1,6 +1,4 @@
 import 'package:analyzer/dart/element/element.dart';
-import 'package:analyzer/dart/element/type.dart';
-
 import '../implementation/implementation.dart';
 import '../comments.dart';
 import '../naming.dart';
@@ -69,10 +67,8 @@ class Methods {
 
     code.write(methodSignature(baseMethod));
 
-    code.writeln("{");
     code.writeln(Implementation.MethodBody(element));
-    code.writeln("}");
-
+    
     return code.toString();
   }
 
@@ -95,15 +91,13 @@ class Methods {
 
     code.write(methodSignature(baseMethod));
 
-    code.writeln("{");
     if (overrideMethod == null) {
       if (element.returnType.displayName != "void") code.write("return ");
       code.writeln(
-          "${implementedInstanceName}.${name}(${element.parameters.map((p) => Naming.getFormattedName(p.name, NameStyle.LowerCamelCase)).join(",")});");
+          "{${implementedInstanceName}.${name}(${element.parameters.map((p) => Naming.getFormattedName(p.name, NameStyle.LowerCamelCase)).join(",")});}");
     } else {
       code.writeln(Implementation.MethodBody(overrideMethod));
     }
-    code.writeln("}");
 
     return code.toString();
   }

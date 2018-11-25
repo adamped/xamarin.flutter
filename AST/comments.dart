@@ -7,7 +7,7 @@ class Comments {
     if (dartComment == null || dartComment == "") return;
 
     buffer.writeln("/// <Summary>");
-    buffer.writeln(element.documentationComment);
+    buffer.writeln(dartComment);
     buffer.writeln("/// </Summary>");
   }
 }

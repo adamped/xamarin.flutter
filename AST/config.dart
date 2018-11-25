@@ -40,6 +40,8 @@ class Config {
     ..add("System.Net.Http")
     ..add("FlutterBinding.UI")
     ..add("System.Collections.Generic")
+    ..add("System.Linq")
     ..add("FlutterBinding.Engine.Painting")
+    ..add("static FlutterSDK.Global")
     ..add("FlutterBinding.Mapping");
 }
