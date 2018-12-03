@@ -2,6 +2,8 @@ import 'dart:io';
 
 class Config {
 
+  static bool includeImplementations = false;
+
   // Path to the flutter src directory
   static String flutterSourcePath = Directory('..\\flutter\\lib\\src')
       .absolute
@@ -37,6 +39,7 @@ class Config {
   static List<String> defaultImports = new List<String>()
     ..add("System")
     ..add("FlutterSDK")
+    ..add("FlutterSDK.Widgets.Framework")
     ..add("System.Net.Http")
     ..add("FlutterBinding.UI")
     ..add("System.Collections.Generic")

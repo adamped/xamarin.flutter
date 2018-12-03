@@ -27,7 +27,7 @@ class Frame {
     }
     code.writeln("}");
 
-    // Interaces abstract classes
+    // Interfaces abstract classes
     for (var type in element.types.where((t) => t.isAbstract == true)) {
       code.writeln(Classes.printInterface(type));
     }

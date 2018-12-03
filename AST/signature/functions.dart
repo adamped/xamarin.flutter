@@ -24,11 +24,11 @@ class Functions {
             ? NameStyle.LeadingUnderscoreLowerCamelCase
             : NameStyle.UpperCamelCase);
 
-    var parameter = Methods.printParameter(element);
+    var parameter = Methods.printParameter(element, element, null);
     var returnType = Naming.getReturnType(element); 
 
     // TODO This is a workaround
-    if(returnType == "() → dynamic"){
+    if(returnType.contains("() → dynamic")){
       returnType = "object";
     }
     return "${returnType} ${methodName}(${parameter})";

@@ -30,12 +30,15 @@ class Naming {
   }
 
   static String nameWithTypeArguments(
-      ParameterizedType element, bool isInterface) {
-    var name = element.name;
+      ParameterizedType type, bool isInterface) {
+    var name = type.name;
     name = getFormattedName(name, NameStyle.UpperCamelCase);
+    if ( type.name.startsWith("_") && type.element is ClassElement) {
+      name = "Internal" + name;
+    }
     if (isInterface) name = "I" + name;
     var typeArguments = new List<String>();
-    for (var argument in element.typeArguments) {
+    for (var argument in type.typeArguments) {
       typeArguments.add(getDartTypeName(argument));
     }
     if (typeArguments.length > 0) {
@@ -44,11 +47,14 @@ class Naming {
     return name;
   }
 
-  static String interfaceTypeName(InterfaceType element) {
-    var name = element.name;
+  static String interfaceTypeName(InterfaceType type) {
+    var name = type.name;
     name = getFormattedName(name, NameStyle.UpperCamelCase);
+    if ( type.name.startsWith("_") && type.element is ClassElement) {
+      name = "Internal" + name;
+    }
     var typeArguments = new List<String>();
-    for (var argument in element.typeArguments) {
+    for (var argument in type.typeArguments) {
       typeArguments.add(getDartTypeName(argument));
     }
     if (typeArguments.length > 0) {
@@ -61,6 +67,9 @@ class Naming {
       TypeParameterizedElement element, bool isInterface) {
     var name = element.name;
     name = getFormattedName(name, NameStyle.UpperCamelCase);
+    if (element.name.startsWith("_") && element is ClassElement) {
+      name = "Internal" + name;
+    }
     if (isInterface) name = "I" + name;
     var typeArguments = new List<String>();
     for (var argument in element.typeParameters) {
@@ -106,18 +115,30 @@ class Naming {
     }
 
     var formattedName = getFormattedTypeName(returnName);
-    
+
     if (!(returnType is TypeParameterType) && returnType.element != null) {
       var library = returnType.element.library;
       if (library != null &&
-          !Config.ignoredImports.contains(library.identifier) && 
-          !["bool", "double", "object", "void", "string", "T"].contains(formattedName)) {
+          !Config.ignoredImports.contains(library.identifier) &&
+          !["bool", "double", "object", "void", "string", "T"]
+              .contains(formattedName)) {
         var namespace = namespaceFromIdentifier(library.identifier);
         formattedName = namespace + "." + formattedName;
       }
-    } 
+    }
 
     return formattedName;
+  }
+
+  static String className(InterfaceType type) {
+    var baseClass = nameWithTypeArguments(type, false);
+    if (type.element.library != null &&
+        type.element.library.identifier != null &&
+        !Config.ignoredImports.contains(type.element.library.identifier)) {
+      var namespace = namespaceFromIdentifier(type.element.library.identifier);
+      baseClass = "${namespace}.${baseClass}";
+    }
+    return baseClass;
   }
 
   static String tokenToText(Token token, bool backwards) {
@@ -153,7 +174,7 @@ class Naming {
         var namespace = namespaceFromIdentifier(library.identifier);
         formattedName = namespace + "." + formattedName;
       }
-    } 
+    }
 
     return formattedName;
   }
@@ -181,7 +202,8 @@ class Naming {
     }
     var formattedName = getFormattedTypeName(typeName);
     var library = element.type.element.library;
-    if (!( element.type is TypeParameterType) &&  library != null &&
+    if (!(element.type is TypeParameterType) &&
+        library != null &&
         !Config.ignoredImports.contains(library.identifier) &&
         formattedName != "object") {
       var namespace = namespaceFromIdentifier(library.identifier);
@@ -245,22 +267,24 @@ class Naming {
     var formattedName = originalName;
     if (formattedName == null ||
         formattedName.length == 0 ||
-        formattedName == "_" ||
-        formattedName == "-") {
+        formattedName == "_") {
       return "";
+    } else if (formattedName == "-") {
+      formattedName = "subtractOperator";
     } else
       formattedName = formattedName.replaceAll("_", "").replaceAll("-", "");
 
     if (style != NameStyle.LeadingUnderscoreLowerCamelCase) {
       formattedName = escapeFixedWords(formattedName);
     }
+
+    // rename operators
     if (formattedName == "==") formattedName = "equals";
     if (formattedName == "~/") formattedName = "divideIntegerResultOperator";
     if (formattedName == "*") formattedName = "multiplyOperator";
     if (formattedName == "/") formattedName = "divideOperator";
     if (formattedName == "%") formattedName = "moduloOperator";
     if (formattedName == "+") formattedName = "addOperator";
-    if (formattedName == "-") formattedName = "subtractOperator";
     if (formattedName == "[]") formattedName = "indexOfOperator";
     if (formattedName == "[]=") formattedName = "insertAtOperator";
 
