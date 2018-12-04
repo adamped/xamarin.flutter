@@ -2,6 +2,7 @@
 using FlutterSDK.Widgets.Navigator;
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace FlutterSDK
@@ -212,6 +213,17 @@ namespace FlutterSDK
 
     public static class Global
     {
+        public static string Multiply(this string source, int multiplier)
+        {
+            StringBuilder sb = new StringBuilder(multiplier * source.Length);
+            for (int i = 0; i < multiplier; i++)
+            {
+                sb.Append(source);
+            }
+
+            return sb.ToString();
+        }
+
         public static bool Identical(object main, object other)
          => main == other;
 

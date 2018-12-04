@@ -52,6 +52,7 @@ class Literals {
 
   static String processSimpleStringLiteral(SimpleStringLiteral literal) {
     var stringValue = literal.toString();
+    
     stringValue = stringValue.substring(1, stringValue.length - 1);
 
     if (stringValue.length == 1 ||

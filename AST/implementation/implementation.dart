@@ -59,10 +59,7 @@ class Implementation {
     return rawBody + "\n";
   }
 
-  static String processEntity(SyntacticEntity entity) {
-    var t = '';
-    if (entity.toString() == 'length') t = 'length';
-
+  static String processEntity(SyntacticEntity entity) {   
     if (entity is BeginToken) {
       return entity.lexeme;
     } else if (entity is KeywordToken) {
@@ -588,7 +585,7 @@ class Implementation {
       if (entity is StringLiteral)
         csharp += entity.stringValue;
       else if (entity is InterpolationString)
-        csharp += entity.value;
+        csharp += entity.toString();
       else if (entity is InterpolationExpression) {
         var stringValue = '{';
         for (var item in entity.childEntities) {
