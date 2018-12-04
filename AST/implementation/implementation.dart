@@ -59,12 +59,15 @@ class Implementation {
     return rawBody + "\n";
   }
 
-  static String processEntity(SyntacticEntity entity) {   
+  static String processEntity(SyntacticEntity entity) {
+    var t = '';
+    if (entity.toString() == 'length') t = 'length';
+
     if (entity is BeginToken) {
       return entity.lexeme;
     } else if (entity is KeywordToken) {
       return processToken(entity);
-    } else if (entity is SimpleToken) {    
+    } else if (entity is SimpleToken) {
       return entity.lexeme;
     } else if (entity is SimpleIdentifier) {
       return processSimpleIdentifier(entity);
@@ -282,8 +285,11 @@ class Implementation {
   static String processAdjacentString(AdjacentStrings string) {
     var csharp = "";
     for (var entity in string.childEntities) {
-      csharp += processEntity(entity);
+      csharp += processEntity(entity) + ' + ';
     }
+
+    if (csharp.length > 3) csharp = csharp.substring(0, csharp.length - 3);
+
     return csharp;
   }
 
@@ -569,6 +575,9 @@ class Implementation {
     if (name == "isFinite") return "IsFinite()";
     if (name == 'runtimeType') return 'GetType()';
 
+    if (name == 'length' && element.enclosingElement.displayName == 'List')
+      return 'Count';
+
     return Naming.upperCamelCase(name);
   }
 
@@ -681,8 +690,8 @@ class Implementation {
     return transpiledBody;
   }
 
-   static String FunctionBody(FunctionElement element) {
+  static String FunctionBody(FunctionElement element) {
     // TODO
-    return "throw new NotImplementedException();";  
+    return "throw new NotImplementedException();";
   }
 }

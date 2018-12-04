@@ -1,6 +1,7 @@
 ﻿using FlutterSDK.Animation.Animation;
 using FlutterSDK.Widgets.Navigator;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace FlutterSDK
@@ -202,40 +203,6 @@ namespace FlutterSDK
         public void remove(T element) => this.Remove(element);
     }
 
-    public class List<T> : System.Collections.Generic.List<T>
-    {
-        public bool contains(object element)
-        {
-            if (element is T)
-                if (this.Contains((T)element))
-                    return true;
-
-            return false;
-        }
-
-        public bool contains(T element)
-        {
-            if (this.Contains(element))
-                return true;
-
-            return false;
-        }
-
-        public int length()
-        {
-            return this.Count;
-        }
-
-        public List<T> from(List<T> newList)
-        {
-            return newList;
-        }
-
-        public bool isEmpty => this.Count == 0;
-
-        public void add(T element) => this.Add(element);
-    }
-
     public class Iterable<T> : List<T>
     {
     }
@@ -286,7 +253,7 @@ namespace FlutterSDK
         public static double ToDouble(this double d) => d;
 
         public static string Join(this List<string> list, string separator) => string.Join(separator, list.ToArray());
-
+        public static string Join(this List<string> list, char separator) => string.Join(Convert.ToString(separator), list.ToArray());
         public static double TruncateToDouble(this double d) => Math.Truncate(d);
 
         public static string ToStringAsFixed(this double d, int value) => d.ToString($"N{value}");
