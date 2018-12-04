@@ -654,6 +654,9 @@ class Implementation {
     if (name == 'length' && element.enclosingElement.displayName == 'List')
       return 'Count';
 
+    if (name == 'length' && element.enclosingElement.displayName == 'List')
+      return 'Count';
+
     return Naming.upperCamelCase(name);
   }
 
