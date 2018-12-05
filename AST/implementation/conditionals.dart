@@ -53,7 +53,9 @@ class Conditionals {
 
   static String processIfStatement(IfStatement statement) {
     var csharp = "";
-    for (var entity in statement.childEntities) csharp += Implementation.processEntity(entity);
+    // TODO: Detect if IsExpression, then set _castMapping only during BlockImpl
+    for (var entity in statement.childEntities) 
+    csharp += Implementation.processEntity(entity);
     return csharp;
   }
 }

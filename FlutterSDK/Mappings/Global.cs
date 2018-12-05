@@ -82,26 +82,10 @@ namespace FlutterSDK
     public class StackTrace // todo
     { }
 
-    public class num
-    {
-        double value;
-
-        public static implicit operator double(num x)
-        {
-            return x.value;
-        }
-
-        public static implicit operator num(double x)
-        {
-            return new num() { value = x };
-        }
-    }
-
     public class AssertionError : System.Exception
     {
         public AssertionError() { }
-        public AssertionError(string message) { }
-        public string message => this.Message;
+        public AssertionError(string message): base(message) { }
     }
 
     public delegate void VoidCallback();
@@ -118,17 +102,17 @@ namespace FlutterSDK
     {
         public Size(double? height)
         {
-            this.height = height;
+            this.Height = height;
         }
 
         public Size(double? width, double? height)
         {
-            this.width = width;
-            this.height = height;
+            this.Width = width;
+            this.Height = height;
         }
 
-        public double? width { get; set; }
-        public double? height { get; set; }
+        public double? Width { get; set; }
+        public double? Height { get; set; }
     }
 
 
@@ -187,13 +171,17 @@ namespace FlutterSDK
 
     public class StringBuffer // Similar to System.Text.StringBuilder
     {
-        private string _value = "";
-        public void write(string value)
+        string _value = "";
+        public void Write(string value)
         {
             _value += value;
         }
 
-        public string toString()
+        public void Writeln(string value) => _value += value + '\n';
+        public void Writeln(char value) => _value += value + '\n';
+        public void WriteAll(List<string> values, char separator) => _value += values.Join(separator);
+      
+        public override string ToString()
         {
             return _value;
         }
@@ -222,6 +210,11 @@ namespace FlutterSDK
             }
 
             return sb.ToString();
+        }
+
+        public static bool IsEmpty(this string value)
+        {
+            return string.IsNullOrEmpty(value);
         }
 
         public static bool Identical(object main, object other)

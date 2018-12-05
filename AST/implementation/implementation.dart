@@ -59,7 +59,9 @@ class Implementation {
     return rawBody + "\n";
   }
 
-  static String processEntity(SyntacticEntity entity) {   
+  static String processEntity(SyntacticEntity entity) {
+    if (entity.toString() == 'exception') entity.toString();
+
     if (entity is BeginToken) {
       return entity.lexeme;
     } else if (entity is KeywordToken) {
@@ -332,11 +334,28 @@ class Implementation {
     return csharp;
   }
 
+  static Map<String, String> _castMapping = new Map<String, String>();
+
   static String processIsExpression(IsExpression expression) {
-    var csharp = '';
-    for (var entity in expression.childEntities) {
-      csharp += processEntity(entity) + ' ';
-    }
+    var count = expression.childEntities.length;
+    if (count < 3 || count > 4)
+      throw new AssertionError(
+          'Expecting IsExpression to always have 3 or 4 entities');
+
+    _castMapping.putIfAbsent(expression.childEntities.elementAt(0).toString(),
+        () => expression.childEntities.elementAt(count - 1).toString());
+
+    var csharp = processEntity(expression.childEntities.elementAt(0));
+
+    csharp += ' is ';
+
+    csharp += processEntity(expression.childEntities.elementAt(count - 1));
+
+    if (count == 4 && expression.childEntities.elementAt(2).toString() == '!')
+      csharp = '!($csharp)';
+    else if (count == 4)
+      throw new AssertionError('Unknown 4 length IsExpression');
+
     return csharp;
   }
 
@@ -521,7 +540,15 @@ class Implementation {
   }
 
   static String processSimpleIdentifier(SimpleIdentifier identifier) {
-    var csharp = "";
+    var csharp = '';
+
+    // var name = identifier.name;
+
+    //  if (_castMapping.containsKey(name)) {    
+    //     // Casting to correct type, as it may be inside an IsStatement.
+    //       return '((${_castMapping[name]})${Naming.upperCamelCase(name)})';
+    //   }
+
     if (identifier.staticElement is ParameterElement) // e.g. child
     {
       csharp += identifier.name;
@@ -533,10 +560,14 @@ class Implementation {
       csharp += processFunctionElement(identifier.staticElement);
     } else if (identifier.staticElement is LocalVariableElement) {
       csharp += identifier.name;
-    } else if (identifier.staticElement is PropertyAccessorElement) {
-      csharp += processPropertyAccessorElement(identifier.staticElement);
+    } else if (identifier.staticElement is PropertyAccessorElement) {     
+        csharp += processPropertyAccessorElement(identifier.staticElement);
     } else {
-      csharp += Naming.upperCamelCase(identifier.name);
+      var name = identifier.name;
+      if (name == 'runtimeType')
+        csharp += 'GetType()';
+      else
+        csharp += Naming.upperCamelCase(name);
     }
     return csharp;
   }
@@ -571,6 +602,9 @@ class Implementation {
     if (name == "inMicroseconds") return "InMicroseconds()";
     if (name == "isFinite") return "IsFinite()";
     if (name == 'runtimeType') return 'GetType()';
+    if (name == 'single') return 'Single()';
+    if (name == 'last') return 'Last()';
+    if (name == 'isEmpty') return 'IsEmpty()';
 
     if (name == 'length' && element.enclosingElement.displayName == 'List')
       return 'Count';
