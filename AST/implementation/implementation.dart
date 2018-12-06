@@ -2,6 +2,7 @@ import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/syntactic_entity.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:front_end/src/scanner/token.dart';
+import '../config.dart';
 import '../naming.dart';
 import 'loops.dart';
 import 'exceptions.dart';
@@ -11,6 +12,9 @@ import 'conditionals.dart';
 /// Provides methods to transpile the body of elements
 class Implementation {
   static String MethodBody(MethodElement element) {
+    if (!Config.includeImplementations)
+      return "{\nthrow new NotImplementedException();\n}";
+
     var body = element.computeNode().body;
 
     if (body is EmptyFunctionBody) {
@@ -34,6 +38,9 @@ class Implementation {
   }
 
   static String processExpressionFunction(ExpressionFunctionBody body) {
+    if (!Config.includeImplementations)
+      return "\nthrow new NotImplementedException();\n";
+
     var rawBody = "";
     for (var child in body.childEntities) {
       rawBody += processEntity(child);
@@ -42,6 +49,9 @@ class Implementation {
   }
 
   static String processBlockFunction(BlockFunctionBody body) {
+    if (!Config.includeImplementations)
+      return "\nthrow new NotImplementedException();\n";
+
     var rawBody = "\n";
     for (var child in body.childEntities) {
       if (child is Block) {
@@ -57,8 +67,8 @@ class Implementation {
     }
 
     return rawBody + "\n";
-  }
-
+  } 
+  
   static String processCastMap(SyntacticEntity entity) {
     var name = entity.toString();
 
@@ -75,12 +85,15 @@ class Implementation {
   }
 
   static String processEntity(SyntacticEntity entity) {
+    if (!Config.includeImplementations)
+      return "\nthrow new NotImplementedException();\n";
+    
     if (entity.toString() == 'exception') entity.toString();
 
     if (startCastMapping) {
       var castMap = processCastMap(entity);
       if (castMap.isNotEmpty) return castMap;
-    }
+    } 
 
     if (entity is BeginToken) {
       return entity.lexeme;
@@ -696,7 +709,8 @@ class Implementation {
   }
 
   static String processVariableDeclarationStatement(
-      VariableDeclarationStatement statement) {
+      VariableDeclarationStatement statement) { 
+
     var csharp = "";
 
     for (var entity in statement.childEntities) {
@@ -706,7 +720,8 @@ class Implementation {
     return csharp;
   }
 
-  static String processVariableDeclarationList(VariableDeclarationList list) {
+  static String processVariableDeclarationList(VariableDeclarationList list) { 
+
     var csharp = "";
 
     var type = "";
@@ -729,6 +744,9 @@ class Implementation {
   }
 
   static String FieldBody(PropertyAccessorElement element) {
+    if (!Config.includeImplementations)
+      return "\nthrow new NotImplementedException();\n";
+
     var body = element.computeNode();
     var bodyLines = Naming.tokenToText(body.beginToken, false).split("\n");
     var rawBody = bodyLines.map((l) => "${l}\n").join();

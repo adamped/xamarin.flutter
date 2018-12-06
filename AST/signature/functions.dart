@@ -7,6 +7,7 @@ import 'methods.dart';
 class Functions {
   static String printFunction(FunctionElement element) {
     var code = new StringBuffer();
+    code.write("internal static ");
     code.write(methodSignature(element));
 
     code.writeln("{");
@@ -24,11 +25,11 @@ class Functions {
             ? NameStyle.LeadingUnderscoreLowerCamelCase
             : NameStyle.UpperCamelCase);
 
-    var parameter = Methods.printParameter(element);
+    var parameter = Methods.printParameter(element, element, null);
     var returnType = Naming.getReturnType(element); 
 
     // TODO This is a workaround
-    if(returnType == "() → dynamic"){
+    if(returnType.contains("() → dynamic")){
       returnType = "object";
     }
     return "${returnType} ${methodName}(${parameter})";
