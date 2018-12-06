@@ -53,7 +53,18 @@ class Conditionals {
 
   static String processIfStatement(IfStatement statement) {
     var csharp = "";
-    for (var entity in statement.childEntities) csharp += Implementation.processEntity(entity);
+
+    for (var entity in statement.childEntities) {
+      if (entity is Block) Implementation.startCastMapping = true;
+
+      csharp += Implementation.processEntity(entity);
+
+      // Clear cast mapping after BlockImpl - TODO: Could backfire if embedded if statements
+      if (entity is Block) {
+        Implementation.castMapping.clear();
+        Implementation.startCastMapping = false;
+      }
+    }
     return csharp;
   }
 }

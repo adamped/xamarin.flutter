@@ -67,11 +67,33 @@ class Implementation {
     }
 
     return rawBody + "\n";
+  } 
+  
+  static String processCastMap(SyntacticEntity entity) {
+    var name = entity.toString();
+
+    if (castMapping.containsKey(name)) {
+      startCastMapping = false;
+      // Casting to correct type, as it is inside an IsStatement.
+      var result =
+          '((${Naming.upperCamelCase(castMapping[name])})${processEntity(entity)})';
+      startCastMapping = true;
+      return result;
+    }
+
+    return '';
   }
 
   static String processEntity(SyntacticEntity entity) {
     if (!Config.includeImplementations)
       return "\nthrow new NotImplementedException();\n";
+    
+    if (entity.toString() == 'exception') entity.toString();
+
+    if (startCastMapping) {
+      var castMap = processCastMap(entity);
+      if (castMap.isNotEmpty) return castMap;
+    } 
 
     if (entity is BeginToken) {
       return entity.lexeme;
@@ -295,8 +317,11 @@ class Implementation {
   static String processAdjacentString(AdjacentStrings string) {
     var csharp = "";
     for (var entity in string.childEntities) {
-      csharp += processEntity(entity);
+      csharp += processEntity(entity) + ' + ';
     }
+
+    if (csharp.length > 3) csharp = csharp.substring(0, csharp.length - 3);
+
     return csharp;
   }
 
@@ -342,11 +367,28 @@ class Implementation {
     return csharp;
   }
 
+  static Map<String, String> castMapping = new Map<String, String>();
+  static bool startCastMapping = false;
   static String processIsExpression(IsExpression expression) {
-    var csharp = '';
-    for (var entity in expression.childEntities) {
-      csharp += processEntity(entity) + ' ';
-    }
+    var count = expression.childEntities.length;
+    if (count < 3 || count > 4)
+      throw new AssertionError(
+          'Expecting IsExpression to always have 3 or 4 entities');
+
+    castMapping.putIfAbsent(expression.childEntities.elementAt(0).toString(),
+        () => expression.childEntities.elementAt(count - 1).toString());
+
+    var csharp = processEntity(expression.childEntities.elementAt(0));
+
+    csharp += ' is ';
+
+    csharp += processEntity(expression.childEntities.elementAt(count - 1));
+
+    if (count == 4 && expression.childEntities.elementAt(2).toString() == '!')
+      csharp = '!($csharp)';
+    else if (count == 4)
+      throw new AssertionError('Unknown 4 length IsExpression');
+
     return csharp;
   }
 
@@ -531,7 +573,12 @@ class Implementation {
   }
 
   static String processSimpleIdentifier(SimpleIdentifier identifier) {
-    var csharp = "";
+    var csharp = '';
+
+    // Map reserved keywords
+    if (identifier.name == 'event') return '@event';
+
+
     if (identifier.staticElement is ParameterElement) // e.g. child
     {
       csharp += identifier.name;
@@ -546,7 +593,11 @@ class Implementation {
     } else if (identifier.staticElement is PropertyAccessorElement) {
       csharp += processPropertyAccessorElement(identifier.staticElement);
     } else {
-      csharp += Naming.upperCamelCase(identifier.name);
+      var name = identifier.name;
+      if (name == 'runtimeType')
+        csharp += 'GetType()';
+      else
+        csharp += Naming.upperCamelCase(name);
     }
     return csharp;
   }
@@ -581,6 +632,12 @@ class Implementation {
     if (name == "inMicroseconds") return "InMicroseconds()";
     if (name == "isFinite") return "IsFinite()";
     if (name == 'runtimeType') return 'GetType()';
+    if (name == 'single') return 'Single()';
+    if (name == 'last') return 'Last()';
+    if (name == 'isEmpty') return 'IsEmpty()';
+
+    if (name == 'length' && element.enclosingElement.displayName == 'List')
+      return 'Count';
 
     return Naming.upperCamelCase(name);
   }
@@ -592,7 +649,7 @@ class Implementation {
       if (entity is StringLiteral)
         csharp += entity.stringValue;
       else if (entity is InterpolationString)
-        csharp += entity.value;
+        csharp += entity.toString();
       else if (entity is InterpolationExpression) {
         var stringValue = '{';
         for (var item in entity.childEntities) {

@@ -8,8 +8,8 @@ namespace FlutterBinding.Mapping
     {
         public enum Endian
         {
-            big,
-            little
+            Big,
+            Little
         }
         
         public class Duration
