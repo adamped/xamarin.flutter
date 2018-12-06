@@ -66,8 +66,8 @@ class Implementation {
     }
 
     return rawBody + "\n";
-  }
-
+  } 
+  
   static String processCastMap(SyntacticEntity entity) {
     var name = entity.toString();
 
@@ -92,7 +92,7 @@ class Implementation {
     if (startCastMapping) {
       var castMap = processCastMap(entity);
       if (castMap.isNotEmpty) return castMap;
-    }
+    } 
 
     if (entity is BeginToken) {
       return entity.lexeme;
@@ -727,7 +727,8 @@ class Implementation {
   }
 
   static String processVariableDeclarationStatement(
-      VariableDeclarationStatement statement) {
+      VariableDeclarationStatement statement) { 
+
     var csharp = "";
 
     for (var entity in statement.childEntities) {
@@ -737,7 +738,8 @@ class Implementation {
     return csharp;
   }
 
-  static String processVariableDeclarationList(VariableDeclarationList list) {
+  static String processVariableDeclarationList(VariableDeclarationList list) { 
+
     var csharp = "";
 
     var type = "";
