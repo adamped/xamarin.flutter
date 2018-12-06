@@ -605,8 +605,8 @@ class Implementation {
       csharp += processFunctionElement(identifier.staticElement);
     } else if (identifier.staticElement is LocalVariableElement) {
       csharp += identifier.name;
-    } else if (identifier.staticElement is PropertyAccessorElement) {     
-        csharp += processPropertyAccessorElement(identifier.staticElement);
+    } else if (identifier.staticElement is PropertyAccessorElement) {
+      csharp += processPropertyAccessorElement(identifier.staticElement);
     } else {
       var name = identifier.name;
       if (name == 'runtimeType')
