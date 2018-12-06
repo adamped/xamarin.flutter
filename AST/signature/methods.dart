@@ -81,6 +81,7 @@ class Methods {
 
   static String printImplementedMethod(
       MethodElement element,
+      String implementationInstanceName,
       InterfaceType implementedClass,
       MethodElement overrideMethod,
       ClassElement classElement) {
@@ -102,7 +103,7 @@ class Methods {
       code.write("{");
       if (baseMethod.returnType.displayName != "void") code.write("return ");
       code.writeln(
-          "${implementedClass.name}.${name}(${baseMethod.parameters.map((p) => Naming.getFormattedName(p.name, NameStyle.LowerCamelCase)).join(",")});}");
+          "${implementationInstanceName}.${name}(${baseMethod.parameters.map((p) => Naming.getFormattedName(p.name, NameStyle.LowerCamelCase)).join(",")});}");
     } else {
       code.writeln(Implementation.MethodBody(overrideMethod));
     }
@@ -138,42 +139,14 @@ class Methods {
 
     // Check if the method has a generic return value
     if (element.returnType.element is TypeParameterElement) {
-      returnType = Naming.getDartTypeName(overridenElement.returnType);
-      /*
-      // Check if the generic type comes from an implemented class
-      if (implementedClass != null &&
-          implementedClass.typeParameters
-              .any((tp) => tp.type == element.type)) {
-        // Substitute the type with the type that was used when implementing the implemented class
-        var typeParameter = implementedClass.typeParameters
-            .firstWhere((tp) => tp.type == element.type);
-        var type = implementedClass.typeArguments[
-            implementedClass.typeParameters.indexOf(typeParameter)];
-        returnType = Naming.getDartTypeName(type);*/
-
-    } /*
-    else {
-      // Otherwise only this method knows the generic type
-      var classHasTypeParameter =
-          element.enclosingElement.typeParameters.any((x) => x == returnType);
-      if (!classHasTypeParameter && element.typeParameters.length == 0) {
-        typeParameter = "<" + returnType + ">";
-      }
-    }*/
+      returnType = Naming.getDartTypeName(overridenElement.returnType); 
+    }  
 
     return "${returnType} ${methodName}${typeParameter}(${parameter})";
   }
 
   static String printParameter(FunctionTypedElement element,
-      FunctionTypedElement overridenElement, InterfaceType implementedClass) {
-    /*if (implementedClass == null &&
-        !(element.enclosingElement is CompilationUnitElement)) {
-      var _class = element.enclosingElement as ClassElement;
-      implementedClass = _class.allSupertypes.firstWhere(
-          (superClass) => superClass.methods
-              .any((method) => method.displayName == element.displayName),
-          orElse: () => null);
-    }*/
+      FunctionTypedElement overridenElement, InterfaceType implementedClass) { 
 
     // Parameter
     var parameters = element.parameters.map((p) {
@@ -185,25 +158,7 @@ class Methods {
 
       // Type
       var parameterType =
-          Naming.getVariableType(p, VariableType.Parameter).split(" ").last;
-/*
-      if (p.type.element is TypeParameterElement && implementedClass != null) {
-        var genericParameter = p.type.element as TypeParameterElement;
-        // Check if the parameter is generic
-        if (genericParameter != null) {
-          // Check if the generic type comes from an implemented class
-
-          // Substitute the type with the type that was used when implementing the implemented class
-          var typeParameter = implementedClass.typeParameters.firstWhere(
-              (tp) => tp.displayName == p.type.displayName,
-              orElse: () => null);
-          if (typeParameter != null) {
-            var type = implementedClass.typeArguments[
-                implementedClass.typeParameters.indexOf(typeParameter)];
-            parameterType = Naming.getDartTypeName(type);
-          }
-        }
-      }*/
+          Naming.getVariableType(p, VariableType.Parameter).split(" ").last; 
 
       if (p.type.element is TypeParameterElement) {
         var actualParameterSignature =

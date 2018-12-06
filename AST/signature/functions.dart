@@ -7,6 +7,7 @@ import 'methods.dart';
 class Functions {
   static String printFunction(FunctionElement element) {
     var code = new StringBuffer();
+    code.write("internal static ");
     code.write(methodSignature(element));
 
     code.writeln("{");

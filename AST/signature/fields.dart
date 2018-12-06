@@ -19,7 +19,8 @@ class Fields {
         element.enclosingElement.allSupertypes.length == 0) return element;
 
     FieldElement fieldInSupertype;
-    for (var supertype in element.enclosingElement.allSupertypes
+    for (var supertype in (element.enclosingElement.allSupertypes
+          ..addAll(element.enclosingElement.superclassConstraints))
         .where((st) => st is ClassElement)
         .cast<ClassElement>()
         .where((st) => st.fields.length > 0)) {
@@ -109,7 +110,8 @@ class Fields {
       InterfaceType implementedClass,
       String implementedFieldName) {
     var code = new StringBuffer();
-    var elementForSignature = getBaseFieldInClass(element);
+    var elementForSignature =
+        overridingElement != null ? overridingElement : element;
 
     if (elementForSignature.hasProtected == true) code.write("protected ");
     if (elementForSignature.isPublic == true) code.write("public ");

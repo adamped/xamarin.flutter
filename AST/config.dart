@@ -44,6 +44,8 @@ class Config {
     ..add("FlutterBinding.UI")
     ..add("System.Collections.Generic")
     ..add("System.Linq")
+    ..add("System.Diagnostics")
+    ..add("SkiaSharp")
     ..add("FlutterBinding.Engine.Painting")
     ..add("static FlutterSDK.Global")
     ..add("FlutterBinding.Mapping");

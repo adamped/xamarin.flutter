@@ -21,7 +21,7 @@ class Frame {
 
     // Add methods that are not inside a class in dart to a default class in c#
     var defaultClassName = Naming.DefaultClassName(element);
-    code.writeln("internal class ${defaultClassName}{");
+    code.writeln("internal static class ${defaultClassName}{");
     for (var function in element.functions) {
       code.writeln(Functions.printFunction(function));
     }
@@ -104,6 +104,8 @@ class Frame {
 
   static String printEnum(ClassElement element) {
     var name = Naming.getFormattedTypeName(element.name);
+    if(element.name.startsWith("_"))
+      name = "Internal" + name;
 
     var code = new StringBuffer();
     code.writeln("");
