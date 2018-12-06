@@ -59,8 +59,28 @@ class Implementation {
     return rawBody + "\n";
   }
 
+  static String processCastMap(SyntacticEntity entity) {
+    var name = entity.toString();
+
+    if (castMapping.containsKey(name)) {
+      startCastMapping = false;
+      // Casting to correct type, as it is inside an IsStatement.
+      var result =
+          '((${Naming.upperCamelCase(castMapping[name])})${processEntity(entity)})';
+      startCastMapping = true;
+      return result;
+    }
+
+    return '';
+  }
+
   static String processEntity(SyntacticEntity entity) {
     if (entity.toString() == 'exception') entity.toString();
+
+    if (startCastMapping) {
+      var castMap = processCastMap(entity);
+      if (castMap.isNotEmpty) return castMap;
+    }
 
     if (entity is BeginToken) {
       return entity.lexeme;
@@ -334,15 +354,15 @@ class Implementation {
     return csharp;
   }
 
-  static Map<String, String> _castMapping = new Map<String, String>();
-
+  static Map<String, String> castMapping = new Map<String, String>();
+  static bool startCastMapping = false;
   static String processIsExpression(IsExpression expression) {
     var count = expression.childEntities.length;
     if (count < 3 || count > 4)
       throw new AssertionError(
           'Expecting IsExpression to always have 3 or 4 entities');
 
-    _castMapping.putIfAbsent(expression.childEntities.elementAt(0).toString(),
+    castMapping.putIfAbsent(expression.childEntities.elementAt(0).toString(),
         () => expression.childEntities.elementAt(count - 1).toString());
 
     var csharp = processEntity(expression.childEntities.elementAt(0));
@@ -542,12 +562,9 @@ class Implementation {
   static String processSimpleIdentifier(SimpleIdentifier identifier) {
     var csharp = '';
 
-    // var name = identifier.name;
+    // Map reserved keywords
+    if (identifier.name == 'event') return '@event';
 
-    //  if (_castMapping.containsKey(name)) {    
-    //     // Casting to correct type, as it may be inside an IsStatement.
-    //       return '((${_castMapping[name]})${Naming.upperCamelCase(name)})';
-    //   }
 
     if (identifier.staticElement is ParameterElement) // e.g. child
     {
@@ -560,8 +577,8 @@ class Implementation {
       csharp += processFunctionElement(identifier.staticElement);
     } else if (identifier.staticElement is LocalVariableElement) {
       csharp += identifier.name;
-    } else if (identifier.staticElement is PropertyAccessorElement) {     
-        csharp += processPropertyAccessorElement(identifier.staticElement);
+    } else if (identifier.staticElement is PropertyAccessorElement) {
+      csharp += processPropertyAccessorElement(identifier.staticElement);
     } else {
       var name = identifier.name;
       if (name == 'runtimeType')

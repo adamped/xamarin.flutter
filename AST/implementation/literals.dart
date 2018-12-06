@@ -35,7 +35,7 @@ class Literals {
   }
 
   static String processMapLiteral(MapLiteral literal) {
-    var csharp = "";
+    var csharp = "new Dictionary";
     for (var entity in literal.childEntities) {
       csharp += Implementation.processEntity(entity);
     }
@@ -45,14 +45,17 @@ class Literals {
   static String processMapLiteralEntry(MapLiteralEntry entry) {
     var csharp = "";
     for (var entity in entry.childEntities) {
-      csharp += Implementation.processEntity(entity);
+      if (entity.toString() == ':')
+        csharp += ', ';
+      else
+        csharp += Implementation.processEntity(entity);
     }
-    return csharp;
+    return '{' + csharp + '}';
   }
 
   static String processSimpleStringLiteral(SimpleStringLiteral literal) {
     var stringValue = literal.toString();
-    
+
     stringValue = stringValue.substring(1, stringValue.length - 1);
 
     if (stringValue.length == 1 ||
@@ -68,16 +71,13 @@ class Literals {
     for (var entity in literal.childEntities) {
       if (entity.toString() == '[')
         csharp += '{';
-      else if (entity.toString() == ']')
-      {
+      else if (entity.toString() == ']') {
         var length = args == true ? 2 : 0;
         csharp = csharp.substring(0, csharp.length - length) + '}';
-      }
-      else if (entity is SimpleStringLiteral) {
+      } else if (entity is SimpleStringLiteral) {
         csharp += Implementation.processEntity(entity) + ', ';
         args = true;
-      }
-      else
+      } else
         csharp += Implementation.processEntity(entity);
 
       if (entity is TypeArgumentList) csharp += '()';

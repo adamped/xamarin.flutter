@@ -79,7 +79,7 @@ namespace FlutterSDK
     public class Null // todo
     { }
 
-    public class StackTrace // todo
+    public class StackTrace // This is really just a string equivalent in .NET land
     { }
 
     public class AssertionError : System.Exception
@@ -198,6 +198,8 @@ namespace FlutterSDK
 
     public class Iterator<T> : Iterable<T>
     { }
+
+    public class Error : Exception { }
 
     public static class Global
     {
