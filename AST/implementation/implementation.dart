@@ -67,8 +67,8 @@ class Implementation {
     }
 
     return rawBody + "\n";
-  } 
-  
+  }
+
   static String processCastMap(SyntacticEntity entity) {
     var name = entity.toString();
 
@@ -87,13 +87,13 @@ class Implementation {
   static String processEntity(SyntacticEntity entity) {
     if (!Config.includeImplementations)
       return "\nthrow new NotImplementedException();\n";
-    
+
     if (entity.toString() == 'exception') entity.toString();
 
     if (startCastMapping) {
       var castMap = processCastMap(entity);
       if (castMap.isNotEmpty) return castMap;
-    } 
+    }
 
     if (entity is BeginToken) {
       return entity.lexeme;
@@ -558,8 +558,17 @@ class Implementation {
     var csharp = "";
 
     if (invocation.isCascaded) {
-      csharp +=
-          processEntity(invocation.parent.childEntities.toList()[0]) + '.';
+      var parentEntity = invocation.parent.childEntities.toList()[0];
+
+      String processedEntity = '';
+      if (invocation.parent?.parent is VariableDeclaration)
+        processedEntity =
+            processEntity(invocation.parent.parent.childEntities.toList()[0]);
+      else
+        processedEntity = processEntity(parentEntity);
+
+      csharp += ';\n' + processedEntity + '.';
+
       for (var entity in invocation.childEntities) {
         if (entity.toString() != '..') csharp += processEntity(entity);
       }
@@ -567,6 +576,9 @@ class Implementation {
       for (var entity in invocation.childEntities) {
         csharp += processEntity(entity);
       }
+
+      // Change all Split's to return a List instead of array
+      if (invocation.methodName.name == 'split') csharp += '.ToList()';
     }
 
     return csharp;
@@ -575,9 +587,13 @@ class Implementation {
   static String processSimpleIdentifier(SimpleIdentifier identifier) {
     var csharp = '';
 
+    // If the identifier is actually a type.
+    if (identifier.parent is TypeName)
+      return Naming.getFormattedTypeName(identifier.name);
+
     // Map reserved keywords
     if (identifier.name == 'event') return '@event';
-
+    if (identifier.name == 'byte') return '@byte';
 
     if (identifier.staticElement is ParameterElement) // e.g. child
     {
@@ -709,8 +725,7 @@ class Implementation {
   }
 
   static String processVariableDeclarationStatement(
-      VariableDeclarationStatement statement) { 
-
+      VariableDeclarationStatement statement) {
     var csharp = "";
 
     for (var entity in statement.childEntities) {
@@ -720,8 +735,7 @@ class Implementation {
     return csharp;
   }
 
-  static String processVariableDeclarationList(VariableDeclarationList list) { 
-
+  static String processVariableDeclarationList(VariableDeclarationList list) {
     var csharp = "";
 
     var type = "";
@@ -740,19 +754,22 @@ class Implementation {
   }
 
   static String processTypeName(TypeName name) {
-    return Naming.getFormattedTypeName(name.toString());
+    var csharp = '';
+    for (var entity in name.childEntities) csharp += processEntity(entity);
+    return csharp;
   }
 
   static String FieldBody(PropertyAccessorElement element) {
     if (!Config.includeImplementations)
       return "\nthrow new NotImplementedException();\n";
 
+    // TODO: this is all messed up anyway
     var body = element.computeNode();
     var bodyLines = Naming.tokenToText(body.beginToken, false).split("\n");
     var rawBody = bodyLines.map((l) => "${l}\n").join();
 
     // Transpile logic comes here
-    var transpiledBody = rawBody + "throw new NotImplementedException();";
+    var transpiledBody = "throw new NotImplementedException();";
     return transpiledBody;
   }
 

@@ -33,7 +33,7 @@ class Naming {
       ParameterizedType type, bool isInterface) {
     var name = type.name;
     name = getFormattedName(name, NameStyle.UpperCamelCase);
-    if ( type.name.startsWith("_") && type.element is ClassElement) {
+    if (type.name.startsWith("_") && type.element is ClassElement) {
       name = "Internal" + name;
     }
     if (isInterface) name = "I" + name;
@@ -50,7 +50,7 @@ class Naming {
   static String interfaceTypeName(InterfaceType type) {
     var name = type.name;
     name = getFormattedName(name, NameStyle.UpperCamelCase);
-    if ( type.name.startsWith("_") && type.element is ClassElement) {
+    if (type.name.startsWith("_") && type.element is ClassElement) {
       name = "Internal" + name;
     }
     var typeArguments = new List<String>();
@@ -224,8 +224,8 @@ class Naming {
 
   static String getFormattedTypeName(String typeName) {
     var formattedName = typeName;
-    if (formattedName.startsWith("ui."))
-      formattedName = formattedName.replaceAll("ui.", "");
+    if (formattedName.toLowerCase().startsWith("ui."))
+      formattedName = formattedName.substring(3, formattedName.length - 3);
 
     if (formattedName.startsWith("Set"))
       formattedName = formattedName.replaceAll("Set", "HashSet");
@@ -253,6 +253,8 @@ class Naming {
       case "future<void>":
       case "future<null>":
         return "Future";
+      case "iterable":
+        return "List";
       default:
         formattedName =
             getFormattedName(formattedName, NameStyle.UpperCamelCase);

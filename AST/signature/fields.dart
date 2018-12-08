@@ -79,7 +79,7 @@ class Fields {
 
     if (hasGetter || hasSetter) {
       code.write("{");
-// getter
+      // getter
       if (hasGetter) {
         var getterNode = element.getter.computeNode();
         if (getterNode == null)

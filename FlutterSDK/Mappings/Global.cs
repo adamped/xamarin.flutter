@@ -2,6 +2,7 @@
 using FlutterSDK.Widgets.Navigator;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -142,7 +143,7 @@ namespace FlutterSDK
 
     public class HashSet<T> : System.Collections.Generic.HashSet<T>
     {
-        public HashSet<T> from(List<T> newList)
+        public HashSet<T> From(List<T> newList)
         {
             var h = new HashSet<T>();
             foreach (var item in newList)
@@ -203,6 +204,7 @@ namespace FlutterSDK
 
     public static class Global
     {
+
         public static string Multiply(this string source, int multiplier)
         {
             StringBuilder sb = new StringBuilder(multiplier * source.Length);
