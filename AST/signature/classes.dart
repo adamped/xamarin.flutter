@@ -56,12 +56,39 @@ class Classes {
 
     if (inheritions.length > 0) code.write(" : " + inheritions.join(","));
 
-    code.writeln("{\n");
+    code.writeln("\n{");
 
+    code.writeln("#region constructors");
+    // Add constructors
+    for (var constructor in element.constructors) {
+      printConstructor(code, constructor);
+    }
+    code.writeln("#endregion\n");
+
+    // Add fields and methods
     printFieldsAndMethods(code, element, implementWithInterface);
 
     code.writeln("}");
     return code.toString();
+  }
+
+  static void printConstructor(
+      StringBuffer code, ConstructorElement constructor) {
+    if (!constructor.isDefaultConstructor) {
+      var parameters = Methods.printParameter(constructor, null, null);
+      if (constructor.enclosingElement is ClassElement) {
+        if (constructor.name == '')
+          code.writeln('public ${constructor.enclosingElement.name}($parameters) {');
+        else if (constructor.name == '_')
+          code.writeln('private ${constructor.enclosingElement.name}($parameters) {');
+        else // I'm named, hence we are turing into static methods that return an instance
+          code.writeln(
+              'public static ${constructor.enclosingElement.name} ${Naming.upperCamelCase(constructor.name)}($parameters) {');
+        code.writeln('}');
+      } else
+        throw new AssertionError(
+            'A constructor is not inside a ClassElement, that should not happen.');
+    }
   }
 
   static void printFieldsAndMethods(

@@ -160,7 +160,7 @@ class Methods {
       var parameterType =
           Naming.getVariableType(p, VariableType.Parameter).split(" ").last; 
 
-      if (p.type.element is TypeParameterElement) {
+      if (p.type.element is TypeParameterElement && overridenElement != null) {
         var actualParameterSignature =
             overridenElement.parameters[element.parameters.indexWhere((x) => x.name == p.name)];
         parameterType = Naming.getVariableType(
