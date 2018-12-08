@@ -85,7 +85,7 @@ class Fields {
         if (getterNode == null)
           code.write("get;");
         else {
-          code.write("get {${Implementation.FieldBody(element.getter)}}");
+          code.write("get {${Implementation.fieldBody(element.getter)}}");
         }
       }
       // setter
@@ -94,7 +94,7 @@ class Fields {
         if (setterNode == null)
           code.write("set;");
         else {
-          code.write("set {${Implementation.FieldBody(element.setter)}}");
+          code.write("set {${Implementation.fieldBody(element.setter)}}");
         }
       }
       code.write("}");

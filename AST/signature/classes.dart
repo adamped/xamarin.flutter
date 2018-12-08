@@ -5,6 +5,7 @@ import '../comments.dart';
 import '../naming.dart';
 import 'fields.dart';
 import 'methods.dart';
+import '../implementation/implementation.dart';
 
 class Classes {
   static String printClass(ClassElement element) {
@@ -78,13 +79,16 @@ class Classes {
       var parameters = Methods.printParameter(constructor, null, null);
       if (constructor.enclosingElement is ClassElement) {
         if (constructor.name == '')
-          code.writeln('public ${constructor.enclosingElement.name}($parameters) {');
+          code.writeln('public ${constructor.enclosingElement.name}($parameters)');
         else if (constructor.name == '_')
-          code.writeln('private ${constructor.enclosingElement.name}($parameters) {');
+          code.writeln('private ${constructor.enclosingElement.name}($parameters)');
         else // I'm named, hence we are turing into static methods that return an instance
           code.writeln(
-              'public static ${constructor.enclosingElement.name} ${Naming.upperCamelCase(constructor.name)}($parameters) {');
-        code.writeln('}');
+              'public static ${constructor.enclosingElement.name} ${Naming.upperCamelCase(constructor.name)}($parameters)');
+
+        // Fill out Constructor body
+        code.writeln(Implementation.MethodBody(constructor.computeNode().body));
+
       } else
         throw new AssertionError(
             'A constructor is not inside a ClassElement, that should not happen.');

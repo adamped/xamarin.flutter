@@ -1,3 +1,4 @@
+import 'package:analyzer/analyzer.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/syntactic_entity.dart';
 import 'package:analyzer/dart/element/element.dart';
@@ -11,11 +12,9 @@ import 'conditionals.dart';
 
 /// Provides methods to transpile the body of elements
 class Implementation {
-  static String MethodBody(MethodElement element) {
+  static String MethodBody(FunctionBody body) {
     if (!Config.includeImplementations)
       return "{\nthrow new NotImplementedException();\n}";
-
-    var body = element.computeNode().body;
 
     if (body is EmptyFunctionBody) {
       var parent = body.parent;
@@ -33,7 +32,7 @@ class Implementation {
       // Nothing comes here, so I have implemented all for now.
       // But this is here in case something in the future appears
       // and needs to be accounted for.
-      return "\nthrow new NotImplementedException();\n";
+      throw new AssertionError('Function block is not defined');
     }
   }
 
@@ -759,7 +758,7 @@ class Implementation {
     return csharp;
   }
 
-  static String FieldBody(PropertyAccessorElement element) {
+  static String fieldBody(PropertyAccessorElement element) {
     if (!Config.includeImplementations)
       return "\nthrow new NotImplementedException();\n";
 
@@ -773,7 +772,7 @@ class Implementation {
     return transpiledBody;
   }
 
-  static String FunctionBody(FunctionElement element) {
+  static String functionBody(FunctionElement element) {
     // TODO
     return "throw new NotImplementedException();";
   }

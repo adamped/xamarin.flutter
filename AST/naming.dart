@@ -33,9 +33,12 @@ class Naming {
       ParameterizedType type, bool isInterface) {
     var name = type.name;
     name = getFormattedName(name, NameStyle.UpperCamelCase);
-    if (type.name.startsWith("_") && type.element is ClassElement) {
-      name = "Internal" + name;
-    }
+
+    // Can't do this, because then constructors and method bodies all have issues.
+    // if (type.name.startsWith("_") && type.element is ClassElement) {
+    //   name = "Internal" + name;
+    // }
+
     if (isInterface) name = "I" + name;
     var typeArguments = new List<String>();
     for (var argument in type.typeArguments) {
@@ -50,9 +53,10 @@ class Naming {
   static String interfaceTypeName(InterfaceType type) {
     var name = type.name;
     name = getFormattedName(name, NameStyle.UpperCamelCase);
-    if (type.name.startsWith("_") && type.element is ClassElement) {
-      name = "Internal" + name;
-    }
+    // Can't do this, because then constructors and method bodies all have issues.
+    // if (type.name.startsWith("_") && type.element is ClassElement) {
+    //   name = "Internal" + name;
+    // }
     var typeArguments = new List<String>();
     for (var argument in type.typeArguments) {
       typeArguments.add(getDartTypeName(argument));
@@ -67,9 +71,10 @@ class Naming {
       TypeParameterizedElement element, bool isInterface) {
     var name = element.name;
     name = getFormattedName(name, NameStyle.UpperCamelCase);
-    if (element.name.startsWith("_") && element is ClassElement) {
-      name = "Internal" + name;
-    }
+    // Can't do this, because then constructors and method bodies all have issues.
+    // if (type.name.startsWith("_") && type.element is ClassElement) {
+    //   name = "Internal" + name;
+    // }
     if (isInterface) name = "I" + name;
     var typeArguments = new List<String>();
     for (var argument in element.typeParameters) {

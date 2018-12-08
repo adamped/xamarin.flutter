@@ -12,7 +12,7 @@ class Functions {
     code.write(methodSignature(element));
 
     code.writeln("{");
-    code.writeln(Implementation.FunctionBody(element));
+    code.writeln(Implementation.functionBody(element));
     code.writeln("}");
 
     return code.toString();

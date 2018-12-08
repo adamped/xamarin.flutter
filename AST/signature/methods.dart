@@ -74,7 +74,7 @@ class Methods {
       code.write("virtual ");
 
     code.write(methodSignature(baseMethod, element, null));
-    code.writeln(Implementation.MethodBody(element));
+    code.writeln(Implementation.MethodBody(element.computeNode().body));
 
     return code.toString();
   }
@@ -105,7 +105,7 @@ class Methods {
       code.writeln(
           "${implementationInstanceName}.${name}(${baseMethod.parameters.map((p) => Naming.getFormattedName(p.name, NameStyle.LowerCamelCase)).join(",")});}");
     } else {
-      code.writeln(Implementation.MethodBody(overrideMethod));
+      code.writeln(Implementation.MethodBody(overrideMethod.computeNode().body));
     }
 
     return code.toString();
