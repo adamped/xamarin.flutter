@@ -247,7 +247,7 @@ namespace FlutterBinding.Engine.Text
             return null;
         }
 
-        protected Paragraph Build()
+        public Paragraph Build()
         {
             return new Paragraph() { Text = _text };
         }

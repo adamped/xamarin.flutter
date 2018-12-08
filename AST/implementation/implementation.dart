@@ -1,7 +1,9 @@
+import 'package:analyzer/analyzer.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/syntactic_entity.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:front_end/src/scanner/token.dart';
+import '../config.dart';
 import '../naming.dart';
 import 'loops.dart';
 import 'exceptions.dart';
@@ -10,8 +12,9 @@ import 'conditionals.dart';
 
 /// Provides methods to transpile the body of elements
 class Implementation {
-  static String MethodBody(MethodElement element) {
-    var body = element.computeNode().body;
+  static String MethodBody(FunctionBody body) {
+    if (!Config.includeImplementations)
+      return "{\nthrow new NotImplementedException();\n}";
 
     if (body is EmptyFunctionBody) {
       var parent = body.parent;
@@ -29,11 +32,14 @@ class Implementation {
       // Nothing comes here, so I have implemented all for now.
       // But this is here in case something in the future appears
       // and needs to be accounted for.
-      return "\nthrow new NotImplementedException();\n";
+      throw new AssertionError('Function block is not defined');
     }
   }
 
   static String processExpressionFunction(ExpressionFunctionBody body) {
+    if (!Config.includeImplementations)
+      return "\nthrow new NotImplementedException();\n";
+
     var rawBody = "";
     for (var child in body.childEntities) {
       rawBody += processEntity(child);
@@ -42,6 +48,9 @@ class Implementation {
   }
 
   static String processBlockFunction(BlockFunctionBody body) {
+    if (!Config.includeImplementations)
+      return "\nthrow new NotImplementedException();\n";
+
     var rawBody = "\n";
     for (var child in body.childEntities) {
       if (child is Block) {
@@ -59,12 +68,37 @@ class Implementation {
     return rawBody + "\n";
   }
 
-  static String processEntity(SyntacticEntity entity) {   
+  static String processCastMap(SyntacticEntity entity) {
+    var name = entity.toString();
+
+    if (castMapping.containsKey(name)) {
+      startCastMapping = false;
+      // Casting to correct type, as it is inside an IsStatement.
+      var result =
+          '((${Naming.upperCamelCase(castMapping[name])})${processEntity(entity)})';
+      startCastMapping = true;
+      return result;
+    }
+
+    return '';
+  }
+
+  static String processEntity(SyntacticEntity entity) {
+    if (!Config.includeImplementations)
+      return "\nthrow new NotImplementedException();\n";
+
+    if (entity.toString() == 'exception') entity.toString();
+
+    if (startCastMapping) {
+      var castMap = processCastMap(entity);
+      if (castMap.isNotEmpty) return castMap;
+    }
+
     if (entity is BeginToken) {
       return entity.lexeme;
     } else if (entity is KeywordToken) {
       return processToken(entity);
-    } else if (entity is SimpleToken) {    
+    } else if (entity is SimpleToken) {
       return entity.lexeme;
     } else if (entity is SimpleIdentifier) {
       return processSimpleIdentifier(entity);
@@ -282,8 +316,11 @@ class Implementation {
   static String processAdjacentString(AdjacentStrings string) {
     var csharp = "";
     for (var entity in string.childEntities) {
-      csharp += processEntity(entity);
+      csharp += processEntity(entity) + ' + ';
     }
+
+    if (csharp.length > 3) csharp = csharp.substring(0, csharp.length - 3);
+
     return csharp;
   }
 
@@ -329,11 +366,28 @@ class Implementation {
     return csharp;
   }
 
+  static Map<String, String> castMapping = new Map<String, String>();
+  static bool startCastMapping = false;
   static String processIsExpression(IsExpression expression) {
-    var csharp = '';
-    for (var entity in expression.childEntities) {
-      csharp += processEntity(entity) + ' ';
-    }
+    var count = expression.childEntities.length;
+    if (count < 3 || count > 4)
+      throw new AssertionError(
+          'Expecting IsExpression to always have 3 or 4 entities');
+
+    castMapping.putIfAbsent(expression.childEntities.elementAt(0).toString(),
+        () => expression.childEntities.elementAt(count - 1).toString());
+
+    var csharp = processEntity(expression.childEntities.elementAt(0));
+
+    csharp += ' is ';
+
+    csharp += processEntity(expression.childEntities.elementAt(count - 1));
+
+    if (count == 4 && expression.childEntities.elementAt(2).toString() == '!')
+      csharp = '!($csharp)';
+    else if (count == 4)
+      throw new AssertionError('Unknown 4 length IsExpression');
+
     return csharp;
   }
 
@@ -503,8 +557,17 @@ class Implementation {
     var csharp = "";
 
     if (invocation.isCascaded) {
-      csharp +=
-          processEntity(invocation.parent.childEntities.toList()[0]) + '.';
+      var parentEntity = invocation.parent.childEntities.toList()[0];
+
+      String processedEntity = '';
+      if (invocation.parent?.parent is VariableDeclaration)
+        processedEntity =
+            processEntity(invocation.parent.parent.childEntities.toList()[0]);
+      else
+        processedEntity = processEntity(parentEntity);
+
+      csharp += ';\n' + processedEntity + '.';
+
       for (var entity in invocation.childEntities) {
         if (entity.toString() != '..') csharp += processEntity(entity);
       }
@@ -512,13 +575,25 @@ class Implementation {
       for (var entity in invocation.childEntities) {
         csharp += processEntity(entity);
       }
+
+      // Change all Split's to return a List instead of array
+      if (invocation.methodName.name == 'split') csharp += '.ToList()';
     }
 
     return csharp;
   }
 
   static String processSimpleIdentifier(SimpleIdentifier identifier) {
-    var csharp = "";
+    var csharp = '';
+
+    // If the identifier is actually a type.
+    if (identifier.parent is TypeName)
+      return Naming.getFormattedTypeName(identifier.name);
+
+    // Map reserved keywords
+    if (identifier.name == 'event') return '@event';
+    if (identifier.name == 'byte') return '@byte';
+
     if (identifier.staticElement is ParameterElement) // e.g. child
     {
       csharp += identifier.name;
@@ -533,7 +608,11 @@ class Implementation {
     } else if (identifier.staticElement is PropertyAccessorElement) {
       csharp += processPropertyAccessorElement(identifier.staticElement);
     } else {
-      csharp += Naming.upperCamelCase(identifier.name);
+      var name = identifier.name;
+      if (name == 'runtimeType')
+        csharp += 'GetType()';
+      else
+        csharp += Naming.upperCamelCase(name);
     }
     return csharp;
   }
@@ -568,6 +647,12 @@ class Implementation {
     if (name == "inMicroseconds") return "InMicroseconds()";
     if (name == "isFinite") return "IsFinite()";
     if (name == 'runtimeType') return 'GetType()';
+    if (name == 'single') return 'Single()';
+    if (name == 'last') return 'Last()';
+    if (name == 'isEmpty') return 'IsEmpty()';
+
+    if (name == 'length' && element.enclosingElement.displayName == 'List')
+      return 'Count';
 
     return Naming.upperCamelCase(name);
   }
@@ -579,7 +664,7 @@ class Implementation {
       if (entity is StringLiteral)
         csharp += entity.stringValue;
       else if (entity is InterpolationString)
-        csharp += entity.value;
+        csharp += entity.toString();
       else if (entity is InterpolationExpression) {
         var stringValue = '{';
         for (var item in entity.childEntities) {
@@ -668,21 +753,27 @@ class Implementation {
   }
 
   static String processTypeName(TypeName name) {
-    return Naming.getFormattedTypeName(name.toString());
+    var csharp = '';
+    for (var entity in name.childEntities) csharp += processEntity(entity);
+    return csharp;
   }
 
-  static String FieldBody(PropertyAccessorElement element) {
+  static String fieldBody(PropertyAccessorElement element) {
+    if (!Config.includeImplementations)
+      return "\nthrow new NotImplementedException();\n";
+
+    // TODO: this is all messed up anyway
     var body = element.computeNode();
     var bodyLines = Naming.tokenToText(body.beginToken, false).split("\n");
     var rawBody = bodyLines.map((l) => "${l}\n").join();
 
     // Transpile logic comes here
-    var transpiledBody = rawBody + "throw new NotImplementedException();";
+    var transpiledBody = "throw new NotImplementedException();";
     return transpiledBody;
   }
 
-   static String FunctionBody(FunctionElement element) {
+  static String functionBody(FunctionElement element) {
     // TODO
-    return "throw new NotImplementedException();";  
+    return "throw new NotImplementedException();";
   }
 }

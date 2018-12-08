@@ -142,6 +142,10 @@
       <Project>{c9313643-3357-4872-9b00-03e2c79ad297}</Project>
       <Name>FlutterBinding</Name>
     </ProjectReference>
+    <ProjectReference Include="..\FlutterSDK\FlutterSDK.csproj">
+      <Project>{0781218d-0bcf-4528-aa32-a1937572e43b}</Project>
+      <Name>FlutterSDK</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>

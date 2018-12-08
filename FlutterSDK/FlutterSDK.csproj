@@ -5,11 +5,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="src\" />
+    <ProjectReference Include="..\FlutterBinding\FlutterBinding.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\FlutterBinding\FlutterBinding.csproj" />
+    <Folder Include="src\" />
   </ItemGroup>
 
 </Project>

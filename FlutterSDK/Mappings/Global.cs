@@ -1,6 +1,9 @@
 ﻿using FlutterSDK.Animation.Animation;
 using FlutterSDK.Widgets.Navigator;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace FlutterSDK
@@ -77,29 +80,13 @@ namespace FlutterSDK
     public class Null // todo
     { }
 
-    public class StackTrace // todo
+    public class StackTrace // This is really just a string equivalent in .NET land
     { }
-
-    public class num
-    {
-        double value;
-
-        public static implicit operator double(num x)
-        {
-            return x.value;
-        }
-
-        public static implicit operator num(double x)
-        {
-            return new num() { value = x };
-        }
-    }
 
     public class AssertionError : System.Exception
     {
         public AssertionError() { }
-        public AssertionError(string message) { }
-        public string message => this.Message;
+        public AssertionError(string message): base(message) { }
     }
 
     public delegate void VoidCallback();
@@ -116,17 +103,17 @@ namespace FlutterSDK
     {
         public Size(double? height)
         {
-            this.height = height;
+            this.Height = height;
         }
 
         public Size(double? width, double? height)
         {
-            this.width = width;
-            this.height = height;
+            this.Width = width;
+            this.Height = height;
         }
 
-        public double? width { get; set; }
-        public double? height { get; set; }
+        public double? Width { get; set; }
+        public double? Height { get; set; }
     }
 
 
@@ -156,7 +143,7 @@ namespace FlutterSDK
 
     public class HashSet<T> : System.Collections.Generic.HashSet<T>
     {
-        public HashSet<T> from(List<T> newList)
+        public HashSet<T> From(List<T> newList)
         {
             var h = new HashSet<T>();
             foreach (var item in newList)
@@ -185,13 +172,17 @@ namespace FlutterSDK
 
     public class StringBuffer // Similar to System.Text.StringBuilder
     {
-        private string _value = "";
-        public void write(string value)
+        string _value = "";
+        public void Write(string value)
         {
             _value += value;
         }
 
-        public string toString()
+        public void Writeln(string value) => _value += value + '\n';
+        public void Writeln(char value) => _value += value + '\n';
+        public void WriteAll(List<string> values, char separator) => _value += values.Join(separator);
+      
+        public override string ToString()
         {
             return _value;
         }
@@ -202,40 +193,6 @@ namespace FlutterSDK
         public void remove(T element) => this.Remove(element);
     }
 
-    public class List<T> : System.Collections.Generic.List<T>
-    {
-        public bool contains(object element)
-        {
-            if (element is T)
-                if (this.Contains((T)element))
-                    return true;
-
-            return false;
-        }
-
-        public bool contains(T element)
-        {
-            if (this.Contains(element))
-                return true;
-
-            return false;
-        }
-
-        public int length()
-        {
-            return this.Count;
-        }
-
-        public List<T> from(List<T> newList)
-        {
-            return newList;
-        }
-
-        public bool isEmpty => this.Count == 0;
-
-        public void add(T element) => this.Add(element);
-    }
-
     public class Iterable<T> : List<T>
     {
     }
@@ -243,8 +200,27 @@ namespace FlutterSDK
     public class Iterator<T> : Iterable<T>
     { }
 
+    public class Error : Exception { }
+
     public static class Global
     {
+
+        public static string Multiply(this string source, int multiplier)
+        {
+            StringBuilder sb = new StringBuilder(multiplier * source.Length);
+            for (int i = 0; i < multiplier; i++)
+            {
+                sb.Append(source);
+            }
+
+            return sb.ToString();
+        }
+
+        public static bool IsEmpty(this string value)
+        {
+            return string.IsNullOrEmpty(value);
+        }
+
         public static bool Identical(object main, object other)
          => main == other;
 
@@ -286,7 +262,7 @@ namespace FlutterSDK
         public static double ToDouble(this double d) => d;
 
         public static string Join(this List<string> list, string separator) => string.Join(separator, list.ToArray());
-
+        public static string Join(this List<string> list, char separator) => string.Join(Convert.ToString(separator), list.ToArray());
         public static double TruncateToDouble(this double d) => Math.Truncate(d);
 
         public static string ToStringAsFixed(this double d, int value) => d.ToString($"N{value}");
