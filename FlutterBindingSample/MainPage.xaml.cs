@@ -40,7 +40,7 @@ namespace FlutterBindingSample
             Engine.Instance.LoadCanvas(e.Surface.Canvas);
             Engine.Instance.SetSize(frame.ActualWidth, frame.ActualHeight);
 
-            RunApp(new MyApp());
+            //RunApp(new MyApp());
         }
 
 

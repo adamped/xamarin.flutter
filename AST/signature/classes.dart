@@ -75,24 +75,41 @@ class Classes {
 
   static void printConstructor(
       StringBuffer code, ConstructorElement constructor) {
-    if (!constructor.isDefaultConstructor) {
+    if (constructor.enclosingElement is ClassElement) {
+      var className = constructor.enclosingElement.name;
+      if (className.startsWith('_'))
+        className = className.substring(1, className.length);
       var parameters = Methods.printParameter(constructor, null, null);
-      if (constructor.enclosingElement is ClassElement) {
-        if (constructor.name == '')
-          code.writeln('public ${constructor.enclosingElement.name}($parameters)');
-        else if (constructor.name == '_')
-          code.writeln('private ${constructor.enclosingElement.name}($parameters)');
-        else // I'm named, hence we are turing into static methods that return an instance
-          code.writeln(
-              'public static ${constructor.enclosingElement.name} ${Naming.upperCamelCase(constructor.name)}($parameters)');
+      if (constructor.name == '')
+        code.writeln(
+            'public ${className}($parameters)');
+      else if (constructor.name == '_')
+        code.writeln(
+            'internal ${className}($parameters)');
+      else if (constructor.name.startsWith('_'))
+        code.writeln(
+            'internal ${className}($parameters)');
+      else // I'm named, hence we are turing into static methods that return an instance
+        code.writeln(
+            'public static ${className} ${Naming.upperCamelCase(constructor.name)}($parameters)');
 
-        // Fill out Constructor body
-        code.writeln(Implementation.MethodBody(constructor.computeNode().body));
+      // Fill out Constructor body
+      var node = constructor.computeNode();
+      if (node != null)
+      {
+        var body = Implementation.MethodBody(node.body, overrideIncludeConfig: true);
 
-      } else
-        throw new AssertionError(
-            'A constructor is not inside a ClassElement, that should not happen.');
-    }
+if (body.contains('throw new Not'))
+body = Implementation.MethodBody(node.body, overrideIncludeConfig: true);
+
+        code.writeln(body);
+
+      }     
+      else
+        code.writeln('{ }');
+    } else
+      throw new AssertionError(
+          'A constructor is not inside a ClassElement, that should not happen.');
   }
 
   static void printFieldsAndMethods(

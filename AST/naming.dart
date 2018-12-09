@@ -251,7 +251,7 @@ class Naming {
       case "double":
       case "string":
         return formattedName.toLowerCase();
-      case "dynamic":
+      case "dynamic": //TODO: we need to fix this. Dynamic is normally hiding a proper type.
         return "object";
       case "duration":
         return "TimeSpan";
