@@ -166,6 +166,9 @@ class Methods {
       var parameterType =
           Naming.getVariableType(p, VariableType.Parameter).split(" ").last;
 
+      if (parameterType == 'object' && !p.toString().contains('dynamic'))
+      parameterType = '';
+
       if (p.type.element is TypeParameterElement && overridenElement != null) {
         var actualParameterSignature = overridenElement
             .parameters[element.parameters.indexWhere((x) => x.name == p.name)];

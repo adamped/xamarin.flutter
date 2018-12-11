@@ -2,6 +2,7 @@ import 'package:analyzer/analyzer.dart';
 import 'package:analyzer/dart/ast/token.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/src/dart/element/type.dart';
 
 import 'config.dart';
 
@@ -186,10 +187,35 @@ class Naming {
 
   static String getVariableType(VariableElement element, VariableType type) {
     String typeName = "object";
-    if (element.type is InterfaceType) {
+    var elementType = element.type;
+    if (elementType is FunctionTypeImpl) {
+      var parameterTypes = '';
+      if (elementType.normalParameterTypes == null)
+        throw new AssertionError('Its null');
+      if (elementType.normalParameterTypes != null) {
+     
+        parameterTypes = elementType.normalParameterTypes
+            .map((p) => getFormattedTypeName(p.displayName))
+            .join(',');
+      }
+      if (elementType.returnType is VoidType) {
+        // This is an Action
+        if (parameterTypes.isEmpty)
+          return 'Action';
+        else
+          return 'Action<$parameterTypes>';
+      } else {
+        // This is a Function
+        var returnType = elementType.returnType.name;
+        if (parameterTypes.isNotEmpty)
+          return 'Func<$returnType, $parameterTypes>';
+        else
+          return 'Func<$returnType>';
+      }
+    } else if (elementType is InterfaceType) {
       typeName = nameWithTypeArguments(element.type, false);
-    } else if (element.type is TypeParameterType) {
-      typeName = element.type.displayName;
+    } else if (elementType is TypeParameterType) {
+      typeName = elementType.displayName;
     } else if (element.computeNode() != null) {
       switch (type) {
         case VariableType.Field:
@@ -206,7 +232,7 @@ class Naming {
       }
     }
     var formattedName = getFormattedTypeName(typeName);
-    var library = element.type.element.library;
+    var library = elementType.element.library;
     if (!(element.type is TypeParameterType) &&
         library != null &&
         !Config.ignoredImports.contains(library.identifier) &&

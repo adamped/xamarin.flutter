@@ -81,31 +81,22 @@ class Classes {
         className = className.substring(1, className.length);
       var parameters = Methods.printParameter(constructor, null, null);
       if (constructor.name == '')
-        code.writeln(
-            'public ${className}($parameters)');
+        code.writeln('public ${className}($parameters)');
       else if (constructor.name == '_')
-        code.writeln(
-            'internal ${className}($parameters)');
+        code.writeln('internal ${className}($parameters)');
       else if (constructor.name.startsWith('_'))
-        code.writeln(
-            'internal ${className}($parameters)');
+        code.writeln('internal ${className}($parameters)');
       else // I'm named, hence we are turing into static methods that return an instance
         code.writeln(
             'public static ${className} ${Naming.upperCamelCase(constructor.name)}($parameters)');
 
       // Fill out Constructor body
       var node = constructor.computeNode();
-      if (node != null)
-      {
-        var body = Implementation.MethodBody(node.body, overrideIncludeConfig: true);
-
-if (body.contains('throw new Not'))
-body = Implementation.MethodBody(node.body, overrideIncludeConfig: true);
-
+      if (node != null) {
+        var body =
+            Implementation.MethodBody(node.body, overrideIncludeConfig: true);
         code.writeln(body);
-
-      }     
-      else
+      } else
         code.writeln('{ }');
     } else
       throw new AssertionError(

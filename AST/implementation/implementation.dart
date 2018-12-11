@@ -93,7 +93,8 @@ class Implementation {
     if (!Config.includeImplementations && !overrideIncludeConfig)
       return "\nthrow new NotImplementedException();\n";
 
-    if (entity.toString() == 'exception') entity.toString();
+    if (entity.toString().contains('??')) 
+    entity.toString();
 
     if (startCastMapping) {
       var castMap = processCastMap(entity);
@@ -545,6 +546,17 @@ class Implementation {
 
   static String processBinaryExpression(BinaryExpression expression) {
     var csharp = "";
+
+    if (expression.childEntities.length == 3
+    && expression.childEntities.elementAt(1).toString() == '??')
+    {
+      var first = expression.childEntities.elementAt(0);
+      var second = expression.childEntities.elementAt(2);
+      if (first is SimpleIdentifier
+      && first.staticType.displayName == 'double') //TODO: Should cover all non-nullable value types
+      return '$first == default(${first.staticType.displayName}) ? $second : $first';
+    }
+
     for (var entity in expression.childEntities) {
       csharp += processEntity(entity);
     }

@@ -47,7 +47,7 @@ class Fields {
 
     if (element.hasProtected == true) code.write("protected ");
     if (element.isPublic == true) code.write("public ");
-    if (element.isPrivate == true) code.write("protected internal ");
+    if (element.isPrivate == true) code.write("internal ");
     if (element.hasOverride == true) code.write("override ");
     if (element.hasOverride == false) code.write("virtual ");
 
