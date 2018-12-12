@@ -8,6 +8,7 @@ obj/
 **/Droid/**/[Rr]esource.[Dd]esigner.cs
 model.json
 src/
+flutter/
 *.htm
 *.lock
 *.packages
