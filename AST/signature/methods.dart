@@ -148,6 +148,41 @@ class Methods {
     return "${returnType} ${methodName}${typeParameter}(${parameter})";
   }
 
+  static String printAutoParameters(FunctionTypedElement element) {
+    return element.parameters.where((x) {
+      return x.isInitializingFormal == true;
+    }).map((p) {
+      var variableName = '';
+
+      if (p.name.startsWith('_'))
+        variableName = p.name;
+      else
+        variableName =
+            Naming.getFormattedName(p.name, NameStyle.UpperCamelCase);
+
+      return variableName +
+          ' = ' +
+          Naming.getFormattedName(p.name, NameStyle.LowerCamelCase) +
+          ';';
+    }).join('\n');
+  }
+
+  /// This function returns a comma delimited list that
+  static String printParameterNames(FunctionTypedElement element) {
+    return element.parameters.map((p) {
+      var parameterName =
+          Naming.getFormattedName(p.name, NameStyle.LowerCamelCase);
+      if (parameterName == "")
+        parameterName = "p" + (element.parameters.indexOf(p) + 1).toString();
+
+      if (parameterName == 'decimal') parameterName = '@decimal';
+      if (parameterName == 'object') parameterName = '@object';
+      if (parameterName == 'byte') parameterName == '@byte';
+
+      return parameterName;
+    }).join(', ');
+  }
+
   static String printParameter(FunctionTypedElement element,
       FunctionTypedElement overridenElement, InterfaceType implementedClass) {
     // Parameter
@@ -167,7 +202,7 @@ class Methods {
           Naming.getVariableType(p, VariableType.Parameter).split(" ").last;
 
       if (parameterType == 'object' && !p.toString().contains('dynamic'))
-      parameterType = '';
+        parameterType = '';
 
       if (p.type.element is TypeParameterElement && overridenElement != null) {
         var actualParameterSignature = overridenElement
