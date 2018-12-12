@@ -34,6 +34,35 @@ namespace FlutterSDK
     /// </summary>
     public delegate Task<Dictionary<string, object>> ServiceExtensionCallback(Dictionary<string, string> parameters);
 
+    public class Element
+    {
+
+    }
+
+    public class Picture
+    {
+
+    }
+
+    public class EngineLa
+    {
+
+    }
+
+    public class Float32List
+    {
+
+    }
+
+    public class Int32List
+    {
+
+    }
+
+    public class Float64List
+    {
+
+    }
     public enum TextDirection
     {
         ltr,
@@ -116,7 +145,7 @@ namespace FlutterSDK
         public double? Height { get; set; }
     }
 
-
+    
     public class Offset //TODO
     {
         public Offset() { }

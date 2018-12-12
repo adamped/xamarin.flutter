@@ -104,9 +104,6 @@ class Frame {
 
   static String printEnum(ClassElement element) {
     var name = Naming.getFormattedTypeName(element.name);
-    if(element.name.startsWith("_"))
-      name = "Internal" + name;
-
     var code = new StringBuffer();
     code.writeln("");
     Comments.appendComment(code, element);

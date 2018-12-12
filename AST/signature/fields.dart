@@ -8,8 +8,12 @@ class Fields {
   static bool containsGenericPart(DartType type) {
     var element = type.element;
     if (element is TypeParameterElement) return true;
-    if (type is ParameterElement) {
-      print("t");
+    if (type is InterfaceType) {
+      var hasTypedTypeArguments =
+          type.typeArguments.any((argument) => argument is TypeParameterType);
+      if (hasTypedTypeArguments) {
+        return true;
+      }
     }
     return false;
   }
@@ -51,27 +55,15 @@ class Fields {
     if (element.hasOverride == true) code.write("override ");
     if (element.hasOverride == false) code.write("virtual ");
 
-    var implementedClass = element.enclosingElement.allSupertypes.firstWhere(
-        (superClass) => superClass.element.fields
-            .any((field) => field.displayName == element.displayName),
-        orElse: () => null);
-
     // type + name
-    if (containsGenericPart(element.type) &&
-        implementedClass != null &&
-        implementedClass.typeParameters
-            .any((tp) => tp.type.displayName == element.type.displayName)) {
-      var typeParameter = implementedClass.typeParameters
-          .firstWhere((tp) => tp.type.displayName == element.type.displayName);
-      var type = implementedClass.typeArguments[
-          implementedClass.typeParameters.indexOf(typeParameter)];
-      var name = getFieldName(element);
-      if (name ==
-          Naming.nameWithTypeParameters(element.enclosingElement, false))
-        name = name + "Value";
-      code.write("${type} ${name}");
+    if (containsGenericPart(element.type)) {
+      code.write(printTypeAndName(element));
     } else {
       code.write(printTypeAndName(baseField));
+    }
+
+    if (code.toString().contains("UiKitViewController")) {
+      print("ouch");
     }
 
     var hasGetter = element.getter != null;
@@ -123,8 +115,8 @@ class Fields {
       name = name + "Value";
 
     if (containsGenericPart(element.type)) {
-      var typeParameter = implementedClass.typeParameters
-          .firstWhere((tp) => tp.type == element.type);
+      var typeParameter = implementedClass.typeParameters.firstWhere(
+          (tp) => element.type.displayName.contains(tp.type.displayName));
       var type = implementedClass.typeArguments[
           implementedClass.typeParameters.indexOf(typeParameter)];
       code.write("${type} ${name}");
@@ -183,6 +175,10 @@ class Fields {
     var name = getFieldName(element);
     if (name == Naming.nameWithTypeParameters(element.enclosingElement, false))
       name = name + "Value";
+    if (type == "UiKitViewController") {
+      print("test");
+      var type = Naming.getVariableType(element, VariableType.Field);
+    }
     return "${type} ${name}";
   }
 

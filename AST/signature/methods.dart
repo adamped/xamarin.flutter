@@ -85,7 +85,9 @@ class Methods {
       InterfaceType implementedClass,
       MethodElement overrideMethod,
       ClassElement classElement) {
-    var baseMethod = implementedClass.element.isMixin ? element : getBaseMethodInClass(element);
+    var baseMethod = implementedClass.element.isMixin
+        ? element
+        : getBaseMethodInClass(element);
 
     var name = Naming.nameWithTypeParameters(element, false);
     var code = new StringBuffer();
@@ -105,7 +107,8 @@ class Methods {
       code.writeln(
           "${implementationInstanceName}.${name}(${baseMethod.parameters.map((p) => Naming.getFormattedName(p.name, NameStyle.LowerCamelCase)).join(",")});}");
     } else {
-      code.writeln(Implementation.MethodBody(overrideMethod.computeNode().body));
+      code.writeln(
+          Implementation.MethodBody(overrideMethod.computeNode().body));
     }
 
     return code.toString();
@@ -134,20 +137,33 @@ class Methods {
             : NameStyle.UpperCamelCase);
 
     var parameter = printParameter(element, overridenElement, implementedClass);
-    var returnType = Naming.getReturnType(element);
+    var returnTypeName = Naming.getReturnType(element);
+    var returnType = element.returnType;
     var typeParameter = "";
 
     // Check if the method has a generic return value
-    if (element.returnType.element is TypeParameterElement) {
-      returnType = Naming.getDartTypeName(overridenElement.returnType); 
-    }  
+    if (returnType is TypeParameterElement) {
+      returnTypeName = Naming.getDartTypeName(overridenElement.returnType);
+    }
+    // Check if the method return type has type arguments with generic values
+    if (returnType is InterfaceType) {
+      var hasTypedTypeArguments = returnType.typeArguments
+          .any((argument) => argument is TypeParameterType);
+      if (hasTypedTypeArguments) {
+        returnTypeName = Naming.nameWithTypeArguments(returnType, false);
+      }
+    }
 
-    return "${returnType} ${methodName}${typeParameter}(${parameter})";
+    if(returnTypeName.contains("List<FlutterSDK.Widgets.Widgetinspector.LocationCount>") ||
+    returnTypeName.contains("List<FlutterSDK.Widgets.Widgetinspector.DiagnosticsPathNode>")){
+          print("ups");
+        }
+
+    return "${returnTypeName} ${methodName}${typeParameter}(${parameter})";
   }
 
   static String printParameter(FunctionTypedElement element,
-      FunctionTypedElement overridenElement, InterfaceType implementedClass) { 
-
+      FunctionTypedElement overridenElement, InterfaceType implementedClass) {
     // Parameter
     var parameters = element.parameters.map((p) {
       // Name
@@ -158,11 +174,11 @@ class Methods {
 
       // Type
       var parameterType =
-          Naming.getVariableType(p, VariableType.Parameter).split(" ").last; 
+          Naming.getVariableType(p, VariableType.Parameter).split(" ").last;
 
       if (p.type.element is TypeParameterElement && overridenElement != null) {
-        var actualParameterSignature =
-            overridenElement.parameters[element.parameters.indexWhere((x) => x.name == p.name)];
+        var actualParameterSignature = overridenElement
+            .parameters[element.parameters.indexWhere((x) => x.name == p.name)];
         parameterType = Naming.getVariableType(
                 actualParameterSignature, VariableType.Parameter)
             .split(" ")

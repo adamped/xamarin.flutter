@@ -11,3 +11,4 @@ src/
 *.htm
 *.lock
 *.packages
+flutter/**
