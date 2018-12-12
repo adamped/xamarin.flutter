@@ -185,7 +185,6 @@ class Fields {
     var name = getFieldName(element);
     if (name == Naming.nameWithTypeParameters(element.enclosingElement, false))
       name = name + "Value";
-
     return "${type} ${name}";
   }
 
