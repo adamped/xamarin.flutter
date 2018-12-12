@@ -60,6 +60,14 @@ class Classes {
     code.writeln("\n{");
 
     code.writeln("#region constructors");
+
+    // Add private named constructor
+    var className = element.name;
+
+    if (className.startsWith('_')) className = className.substring(1);
+    code.writeln(
+        'private ${className}(string named = "") {\n // Just here to create blank instance \n}');
+
     // Add constructors
     for (var constructor in element.constructors) {
       printConstructor(code, constructor);
@@ -75,24 +83,60 @@ class Classes {
 
   static void printConstructor(
       StringBuffer code, ConstructorElement constructor) {
-    if (!constructor.isDefaultConstructor) {
+    if (constructor.enclosingElement is ClassElement) {
+      var isStatic = false;
+      var className = constructor.enclosingElement.name;
+      if (className.startsWith('_'))
+        className = className.substring(1, className.length);
       var parameters = Methods.printParameter(constructor, null, null);
-      if (constructor.enclosingElement is ClassElement) {
-        if (constructor.name == '')
-          code.writeln('public ${constructor.enclosingElement.name}($parameters)');
-        else if (constructor.name == '_')
-          code.writeln('private ${constructor.enclosingElement.name}($parameters)');
-        else // I'm named, hence we are turing into static methods that return an instance
+      if (constructor.name == '')
+        code.writeln('public ${className}($parameters)');
+      else if (constructor.name == '_')
+        code.writeln('internal ${className}($parameters)');
+      else if (constructor.name.startsWith('_'))
+        code.writeln('internal ${className}($parameters)');
+      else // I'm named, hence we are turing into static methods that return an instance
+      {
+        isStatic = true;
+        code.writeln(
+            'public static ${className} ${Naming.upperCamelCase(constructor.name)}($parameters)');
+      }
+
+      // Base class call
+      if (constructor.redirectedConstructor != null) {
+        var baseCall = constructor.redirectedConstructor;
+        var baseParameters = Methods.printParameterNames(baseCall);
+
+        code.writeln(': base($baseParameters)');
+      }
+
+      // Fill out Constructor body
+      var node = constructor.computeNode();
+      if (node != null) {
+        var body =
+            Implementation.MethodBody(node.body, overrideIncludeConfig: true);
+
+        // Add auto assignments if any
+        var autoAssignment = Methods.printAutoParameters(constructor);
+        if (autoAssignment.isNotEmpty) body = '{' + autoAssignment + '\n' + body.substring(2);
+
+        if (isStatic) {
+          var parameterNames = Methods.printParameterNames(constructor);
+          // Call private constructor
           code.writeln(
-              'public static ${constructor.enclosingElement.name} ${Naming.upperCamelCase(constructor.name)}($parameters)');
+              '{\nvar instance = new ${className}(named:"${Naming.upperCamelCase(constructor.name)}"); \ninstance.${Naming.upperCamelCase(constructor.name)}Constructor($parameterNames);\nreturn instance;\n}\n');
 
-        // Fill out Constructor body
-        code.writeln(Implementation.MethodBody(constructor.computeNode().body));
-
+          code.writeln(
+              'private void ${Naming.upperCamelCase(constructor.name)}Constructor($parameters) $body');
+        } else {
+          // Normal constructor body
+          code.writeln(body);
+        }
       } else
-        throw new AssertionError(
-            'A constructor is not inside a ClassElement, that should not happen.');
-    }
+        code.writeln('{ }');
+    } else
+      throw new AssertionError(
+          'A constructor is not inside a ClassElement, that should not happen.');
   }
 
   static void printFieldsAndMethods(

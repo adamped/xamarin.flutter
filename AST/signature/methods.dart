@@ -85,7 +85,9 @@ class Methods {
       InterfaceType implementedClass,
       MethodElement overrideMethod,
       ClassElement classElement) {
-    var baseMethod = implementedClass.element.isMixin ? element : getBaseMethodInClass(element);
+    var baseMethod = implementedClass.element.isMixin
+        ? element
+        : getBaseMethodInClass(element);
 
     var name = Naming.nameWithTypeParameters(element, false);
     var code = new StringBuffer();
@@ -105,7 +107,8 @@ class Methods {
       code.writeln(
           "${implementationInstanceName}.${name}(${baseMethod.parameters.map((p) => Naming.getFormattedName(p.name, NameStyle.LowerCamelCase)).join(",")});}");
     } else {
-      code.writeln(Implementation.MethodBody(overrideMethod.computeNode().body));
+      code.writeln(
+          Implementation.MethodBody(overrideMethod.computeNode().body));
     }
 
     return code.toString();
@@ -139,15 +142,49 @@ class Methods {
 
     // Check if the method has a generic return value
     if (element.returnType.element is TypeParameterElement) {
-      returnType = Naming.getDartTypeName(overridenElement.returnType); 
-    }  
+      returnType = Naming.getDartTypeName(overridenElement.returnType);
+    }
 
     return "${returnType} ${methodName}${typeParameter}(${parameter})";
   }
 
-  static String printParameter(FunctionTypedElement element,
-      FunctionTypedElement overridenElement, InterfaceType implementedClass) { 
+  static String printAutoParameters(FunctionTypedElement element) {
+    return element.parameters.where((x) {
+      return x.isInitializingFormal == true;
+    }).map((p) {
+      var variableName = '';
 
+      if (p.name.startsWith('_'))
+        variableName = p.name;
+      else
+        variableName =
+            Naming.getFormattedName(p.name, NameStyle.UpperCamelCase);
+
+      return variableName +
+          ' = ' +
+          Naming.getFormattedName(p.name, NameStyle.LowerCamelCase) +
+          ';';
+    }).join('\n');
+  }
+
+  /// This function returns a comma delimited list that
+  static String printParameterNames(FunctionTypedElement element) {
+    return element.parameters.map((p) {
+      var parameterName =
+          Naming.getFormattedName(p.name, NameStyle.LowerCamelCase);
+      if (parameterName == "")
+        parameterName = "p" + (element.parameters.indexOf(p) + 1).toString();
+
+      if (parameterName == 'decimal') parameterName = '@decimal';
+      if (parameterName == 'object') parameterName = '@object';
+      if (parameterName == 'byte') parameterName == '@byte';
+
+      return parameterName;
+    }).join(', ');
+  }
+
+  static String printParameter(FunctionTypedElement element,
+      FunctionTypedElement overridenElement, InterfaceType implementedClass) {
     // Parameter
     var parameters = element.parameters.map((p) {
       // Name
@@ -156,13 +193,20 @@ class Methods {
       if (parameterName == "")
         parameterName = "p" + (element.parameters.indexOf(p) + 1).toString();
 
+      if (parameterName == 'decimal') parameterName = '@decimal';
+      if (parameterName == 'object') parameterName = '@object';
+      if (parameterName == 'byte') parameterName == '@byte';
+
       // Type
       var parameterType =
-          Naming.getVariableType(p, VariableType.Parameter).split(" ").last; 
+          Naming.getVariableType(p, VariableType.Parameter).split(" ").last;
+
+      if (parameterType == 'object' && !p.toString().contains('dynamic'))
+        parameterType = '';
 
       if (p.type.element is TypeParameterElement && overridenElement != null) {
-        var actualParameterSignature =
-            overridenElement.parameters[element.parameters.indexWhere((x) => x.name == p.name)];
+        var actualParameterSignature = overridenElement
+            .parameters[element.parameters.indexWhere((x) => x.name == p.name)];
         parameterType = Naming.getVariableType(
                 actualParameterSignature, VariableType.Parameter)
             .split(" ")

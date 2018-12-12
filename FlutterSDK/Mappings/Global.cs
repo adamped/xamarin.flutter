@@ -1,11 +1,12 @@
 ﻿using FlutterSDK.Animation.Animation;
+using FlutterSDK.Widgets.Framework;
 using FlutterSDK.Widgets.Navigator;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+namespace FlutterSDK.Foundation.Annotations { }
 namespace FlutterSDK
 {
     // Instead of changing up code, here I have implemented a number of common things, to tie their approach to .NET

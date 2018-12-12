@@ -104,8 +104,9 @@ class Frame {
 
   static String printEnum(ClassElement element) {
     var name = Naming.getFormattedTypeName(element.name);
-    if(element.name.startsWith("_"))
-      name = "Internal" + name;
+    // Can't do this, as it messes up lots of naming inside methods :)
+    // if(element.name.startsWith("_"))
+    //   name = "Internal" + name;
 
     var code = new StringBuffer();
     code.writeln("");

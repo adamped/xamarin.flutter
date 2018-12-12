@@ -12,8 +12,8 @@ import 'conditionals.dart';
 
 /// Provides methods to transpile the body of elements
 class Implementation {
-  static String MethodBody(FunctionBody body) {
-    if (!Config.includeImplementations)
+  static String MethodBody(FunctionBody body, {bool overrideIncludeConfig = false}) {
+    if (!Config.includeImplementations && !overrideIncludeConfig)
       return "{\nthrow new NotImplementedException();\n}";
 
     if (body is EmptyFunctionBody) {
@@ -25,9 +25,9 @@ class Implementation {
       else
         return '{ \n}'; // No code;
     } else if (body is BlockFunctionBody) {
-      return processBlockFunction(body);
+      return processBlockFunction(body, overrideIncludeConfig: overrideIncludeConfig);
     } else if (body is ExpressionFunctionBody) {
-      return processExpressionFunction(body);
+      return processExpressionFunction(body, overrideIncludeConfig: overrideIncludeConfig);
     } else {
       // Nothing comes here, so I have implemented all for now.
       // But this is here in case something in the future appears
@@ -36,26 +36,31 @@ class Implementation {
     }
   }
 
-  static String processExpressionFunction(ExpressionFunctionBody body) {
-    if (!Config.includeImplementations)
-      return "\nthrow new NotImplementedException();\n";
+  static String processExpressionFunction(ExpressionFunctionBody body, {bool overrideIncludeConfig: false}) {
+    if (!Config.includeImplementations && !overrideIncludeConfig)
+      return "\nthrow new NotImplementedException()";
 
+    var impl = Config.includeImplementations;
+    Config.includeImplementations = true;
     var rawBody = "";
     for (var child in body.childEntities) {
-      rawBody += processEntity(child);
+      rawBody += processEntity(child, overrideIncludeConfig: overrideIncludeConfig);
     }
-    return rawBody;
+    Config.includeImplementations = impl;
+    return rawBody + '\n';
   }
 
-  static String processBlockFunction(BlockFunctionBody body) {
-    if (!Config.includeImplementations)
+  static String processBlockFunction(BlockFunctionBody body, {bool overrideIncludeConfig: false}) {
+    if (!Config.includeImplementations && !overrideIncludeConfig)
       return "\nthrow new NotImplementedException();\n";
 
     var rawBody = "\n";
+    var impl = Config.includeImplementations;
+    Config.includeImplementations = true;
     for (var child in body.childEntities) {
       if (child is Block) {
         for (var entity in child.childEntities) {
-          rawBody += processEntity(entity) + "\n";
+          rawBody += processEntity(entity, overrideIncludeConfig: overrideIncludeConfig) + "\n";
         }
       } else if (child is KeywordToken) {
         rawBody += child.toString() + "\n";
@@ -64,6 +69,7 @@ class Implementation {
       } else
         rawBody += "\n// Block Function type not dealt with $child";
     }
+    Config.includeImplementations = impl;
 
     return rawBody + "\n";
   }
@@ -83,11 +89,12 @@ class Implementation {
     return '';
   }
 
-  static String processEntity(SyntacticEntity entity) {
-    if (!Config.includeImplementations)
+  static String processEntity(SyntacticEntity entity, {bool overrideIncludeConfig: false}) {
+    if (!Config.includeImplementations && !overrideIncludeConfig)
       return "\nthrow new NotImplementedException();\n";
 
-    if (entity.toString() == 'exception') entity.toString();
+    if (entity.toString().contains('??')) 
+    entity.toString();
 
     if (startCastMapping) {
       var castMap = processCastMap(entity);
@@ -539,6 +546,17 @@ class Implementation {
 
   static String processBinaryExpression(BinaryExpression expression) {
     var csharp = "";
+
+    if (expression.childEntities.length == 3
+    && expression.childEntities.elementAt(1).toString() == '??')
+    {
+      var first = expression.childEntities.elementAt(0);
+      var second = expression.childEntities.elementAt(2);
+      if (first is SimpleIdentifier
+      && first.staticType.displayName == 'double') //TODO: Should cover all non-nullable value types
+      return '$first == default(${first.staticType.displayName}) ? $second : $first';
+    }
+
     for (var entity in expression.childEntities) {
       csharp += processEntity(entity);
     }
@@ -650,6 +668,9 @@ class Implementation {
     if (name == 'single') return 'Single()';
     if (name == 'last') return 'Last()';
     if (name == 'isEmpty') return 'IsEmpty()';
+
+    if (name == 'length' && element.enclosingElement.displayName == 'List')
+      return 'Count';
 
     if (name == 'length' && element.enclosingElement.displayName == 'List')
       return 'Count';

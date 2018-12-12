@@ -47,7 +47,7 @@ class Fields {
 
     if (element.hasProtected == true) code.write("protected ");
     if (element.isPublic == true) code.write("public ");
-    if (element.isPrivate == true) code.write("protected internal ");
+    if (element.isPrivate == true) code.write("internal ");
     if (element.hasOverride == true) code.write("override ");
     if (element.hasOverride == false) code.write("virtual ");
 
@@ -79,6 +79,7 @@ class Fields {
 
     if (hasGetter || hasSetter) {
       code.write("{");
+      var implementedGetter = false;
       // getter
       if (hasGetter) {
         var getterNode = element.getter.computeNode();
@@ -86,6 +87,7 @@ class Fields {
           code.write("get;");
         else {
           code.write("get {${Implementation.fieldBody(element.getter)}}");
+          implementedGetter = true;
         }
       }
       // setter
@@ -96,6 +98,12 @@ class Fields {
         else {
           code.write("set {${Implementation.fieldBody(element.setter)}}");
         }
+      } else {
+        if (implementedGetter)
+          code.write("set { ${Implementation.fieldBody(element.setter)} }");
+        else
+          code.write(
+              "private set;"); // For static auto initialization of variables
       }
       code.write("}");
     } else
@@ -144,6 +152,8 @@ class Fields {
       // setter
       if (hasSetter) {
         code.write("set => ${implementedFieldName}.${name} = value;");
+      } else {
+        code.write("private set => ${implementedFieldName}.${name} = value;");
       }
       code.write("}");
     } else
@@ -163,7 +173,7 @@ class Fields {
 
     if (hasGetter || hasSetter) {
       code.write("{");
-// getter
+      // getter
       if (hasGetter) {
         code.write("get;");
       }
@@ -183,6 +193,7 @@ class Fields {
     var name = getFieldName(element);
     if (name == Naming.nameWithTypeParameters(element.enclosingElement, false))
       name = name + "Value";
+
     return "${type} ${name}";
   }
 
