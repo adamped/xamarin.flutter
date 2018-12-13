@@ -20,6 +20,7 @@ rm -r -fo "flutter"
 rm $zip
 echo "finished downloading flutter" 
 
+<<<<<<< HEAD
 echo "attempt to run flutter package get"
 if (Get-Command flutter -errorAction SilentlyContinue)
 {  
@@ -28,3 +29,6 @@ if (Get-Command flutter -errorAction SilentlyContinue)
 else{
     echo "cmdlet flutter is not available"
 }
+=======
+flutter packages get
+>>>>>>> added flutter source download script
