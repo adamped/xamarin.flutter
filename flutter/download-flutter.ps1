@@ -19,7 +19,11 @@ echo "cleaning up"
 rm -r -fo "flutter"
 rm $zip
 echo "finished downloading flutter" 
+<<<<<<< HEAD
  
+=======
+
+>>>>>>> Execute flutter package only when flutter is installed
 echo "attempt to run flutter package get"
 if (Get-Command flutter -errorAction SilentlyContinue)
 {  
@@ -27,4 +31,8 @@ if (Get-Command flutter -errorAction SilentlyContinue)
 }
 else{
     echo "cmdlet flutter is not available"
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> Execute flutter package only when flutter is installed
