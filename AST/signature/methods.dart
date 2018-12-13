@@ -137,15 +137,29 @@ class Methods {
             : NameStyle.UpperCamelCase);
 
     var parameter = printParameter(element, overridenElement, implementedClass);
-    var returnType = Naming.getReturnType(element);
+    var returnTypeName = Naming.getReturnType(element);
+    var returnType = element.returnType;
     var typeParameter = "";
 
     // Check if the method has a generic return value
-    if (element.returnType.element is TypeParameterElement) {
-      returnType = Naming.getDartTypeName(overridenElement.returnType);
+    if (returnType is TypeParameterElement) {
+      returnTypeName = Naming.getDartTypeName(overridenElement.returnType);
+    }
+    // Check if the method return type has type arguments with generic values
+    if (returnType is InterfaceType) {
+      var hasTypedTypeArguments = returnType.typeArguments
+          .any((argument) => argument is TypeParameterType);
+      if (hasTypedTypeArguments) {
+        returnTypeName = Naming.nameWithTypeArguments(returnType, false);
+      }
     }
 
-    return "${returnType} ${methodName}${typeParameter}(${parameter})";
+    if(returnTypeName.contains("List<FlutterSDK.Widgets.Widgetinspector.LocationCount>") ||
+    returnTypeName.contains("List<FlutterSDK.Widgets.Widgetinspector.DiagnosticsPathNode>")){
+          print("ups");
+        }
+
+    return "${returnTypeName} ${methodName}${typeParameter}(${parameter})";
   }
 
   static String printAutoParameters(FunctionTypedElement element) {

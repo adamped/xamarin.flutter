@@ -8,7 +8,9 @@ obj/
 **/Droid/**/[Rr]esource.[Dd]esigner.cs
 model.json
 src/
-flutter/
+flutter/*
+!flutter/download-flutter.ps1
 *.htm
 *.lock
 *.packages
+flutter/**
