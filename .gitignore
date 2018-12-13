@@ -13,3 +13,4 @@ flutter/*
 *.htm
 *.lock
 *.packages
+flutter/**

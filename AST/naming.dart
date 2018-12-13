@@ -306,15 +306,19 @@ class Naming {
 
   static String getFormattedName(String originalName, NameStyle style) {
     var formattedName = originalName;
-    if (formattedName == null ||
-        formattedName.length == 0 ||
-        formattedName == "_") {
+    if (formattedName == null || formattedName.length == 0) {
+      // Readd this once underscores are handled everywhere
+      //  || formattedName == "_") {
       return "";
     } else if (formattedName == "-") {
       formattedName = "subtractOperator";
-    } else
+    } else {
+      var reAddUnderscore = formattedName.startsWith("_");
       formattedName = formattedName.replaceAll("_", "").replaceAll("-", "");
-
+      if (reAddUnderscore) {
+        formattedName = "_" + formattedName;
+      }
+    }
     if (style != NameStyle.LeadingUnderscoreLowerCamelCase) {
       formattedName = escapeFixedWords(formattedName);
     }
@@ -337,7 +341,8 @@ class Naming {
         formattedName = upperCamelCase(formattedName);
         break;
       case NameStyle.LeadingUnderscoreLowerCamelCase:
-        formattedName = "_" + lowerCamelCase(formattedName);
+        if (!formattedName.startsWith("_"))
+          formattedName = "_" + lowerCamelCase(formattedName);
         break;
     }
     return formattedName;
@@ -353,7 +358,7 @@ class Naming {
 
   static String escapeFixedWords(String word) {
     var lowerName = word.toLowerCase();
-    if (["event", "object", "delegate", "byte", "fixed", "checked"]
+    if (["event", "object", "delegate", "byte", "fixed", "checked", "base", "decimal"]
         .any((x) => lowerName == x))
       return "@" + word;
     else
