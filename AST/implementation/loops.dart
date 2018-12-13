@@ -10,7 +10,7 @@ class Loops {
     return csharp;
   }
 
-   static String processWhileStatement(WhileStatement statement) {
+  static String processWhileStatement(WhileStatement statement) {
     var csharp = "";
     for (var entity in statement.childEntities) {
       csharp += Implementation.processEntity(entity);
@@ -29,7 +29,10 @@ class Loops {
   static String processForEachStatement(ForEachStatement statement) {
     var csharp = "";
     for (var entity in statement.childEntities) {
-      csharp += Implementation.processEntity(entity);
+      if (entity.toString() == 'for')
+        csharp += 'foreach';
+      else
+        csharp += Implementation.processEntity(entity);
     }
     return csharp;
   }

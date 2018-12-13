@@ -198,6 +198,13 @@ class Naming {
             .map((p) => getFormattedTypeName(p.displayName))
             .join(',');
       }
+
+      // Also a type might be coming back that is Dictionary<String, String>
+      // TODO: we actually need to process each type element
+      
+      // Remove all spaces
+      parameterTypes = parameterTypes.replaceAll(' ', '');
+
       if (elementType.returnType is VoidType) {
         // This is an Action
         if (parameterTypes.isEmpty)
@@ -208,7 +215,7 @@ class Naming {
         // This is a Function
         var returnType = elementType.returnType.name;
         if (parameterTypes.isNotEmpty)
-          return 'Func<$returnType, $parameterTypes>';
+          return 'Func<$returnType,$parameterTypes>';
         else
           return 'Func<$returnType>';
       }
@@ -240,6 +247,7 @@ class Naming {
       var namespace = namespaceFromIdentifier(library.identifier);
       formattedName = namespace + "." + formattedName;
     }
+    
     return formattedName;
   }
 
