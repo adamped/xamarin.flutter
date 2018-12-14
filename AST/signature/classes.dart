@@ -60,13 +60,7 @@ class Classes {
     code.writeln("\n{");
 
     code.writeln("#region constructors");
-
-    // Add private named constructor
-    var className = element.name;
-
-    code.writeln(
-        'private ${className}(string named = "") {\n // Just here to create blank instance \n}');
-
+   
     // Add constructors
     for (var constructor in element.constructors) {
       printConstructor(code, constructor);
@@ -96,8 +90,7 @@ class Classes {
       else // I'm named, hence we are turing into static methods that return an instance
       {
         isStatic = true;
-        code.writeln(
-            'public static ${className} ${Naming.upperCamelCase(constructor.name)}($parameters)');
+        code.writeln('private ${className}($parameters)');        
       }
 
       // Base class call
@@ -116,20 +109,19 @@ class Classes {
 
         // Add auto assignments if any
         var autoAssignment = Methods.printAutoParameters(constructor);
-        if (autoAssignment.isNotEmpty) body = '{' + autoAssignment + '\n' + body.substring(2);
+        if (autoAssignment.isNotEmpty) body = '{\n' + autoAssignment + '\n' + body.substring(2);
+
+// Normal constructor body
+          code.writeln(body);
 
         if (isStatic) {
+          code.writeln(
+            'public static ${className} ${Naming.upperCamelCase(constructor.name)}($parameters)');
           var parameterNames = Methods.printParameterNames(constructor);
           // Call private constructor
           code.writeln(
-              '{\nvar instance = new ${className}(named:"${Naming.upperCamelCase(constructor.name)}"); \ninstance.${Naming.upperCamelCase(constructor.name)}Constructor($parameterNames);\nreturn instance;\n}\n');
-
-          code.writeln(
-              'private void ${Naming.upperCamelCase(constructor.name)}Constructor($parameters) $body');
-        } else {
-          // Normal constructor body
-          code.writeln(body);
-        }
+              '{\nvar instance = new ${className}($parameterNames);\nreturn instance;\n}\n');
+        } 
       } else
         code.writeln('{ }');
     } else
