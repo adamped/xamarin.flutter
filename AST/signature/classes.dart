@@ -64,7 +64,6 @@ class Classes {
     // Add private named constructor
     var className = element.name;
 
-    if (className.startsWith('_')) className = className.substring(1);
     code.writeln(
         'private ${className}(string named = "") {\n // Just here to create blank instance \n}');
 
@@ -86,8 +85,7 @@ class Classes {
     if (constructor.enclosingElement is ClassElement) {
       var isStatic = false;
       var className = constructor.enclosingElement.name;
-      if (className.startsWith('_'))
-        className = className.substring(1, className.length);
+    
       var parameters = Methods.printParameter(constructor, null, null);
       if (constructor.name == '')
         code.writeln('public ${className}($parameters)');

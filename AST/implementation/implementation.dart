@@ -584,14 +584,15 @@ class Implementation {
     var csharp = "";
 
     if (invocation.isCascaded) {
-      var parentEntity = invocation.parent.childEntities.toList()[0];
+      var parentEntity = invocation.parent;
 
-      String processedEntity = '';
-      if (invocation.parent?.parent is VariableDeclaration)
-        processedEntity =
-            processEntity(invocation.parent.parent.childEntities.toList()[0]);
-      else
-        processedEntity = processEntity(parentEntity);
+      while (parentEntity != null &&
+          (parentEntity is! VariableDeclaration &&
+              parentEntity is! AssignmentExpression))
+        parentEntity = parentEntity.parent;
+
+      String processedEntity =
+          processEntity(parentEntity.childEntities.toList()[0]);
 
       csharp += ';\n' + processedEntity + '.';
 
@@ -629,8 +630,7 @@ class Implementation {
     {
       csharp += processMethodElement(identifier.staticElement);
     } else if (identifier.staticElement is EnumElementImpl) {
-      var name = identifier.name;
-      if (name.startsWith('_')) name = name.substring(1);
+      var name = identifier.name;      
       csharp += name;
     } else if (identifier.staticElement is FunctionElement) {
       csharp += processFunctionElement(identifier.staticElement);

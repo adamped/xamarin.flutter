@@ -174,8 +174,7 @@ class Methods {
         variableName =
             Naming.getFormattedName(p.name, NameStyle.UpperCamelCase);
 
-      return variableName +
-          ' = ' +
+      return 'this.$variableName = ' +
           Naming.getFormattedName(p.name, NameStyle.LowerCamelCase) +
           ';';
     }).join('\n');

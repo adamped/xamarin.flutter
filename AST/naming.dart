@@ -193,15 +193,21 @@ class Naming {
       if (elementType.normalParameterTypes == null)
         throw new AssertionError('Its null');
       if (elementType.normalParameterTypes != null) {
-     
-        parameterTypes = elementType.normalParameterTypes
-            .map((p) => getFormattedTypeName(p.displayName))
-            .join(',');
+        parameterTypes = elementType.normalParameterTypes.map((p) {
+          if (p is InterfaceType) {
+            var type = getFormattedTypeName(p.name);
+            var typeArguments = p.typeArguments.map((t) {
+              return getFormattedTypeName(t.displayName);
+            }).join(',');
+            if (typeArguments.isEmpty)
+              return type;
+            else
+              return type + '<$typeArguments>';
+          } else
+            return getFormattedTypeName(p.displayName);
+        }).join(',');
       }
 
-      // Also a type might be coming back that is Dictionary<String, String>
-      // TODO: we actually need to process each type element
-      
       // Remove all spaces
       parameterTypes = parameterTypes.replaceAll(' ', '');
 
@@ -247,7 +253,7 @@ class Naming {
       var namespace = namespaceFromIdentifier(library.identifier);
       formattedName = namespace + "." + formattedName;
     }
-    
+
     return formattedName;
   }
 
@@ -261,6 +267,8 @@ class Naming {
     return getFormattedTypeName(typeName);
   }
 
+  // TODO: I think this should be rebuilt and accept DartType
+  // Then work from there.
   static String getFormattedTypeName(String typeName) {
     var formattedName = typeName;
     if (formattedName.toLowerCase().startsWith("ui."))
@@ -358,8 +366,16 @@ class Naming {
 
   static String escapeFixedWords(String word) {
     var lowerName = word.toLowerCase();
-    if (["event", "object", "delegate", "byte", "fixed", "checked", "base", "decimal"]
-        .any((x) => lowerName == x))
+    if ([
+      "event",
+      "object",
+      "delegate",
+      "byte",
+      "fixed",
+      "checked",
+      "base",
+      "decimal"
+    ].any((x) => lowerName == x))
       return "@" + word;
     else
       return word;
