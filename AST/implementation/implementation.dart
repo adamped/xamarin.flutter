@@ -247,6 +247,8 @@ class Implementation {
       return processFunctionDeclaration(entity);
     } else if (entity is MapLiteralEntry) {
       return Literals.processMapLiteralEntry(entity);
+    } else if (entity is Annotation) {
+      return ''; // Just ignoring these, because properties in the element determine these annotations, I don't need to parse them.
     } else {
       throw new AssertionError('Unknown entity');
     }
@@ -630,7 +632,7 @@ class Implementation {
     {
       csharp += processMethodElement(identifier.staticElement);
     } else if (identifier.staticElement is EnumElementImpl) {
-      var name = identifier.name;      
+      var name = identifier.name;
       csharp += name;
     } else if (identifier.staticElement is FunctionElement) {
       csharp += processFunctionElement(identifier.staticElement);
@@ -789,7 +791,8 @@ class Implementation {
   static String processTypeName(TypeName name) {
     var csharp = '';
 
-    for (var entity in name.childEntities) csharp += processEntity(entity);
+    for (var entity in name.childEntities)
+      csharp += processEntity(entity, overrideIncludeConfig: true);
     return csharp;
   }
 
