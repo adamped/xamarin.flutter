@@ -154,10 +154,12 @@ class Methods {
       }
     }
 
-    if(returnTypeName.contains("List<FlutterSDK.Widgets.Widgetinspector.LocationCount>") ||
-    returnTypeName.contains("List<FlutterSDK.Widgets.Widgetinspector.DiagnosticsPathNode>")){
-          print("ups");
-        }
+    if (returnTypeName.contains(
+            "List<FlutterSDK.Widgets.Widgetinspector.LocationCount>") ||
+        returnTypeName.contains(
+            "List<FlutterSDK.Widgets.Widgetinspector.DiagnosticsPathNode>")) {
+      print("ups");
+    }
 
     return "${returnTypeName} ${methodName}${typeParameter}(${parameter})";
   }
@@ -229,7 +231,16 @@ class Methods {
       if (parameterType == "@") {
         parameterType = "object";
       }
-      var parameterSignature = parameterType + " " + parameterName;
+
+      var parameterSignature = '';
+
+      if (parameterType == 'object') {
+        var computedParameter = p.computeNode();
+        parameterSignature = computedParameter.childEntities.map((p) {
+          return Implementation.processEntity(p, overrideIncludeConfig: true);
+        }).join(' ');
+      } else
+        parameterSignature = parameterType + " " + parameterName;
 
       if (p.hasRequired) {
         parameterSignature = "[NotNull] " + parameterSignature;
