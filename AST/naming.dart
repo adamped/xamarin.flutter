@@ -189,41 +189,48 @@ class Naming {
     String typeName = "object";
     var elementType = element.type;
     if (elementType is FunctionTypeImpl) {
-      var parameterTypes = '';
-      if (elementType.normalParameterTypes == null)
-        throw new AssertionError('Its null');
-      if (elementType.normalParameterTypes != null) {
-        parameterTypes = elementType.normalParameterTypes.map((p) {
-          if (p is InterfaceType) {
-            var type = getFormattedTypeName(p.name);
-            var typeArguments = p.typeArguments.map((t) {
-              return getFormattedTypeName(t.displayName);
-            }).join(',');
-            if (typeArguments.isEmpty)
-              return type;
-            else
-              return type + '<$typeArguments>';
-          } else
-            return getFormattedTypeName(p.displayName);
-        }).join(',');
-      }
+      if (elementType.newPrune != null && elementType.newPrune.length == 1)
+        typeName = elementType.newPrune[0].displayName;
+      else if (elementType.newPrune != null)
+        throw new AssertionError(
+            'Never accounted for elementType to have more than 1 newPrune value.');
+      else {
+        var parameterTypes = '';
+        if (elementType.normalParameterTypes == null)
+          throw new AssertionError('Its null');
+        if (elementType.normalParameterTypes != null) {
+          parameterTypes = elementType.normalParameterTypes.map((p) {
+            if (p is InterfaceType) {
+              var type = getFormattedTypeName(p.name);
+              var typeArguments = p.typeArguments.map((t) {
+                return getFormattedTypeName(t.displayName);
+              }).join(',');
+              if (typeArguments.isEmpty)
+                return type;
+              else
+                return type + '<$typeArguments>';
+            } else
+              return getFormattedTypeName(p.displayName);
+          }).join(',');
+        }
 
-      // Remove all spaces
-      parameterTypes = parameterTypes.replaceAll(' ', '');
+        // Remove all spaces
+        parameterTypes = parameterTypes.replaceAll(' ', '');
 
-      if (elementType.returnType is VoidType) {
-        // This is an Action
-        if (parameterTypes.isEmpty)
-          return 'Action';
-        else
-          return 'Action<$parameterTypes>';
-      } else {
-        // This is a Function
-        var returnType = elementType.returnType.name;
-        if (parameterTypes.isNotEmpty)
-          return 'Func<$returnType,$parameterTypes>';
-        else
-          return 'Func<$returnType>';
+        if (elementType.returnType is VoidType) {
+          // This is an Action
+          if (parameterTypes.isEmpty)
+            return 'Action';
+          else
+            return 'Action<$parameterTypes>';
+        } else {
+          // This is a Function
+          var returnType = elementType.returnType.name;
+          if (parameterTypes.isNotEmpty)
+            return 'Func<$returnType,$parameterTypes>';
+          else
+            return 'Func<$returnType>';
+        }
       }
     } else if (elementType is InterfaceType) {
       typeName = nameWithTypeArguments(element.type, false);
