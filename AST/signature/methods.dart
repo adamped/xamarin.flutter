@@ -1,10 +1,15 @@
+import 'package:analyzer/analyzer.dart';
 import 'package:analyzer/src/dart/element/member.dart';
+import 'package:analyzer/src/dart/element/element.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
+import 'package:analyzer/dart/ast/ast.dart';
+import 'package:front_end/src/scanner/token.dart';
 
 import '../implementation/implementation.dart';
 import '../comments.dart';
 import '../naming.dart';
+import '../types.dart';
 
 class Methods {
   static bool isSameSignature(MethodElement m1, MethodElement m2) {
@@ -44,8 +49,8 @@ class Methods {
 
   static bool overridesParentBaseMethod(
       MethodElement method, ClassElement element) {
-    for (var superType
-        in element.allSupertypes.where((st) => !element.mixins.contains(st))) {
+    for (var superType in element.allSupertypes.where(
+        (st) => st.displayName != "Object" && !element.mixins.contains(st))) {
       if (overridesBaseMethod(method, superType.element)) return true;
     }
     return false;
@@ -143,7 +148,7 @@ class Methods {
 
     // Check if the method has a generic return value
     if (returnType is TypeParameterElement) {
-      returnTypeName = Naming.getDartTypeName(overridenElement.returnType);
+      returnTypeName = Types.getDartTypeName(overridenElement.returnType);
     }
     // Check if the method return type has type arguments with generic values
     if (returnType is InterfaceType) {
@@ -190,65 +195,46 @@ class Methods {
       if (parameterName == "")
         parameterName = "p" + (element.parameters.indexOf(p) + 1).toString();
 
-      if (parameterName == 'decimal') parameterName = '@decimal';
-      if (parameterName == 'object') parameterName = '@object';
-      if (parameterName == 'byte') parameterName == '@byte';
-
       return parameterName;
     }).join(', ');
   }
 
-  static String printParameter(FunctionTypedElement element,
-      FunctionTypedElement overridenElement, InterfaceType implementedClass) {
+  static String printParameter(FunctionTypedElement method,
+      FunctionTypedElement overridenMethod, InterfaceType implementedClass) {
     // Parameter
-    var parameters = element.parameters.map((p) {
+    var parameters = method.parameters.map((p) {
       // Name
       var parameterName =
           Naming.getFormattedName(p.name, NameStyle.LowerCamelCase);
       if (parameterName == "")
-        parameterName = "p" + (element.parameters.indexOf(p) + 1).toString();
+        parameterName = "p" + (method.parameters.indexOf(p) + 1).toString();
 
-      if (parameterName == 'decimal') parameterName = '@decimal';
-      if (parameterName == 'object') parameterName = '@object';
-      if (parameterName == 'byte') parameterName == '@byte';
-
-      // Type
       var parameterType =
-          Naming.getVariableType(p, VariableType.Parameter).split(" ").last;
+          Types.getParameterType(p, method, overridenMethod, implementedClass);
 
-      if (parameterType == 'object' && !p.toString().contains('dynamic'))
-        parameterType = '';
-
-      if (p.type.element is TypeParameterElement && overridenElement != null) {
-        var actualParameterSignature = overridenElement
-            .parameters[element.parameters.indexWhere((x) => x.name == p.name)];
-        parameterType = Naming.getVariableType(
-                actualParameterSignature, VariableType.Parameter)
-            .split(" ")
-            .last;
-      }
-
-      if (parameterType == "@") {
+      if (parameterType == null) {
         parameterType = "object";
       }
 
-      var parameterSignature = '';
+      var parameterSignature = parameterType + " " + parameterName;
 
-      if (parameterType == 'object') {
-        var computedParameter = p.computeNode();
-        parameterSignature = computedParameter.childEntities.map((p) {
-          return Implementation.processEntity(p, overrideIncludeConfig: true);
-        }).join(' ');
-      } else
-        parameterSignature = parameterType + " " + parameterName;
-
-      if (p.hasRequired) {
+      // Add keys
+      // Required
+      if (p.hasRequired || p.toString().contains("@required")) {
         parameterSignature = "[NotNull] " + parameterSignature;
       }
 
+      // Optional
       if (p.isOptional) {
-        parameterSignature += " = default(${parameterType})";
-      }
+        var defaultValue = "default(${parameterType})";
+
+        // Get correct default value
+        //if (p is ConstVariableElement && p.defaultValueCode != null) {
+        //   defaultValue = p.defaultValueCode;
+        // }
+
+        parameterSignature += " = ${defaultValue}";
+      } 
       return parameterSignature;
     });
     return parameters == null ? "" : parameters.join(",");

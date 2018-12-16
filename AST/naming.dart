@@ -5,6 +5,7 @@ import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/src/dart/element/type.dart';
 
 import 'config.dart';
+import 'types.dart';
 
 class Naming {
   static List<String> namespacePartsFromIdentifier(String identifier) {
@@ -43,7 +44,7 @@ class Naming {
     if (isInterface) name = "I" + name;
     var typeArguments = new List<String>();
     for (var argument in type.typeArguments) {
-      typeArguments.add(getDartTypeName(argument));
+      typeArguments.add(Types.getDartTypeName(argument));
     }
     if (typeArguments.length > 0) {
       name += "<${typeArguments.join(",")}>";
@@ -60,7 +61,7 @@ class Naming {
     // }
     var typeArguments = new List<String>();
     for (var argument in type.typeArguments) {
-      typeArguments.add(getDartTypeName(argument));
+      typeArguments.add(Types.getDartTypeName(argument));
     }
     if (typeArguments.length > 0) {
       name += "<${typeArguments.join(",")}>";
@@ -162,108 +163,7 @@ class Naming {
 
     return text;
   }
-
-  static String getDartTypeName(DartType type) {
-    String typeName = "object";
-    if (type is InterfaceType) {
-      typeName = nameWithTypeArguments(type, false);
-    } else if (type is TypeParameterType) {
-      typeName = type.displayName;
-    }
-    var formattedName = getFormattedTypeName(typeName);
-
-    if (!(type is TypeParameterType) && type.element != null) {
-      var library = type.element.library;
-      if (library != null &&
-          !Config.ignoredImports.contains(library.identifier) &&
-          formattedName != "object") {
-        var namespace = namespaceFromIdentifier(library.identifier);
-        formattedName = namespace + "." + formattedName;
-      }
-    }
-
-    return formattedName;
-  }
-
-  static String getVariableType(VariableElement element, VariableType type) {
-    String typeName = "object";
-    var elementType = element.type;
-    if (elementType is FunctionTypeImpl) {
-      if (elementType.newPrune != null && elementType.newPrune.length == 1)
-        typeName = elementType.newPrune[0].displayName;
-      else if (elementType.newPrune != null)
-        throw new AssertionError(
-            'Never accounted for elementType to have more than 1 newPrune value.');
-      else {
-        var parameterTypes = '';
-        if (elementType.normalParameterTypes == null)
-          throw new AssertionError('Its null');
-        if (elementType.normalParameterTypes != null) {
-          parameterTypes = elementType.normalParameterTypes.map((p) {
-            if (p is InterfaceType) {
-              var type = getFormattedTypeName(p.name);
-              var typeArguments = p.typeArguments.map((t) {
-                return getFormattedTypeName(t.displayName);
-              }).join(',');
-              if (typeArguments.isEmpty)
-                return type;
-              else
-                return type + '<$typeArguments>';
-            } else
-              return getFormattedTypeName(p.displayName);
-          }).join(',');
-        }
-
-        // Remove all spaces
-        parameterTypes = parameterTypes.replaceAll(' ', '');
-
-        if (elementType.returnType is VoidType) {
-          // This is an Action
-          if (parameterTypes.isEmpty)
-            return 'Action';
-          else
-            return 'Action<$parameterTypes>';
-        } else {
-          // This is a Function
-          var returnType = elementType.returnType.name;
-          if (parameterTypes.isNotEmpty)
-            return 'Func<$returnType,$parameterTypes>';
-          else
-            return 'Func<$returnType>';
-        }
-      }
-    } else if (elementType is InterfaceType) {
-      typeName = nameWithTypeArguments(element.type, false);
-    } else if (elementType is TypeParameterType) {
-      typeName = elementType.displayName;
-    } else if (element.computeNode() != null) {
-      switch (type) {
-        case VariableType.Field:
-          typeName =
-              tokenToText(element.computeNode().beginToken.previous, true)
-                  .split(" ")
-                  .first;
-          break;
-        case VariableType.Parameter:
-          typeName = tokenToText(element.computeNode().endToken.previous, true)
-              .split(" ")
-              .last;
-          break;
-      }
-    }
-    var formattedName = getFormattedTypeName(typeName);
-    var library = elementType.element.library;
-    if (!(element.type is TypeParameterType) &&
-        library != null &&
-        !Config.ignoredImports.contains(library.identifier) &&
-        formattedName != "object") {
-      var namespace = namespaceFromIdentifier(library.identifier);
-      formattedName = namespace + "." + formattedName;
-    }
-
-    return formattedName;
-  }
-
+ 
   static String getTypeParameterName(TypeParameterElement element) {
     String typeName = "object";
 
@@ -381,7 +281,8 @@ class Naming {
       "fixed",
       "checked",
       "base",
-      "decimal"
+      "decimal",
+      "byte"
     ].any((x) => lowerName == x))
       return "@" + word;
     else

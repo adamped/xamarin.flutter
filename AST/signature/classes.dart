@@ -3,6 +3,7 @@ import 'package:analyzer/dart/element/type.dart';
 
 import '../comments.dart';
 import '../naming.dart';
+import 'constructors.dart';
 import 'fields.dart';
 import 'methods.dart';
 import '../implementation/implementation.dart';
@@ -63,7 +64,7 @@ class Classes {
 
     // Add constructors
     for (var constructor in element.constructors) {
-      printConstructor(code, constructor);
+      Constructors.printConstructor(code, constructor);
     }
     code.writeln("#endregion\n");
 
@@ -72,62 +73,6 @@ class Classes {
 
     code.writeln("}");
     return code.toString();
-  }
-
-  static void printConstructor(
-      StringBuffer code, ConstructorElement constructor) {
-    if (constructor.enclosingElement is ClassElement) {
-      var isStatic = false;
-      var className = constructor.enclosingElement.name;
-
-      var parameters = Methods.printParameter(constructor, null, null);
-      if (constructor.name == '')
-        code.writeln('public ${className}($parameters)');
-      else if (constructor.name == '_')
-        code.writeln('internal ${className}($parameters)');
-      else if (constructor.name.startsWith('_'))
-        code.writeln('internal ${className}($parameters)');
-      else // I'm named, hence we are turing into static methods that return an instance
-      {
-        isStatic = true;
-        code.writeln('private ${className}($parameters)');
-      }
-
-      // Base class call
-      if (constructor.redirectedConstructor != null) {
-        var baseCall = constructor.redirectedConstructor;
-        var baseParameters = Methods.printParameterNames(baseCall);
-
-        code.writeln(': base($baseParameters)');
-      }
-
-      // Fill out Constructor body
-      var node = constructor.computeNode();
-      if (node != null) {
-        var body =
-            Implementation.MethodBody(node.body, overrideIncludeConfig: true);
-
-        // Add auto assignments if any
-        var autoAssignment = Methods.printAutoParameters(constructor);
-        if (autoAssignment.isNotEmpty)
-          body = '{\n' + autoAssignment + '\n' + body.substring(2);
-
-        // Normal constructor body
-        code.writeln(body);
-
-        if (isStatic) {
-          code.writeln(
-              'public static ${className} ${Naming.upperCamelCase(constructor.name)}($parameters)');
-          var parameterNames = Methods.printParameterNames(constructor);
-          // Call private constructor
-          code.writeln(
-              '{\nvar instance = new ${className}($parameterNames);\nreturn instance;\n}\n');
-        }
-      } else
-        code.writeln('{ }');
-    } else
-      throw new AssertionError(
-          'A constructor is not inside a ClassElement, that should not happen.');
   }
 
   static void printFieldsAndMethods(
