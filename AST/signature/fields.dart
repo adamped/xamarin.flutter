@@ -3,6 +3,7 @@ import 'package:analyzer/dart/element/type.dart';
 import 'package:analyzer/src/dart/element/member.dart';
 import '../implementation/implementation.dart';
 import '../naming.dart';
+import '../types.dart';
 
 class Fields {
   static bool containsGenericPart(DartType type) {
@@ -181,7 +182,7 @@ class Fields {
   }
 
   static String printTypeAndName(FieldElement element) {
-    var type = Naming.getVariableType(element, VariableType.Field);
+    var type = Types.getVariableType(element, VariableType.Field);
     var name = getFieldName(element);
     if (name == Naming.nameWithTypeParameters(element.enclosingElement, false))
       name = name + "Value";
@@ -190,7 +191,7 @@ class Fields {
 
   static String printImplementedTypeAndName(
       FieldElement element, ClassElement supertypeThatProvidesField) {
-    var type = Naming.getVariableType(element, VariableType.Field);
+    var type = Types.getVariableType(element, VariableType.Field);
     var name = getFieldName(element);
     if (name == Naming.nameWithTypeParameters(element.enclosingElement, false))
       name = name + "Value";

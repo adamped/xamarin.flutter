@@ -651,11 +651,8 @@ class Implementation {
   }
 
   static String processPrefixedIdentifier(PrefixedIdentifier identifier) {
-    var csharp = "";
-    for (var entity in identifier.childEntities) {
-      csharp += processEntity(entity);
-    }
-    return csharp;
+    var last = identifier.childEntities.last.toString();
+    return last;
   }
 
   static String processMethodElement(MethodElement element) {
