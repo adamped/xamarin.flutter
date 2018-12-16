@@ -19,14 +19,14 @@ class Types {
     } else if (type is TypeParameterType) {
       typeName = type.displayName;
     }
-    var formattedName =  Naming.getFormattedTypeName(typeName);
+    var formattedName = Naming.getFormattedTypeName(typeName);
 
     if (!(type is TypeParameterType) && type.element != null) {
       var library = type.element.library;
       if (library != null &&
           !Config.ignoredImports.contains(library.identifier) &&
           formattedName != "object") {
-        var namespace =  Naming.namespaceFromIdentifier(library.identifier);
+        var namespace = Naming.namespaceFromIdentifier(library.identifier);
         formattedName = namespace + "." + formattedName;
       }
     }
@@ -147,9 +147,7 @@ class Types {
     }
 
     var parameterType =
-        getVariableType(parameter, VariableType.Parameter)
-            .split(" ")
-            .last;
+        getVariableType(parameter, VariableType.Parameter).split(" ").last;
 
     if (parameterType == "@") {
       parameterType = "object";
@@ -188,7 +186,14 @@ class Types {
       // Two child entities, type + name
     } else if (childEntities.length == 2) {
       if (expectedTypeEntity is TypeName) {
-        return Implementation.processTypeName(expectedTypeEntity);
+        // Check if this is a prefixed identifier eg. 'ui.actualType'
+        if (expectedTypeEntity.childEntities.length == 1 &&
+            expectedTypeEntity.childEntities.first is PrefixedIdentifier) {
+          var prefixedIdentifier =
+              expectedTypeEntity.childEntities.first as PrefixedIdentifier;
+          return prefixedIdentifier.childEntities.last.toString();
+        } else
+          return Implementation.processTypeName(expectedTypeEntity);
       } else {
         throw new AssertionError("Parameter uses unexpected type.");
       }
