@@ -13,7 +13,7 @@ class Config {
       .replaceAll('\\AST\\..', '');
 
   // Absolute path to the dart-sdk directory
-  static String DartSdkPath = "D:\\Dart\\dart-sdk";
+  static String DartSdkPath = "C:\\Program Files\\Dart\\dart-sdk";
 
   // Root namespace the transpiled namespaces will start with
   static String rootNamespace = "FlutterSDK";
