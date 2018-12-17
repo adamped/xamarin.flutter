@@ -4,8 +4,8 @@ import 'package:analyzer/dart/ast/syntactic_entity.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/src/dart/element/element.dart';
 import 'package:front_end/src/scanner/token.dart';
-import '../config.dart';
 import '../naming.dart';
+import '../config.dart';
 import 'loops.dart';
 import 'exceptions.dart';
 import 'literals.dart';
@@ -13,63 +13,45 @@ import 'conditionals.dart';
 
 /// Provides methods to transpile the body of elements
 class Implementation {
-  static String MethodBody(FunctionBody body,
-      {bool overrideIncludeConfig = false}) {
-    if (!Config.includeImplementations && !overrideIncludeConfig)
-      return "{\nthrow new NotImplementedException();\n}";
-
-    if (body is EmptyFunctionBody) {
-      var parent = body.parent;
-      if (parent is MethodDeclaration &&
-          parent.returnType != null &&
-          parent.returnType.toString() != 'void')
-        return '{ \nreturn default(${processEntity(parent.returnType)}); \n}';
-      else
-        return '{ \n}'; // No code;
-    } else if (body is BlockFunctionBody) {
-      return processBlockFunction(body,
-          overrideIncludeConfig: overrideIncludeConfig);
-    } else if (body is ExpressionFunctionBody) {
-      return processExpressionFunction(body,
-          overrideIncludeConfig: overrideIncludeConfig);
-    } else {
-      // Nothing comes here, so I have implemented all for now.
-      // But this is here in case something in the future appears
-      // and needs to be accounted for.
-      throw new AssertionError('Function block is not defined');
-    }
+  static String MethodBody(FunctionBody body) {
+    if (Config.includeMethodImplementations) {
+      if (body is EmptyFunctionBody) {
+        var parent = body.parent;
+        if (parent is MethodDeclaration &&
+            parent.returnType != null &&
+            parent.returnType.toString() != 'void')
+          return '{ \nreturn default(${processEntity(parent.returnType)}); \n}';
+        else
+          return '{ \n}'; // No code;
+      } else if (body is BlockFunctionBody) {
+        return processBlockFunction(body);
+      } else if (body is ExpressionFunctionBody) {
+        return processExpressionFunction(body);
+      } else {
+        // Nothing comes here, so I have implemented all for now.
+        // But this is here in case something in the future appears
+        // and needs to be accounted for.
+        throw new AssertionError('Function block is not defined');
+      }
+    } else
+      return '{ throw new NotImplementedException(); }';
   }
 
-  static String processExpressionFunction(ExpressionFunctionBody body,
-      {bool overrideIncludeConfig: false}) {
-    if (!Config.includeImplementations && !overrideIncludeConfig)
-      return "\nthrow new NotImplementedException()";
-
-    var impl = Config.includeImplementations;
-    Config.includeImplementations = true;
+  static String processExpressionFunction(ExpressionFunctionBody body) {
     var rawBody = "";
     for (var child in body.childEntities) {
-      rawBody +=
-          processEntity(child, overrideIncludeConfig: overrideIncludeConfig);
+      rawBody += processEntity(child);
     }
-    Config.includeImplementations = impl;
+
     return rawBody + '\n';
   }
 
-  static String processBlockFunction(BlockFunctionBody body,
-      {bool overrideIncludeConfig: false}) {
-    if (!Config.includeImplementations && !overrideIncludeConfig)
-      return "\nthrow new NotImplementedException();\n";
-
+  static String processBlockFunction(BlockFunctionBody body) {
     var rawBody = "\n";
-    var impl = Config.includeImplementations;
-    Config.includeImplementations = true;
     for (var child in body.childEntities) {
       if (child is Block) {
         for (var entity in child.childEntities) {
-          rawBody += processEntity(entity,
-                  overrideIncludeConfig: overrideIncludeConfig) +
-              "\n";
+          rawBody += processEntity(entity) + "\n";
         }
       } else if (child is KeywordToken) {
         rawBody += child.toString() + "\n";
@@ -78,7 +60,6 @@ class Implementation {
       } else
         rawBody += "\n// Block Function type not dealt with $child";
     }
-    Config.includeImplementations = impl;
 
     return rawBody + "\n";
   }
@@ -98,14 +79,7 @@ class Implementation {
     return '';
   }
 
-  static String processEntity(SyntacticEntity entity,
-      {bool overrideIncludeConfig: false}) {
-    if (!Config.includeImplementations && !overrideIncludeConfig)
-      return "\nthrow new NotImplementedException();\n";
-
-    // if (entity.toString().contains('_TrainHopping'))
-    // entity.toString();
-
+  static String processEntity(SyntacticEntity entity) {
     if (startCastMapping) {
       var castMap = processCastMap(entity);
       if (castMap.isNotEmpty) return castMap;
@@ -791,23 +765,22 @@ class Implementation {
   static String processTypeName(TypeName name) {
     var csharp = '';
 
-    for (var entity in name.childEntities)
-      csharp += processEntity(entity, overrideIncludeConfig: true);
+    for (var entity in name.childEntities) csharp += processEntity(entity);
     return csharp;
   }
 
   static String fieldBody(PropertyAccessorElement element) {
-    if (!Config.includeImplementations)
-      return "\nthrow new NotImplementedException();\n";
+    if (Config.includeFieldImplementations) {
+      // TODO: this is all messed up anyway
+      var body = element.computeNode();
+      var bodyLines = Naming.tokenToText(body.beginToken, false).split("\n");
+      var rawBody = bodyLines.map((l) => "${l}\n").join();
 
-    // TODO: this is all messed up anyway
-    var body = element.computeNode();
-    var bodyLines = Naming.tokenToText(body.beginToken, false).split("\n");
-    var rawBody = bodyLines.map((l) => "${l}\n").join();
-
-    // Transpile logic comes here
-    var transpiledBody = "throw new NotImplementedException();";
-    return transpiledBody;
+      // Transpile logic comes here
+      var transpiledBody = "throw new NotImplementedException();";
+      return transpiledBody;
+    } else
+      return 'throw new NotImplementedException();';
   }
 
   static String functionBody(FunctionElement element) {

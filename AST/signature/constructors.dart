@@ -3,6 +3,7 @@ import 'package:analyzer/dart/element/element.dart';
 import '../implementation/implementation.dart';
 import '../naming.dart';
 import 'methods.dart';
+import '../config.dart';
 
 class Constructors {
   static void printConstructor(
@@ -35,9 +36,13 @@ class Constructors {
       // Fill out Constructor body
       var node = constructor.computeNode();
       if (node != null) {
-        var body =
-            Implementation.MethodBody(node.body);
+        var body = '';
 
+        if (Config.includeConstructorImplementations)
+          body = Implementation.MethodBody(node.body);
+        else
+          body = '{ throw new NotImplementedException(); }';
+          
         // Add auto assignments if any
         var autoAssignment = Methods.printAutoParameters(constructor);
         if (autoAssignment.isNotEmpty)
