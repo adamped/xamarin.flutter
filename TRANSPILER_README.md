@@ -13,7 +13,7 @@ and place this file directly in `flutter/lib` in this solution.
 
 2) Install [Dart SDK](https://www.dartlang.org/tools/sdk#install) on your computer.
 
-3) Open `analyzer.dart` and change `D:\\Dart\\dart-sdk` to the location of your Dart SDK.
+3) Open `analyzer.dart` and change `D:\\Dart\\dart-sdk` in `AST\config.dart` to the location of your Dart SDK.
 
 4) In a terminal window or command prompt, run `dart analyzer`.
 
