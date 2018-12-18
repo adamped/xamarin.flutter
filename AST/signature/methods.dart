@@ -13,7 +13,8 @@ import '../types.dart';
 
 class Methods {
   static bool isSameSignature(MethodElement m1, MethodElement m2) {
-    return methodSignature(m1, m1, null) == methodSignature(m2, m2, null);
+    return methodSignature(m1, m1, null, false) ==
+        methodSignature(m2, m2, null, false);
   }
 
   static bool overridesBaseMethod(MethodElement method, ClassElement element) {
@@ -57,7 +58,8 @@ class Methods {
   }
 
   static String printMethod(
-      MethodElement element, bool insideMixin, bool isOverride) {
+      MethodElement element, bool insideMixin, bool isOverride,
+      [String inheritedType = '']) {
     var baseMethod = getBaseMethodInClass(element);
 
     var code = new StringBuffer();
@@ -78,7 +80,8 @@ class Methods {
     else if (element.hasOverride == false && element.isPrivate == false)
       code.write("virtual ");
 
-    code.write(methodSignature(baseMethod, element, null));
+    code.write(
+        methodSignature(baseMethod, element, null, isOverride, inheritedType));
     code.writeln(Implementation.MethodBody(element.computeNode().body));
 
     return code.toString();
@@ -104,7 +107,7 @@ class Methods {
     if (element.hasSealed == true) code.write("sealed ");
     code.write("virtual ");
 
-    code.write(methodSignature(baseMethod, element, implementedClass));
+    code.write(methodSignature(baseMethod, element, implementedClass, false));
 
     if (overrideMethod == null) {
       code.write("{");
@@ -128,8 +131,12 @@ class Methods {
     return false;
   }
 
-  static String methodSignature(MethodElement element,
-      MethodElement overridenElement, InterfaceType implementedClass) {
+  static String methodSignature(
+      MethodElement element,
+      MethodElement overridenElement,
+      InterfaceType implementedClass,
+      bool isOverride,
+      [String inheritedType = '']) {
     var methodName = Naming.nameWithTypeParameters(element, false);
     if (methodName ==
         Naming.nameWithTypeParameters(element.enclosingElement, false))
@@ -150,6 +157,7 @@ class Methods {
     if (returnType is TypeParameterElement) {
       returnTypeName = Types.getDartTypeName(overridenElement.returnType);
     }
+
     // Check if the method return type has type arguments with generic values
     if (returnType is InterfaceType) {
       var hasTypedTypeArguments = returnType.typeArguments
@@ -164,6 +172,10 @@ class Methods {
         returnTypeName.contains(
             "List<FlutterSDK.Widgets.Widgetinspector.DiagnosticsPathNode>")) {
       print("ups");
+    }
+
+    if (isOverride && returnTypeName == 'T') {
+      returnTypeName = inheritedType;
     }
 
     return "${returnTypeName} ${methodName}${typeParameter}(${parameter})";
@@ -234,7 +246,7 @@ class Methods {
         // }
 
         parameterSignature += " = ${defaultValue}";
-      } 
+      }
       return parameterSignature;
     });
     return parameters == null ? "" : parameters.join(",");

@@ -42,7 +42,7 @@ class Constructors {
           body = Implementation.MethodBody(node.body);
         else
           body = '{ throw new NotImplementedException(); }';
-          
+
         // Add auto assignments if any
         var autoAssignment = Methods.printAutoParameters(constructor);
         if (autoAssignment.isNotEmpty)

@@ -58,6 +58,17 @@ class Classes {
 
     if (inheritions.length > 0) code.write(" : " + inheritions.join(","));
 
+    var inheritedType = '';
+    // HACK: Inherited Generic Type Parameter
+    // This is a hack because we should be applying this to the specific
+    // methods its overriding, but seeing if I can get away with this for the moment.
+    if (inheritions.length == 1) {
+      var value = inheritions[0];
+      if (value.contains('<'))
+        inheritedType =
+            value.substring(value.indexOf('<') + 1, value.indexOf('>'));
+    }
+
     code.writeln("\n{");
 
     code.writeln("#region constructors");
@@ -69,14 +80,14 @@ class Classes {
     code.writeln("#endregion\n");
 
     // Add fields and methods
-    printFieldsAndMethods(code, element, implementWithInterface);
+    printFieldsAndMethods(code, element, implementWithInterface, inheritedType);
 
     code.writeln("}");
     return code.toString();
   }
 
-  static void printFieldsAndMethods(
-      StringBuffer code, ClassElement element, bool implementWithInterface) {
+  static void printFieldsAndMethods(StringBuffer code, ClassElement element,
+      bool implementWithInterface, String inheritedType) {
     // Add mixin fields and method implementations
     code.writeln("#region inherited methods and fields");
     var overridenImplementations = new List<ClassMemberElement>();
@@ -139,7 +150,7 @@ class Classes {
         !overridenImplementations.any((x) => x.name == m.name) &&
         !implementedVariables.any((x) => x.name == m.name))) {
       code.writeln(Methods.printMethod(method, implementWithInterface,
-          Methods.overridesParentBaseMethod(method, element)));
+          Methods.overridesParentBaseMethod(method, element), inheritedType));
     }
     code.writeln("#endregion");
   }
@@ -274,7 +285,8 @@ class Classes {
     for (var method in element.methods
         .where((method) => method.isPublic || method.hasProtected)) {
       var baseMethod = Methods.getBaseMethodInClass(method);
-      code.writeln(Methods.methodSignature(baseMethod, method, null) + ";");
+      code.writeln(
+          Methods.methodSignature(baseMethod, method, null, false) + ";");
     }
 
     for (var field in element.fields
