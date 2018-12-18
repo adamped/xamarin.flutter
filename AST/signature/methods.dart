@@ -221,6 +221,9 @@ class Methods {
       if (parameterName == "")
         parameterName = "p" + (method.parameters.indexOf(p) + 1).toString();
 
+
+      if (parameterName.toLowerCase().contains('onswitchedtrain'))
+      parameterName = parameterName;
       var parameterType =
           Types.getParameterType(p, method, overridenMethod, implementedClass);
 

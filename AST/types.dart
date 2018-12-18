@@ -171,9 +171,12 @@ class Types {
         .any((ignored) => firstEntityName == ignored)) {
       childEntities = childEntities.skip(1);
     }
-
+  
     // this first element should be the element, that represents the type
     var expectedTypeEntity = childEntities.elementAt(0);
+
+    // if (expectedTypeEntity is !SimpleFormalParameter)
+    //   expectedTypeEntity = expectedTypeEntity.parent
 
     // One child entity, parameter might be wrapped
     if (childEntities.length == 1) {
@@ -211,6 +214,14 @@ class Types {
           (f) => f.displayName == parameter.name,
           orElse: () => null);
       if (field != null && field is FieldElementImpl) {
+        var computed = field.computeNode();
+        var parent = computed.parent;
+        if (parent is VariableDeclarationList)
+        {
+          var type = parent.type;
+          if (type is TypeName)
+            return Implementation.processEntity(type);
+        }
         return getDartTypeName(field.type);
       } else {
         throw new AssertionError(
