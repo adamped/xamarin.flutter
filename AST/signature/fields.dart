@@ -110,6 +110,7 @@ class Fields {
       FieldElement overridingElement,
       InterfaceType implementedClass,
       String implementedFieldName) {
+
     var code = new StringBuffer();
     var elementForSignature =
         overridingElement != null ? overridingElement : element;
@@ -128,7 +129,10 @@ class Fields {
           (tp) => element.type.displayName.contains(tp.type.displayName));
       var type = implementedClass.typeArguments[
           implementedClass.typeParameters.indexOf(typeParameter)];
-      code.write("${type} ${name}");
+      if (type.name == 'T')
+        code.write('${type.name} $name');
+      else
+        code.write("${element.type.name}<${type.name}> $name");
     } else {
       code.write(printTypeAndName(element));
     }
