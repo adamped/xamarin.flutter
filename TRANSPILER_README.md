@@ -8,14 +8,14 @@ In the AST folder is `analyzer.dart`, which uses the Dart Analyzer to create a S
 
 ### Running the Dart Analyzer
 
-1) The Flutter SDK isn't included in this project. Download the latest directly from [Flutter GitHub Repo](https://github.com/flutter/flutter/tree/master/packages/flutter/lib)
-and place this file directly in `flutter/lib` in this solution.
+1. The Flutter SDK isn't included in this project. Install it and make sure that its `bin` directory is in PATH.
+2.  Run `download-flutter.ps1` script in flutter sub directory (make sure that PATH from previous step is applied, or if it wasn't, run `flutter packages get` manually).
 
-2) Install [Dart SDK](https://www.dartlang.org/tools/sdk#install) on your computer.
+3. Install [Dart SDK](https://www.dartlang.org/tools/sdk#install) on your computer.
 
-3) Open `analyzer.dart` and change `D:\\Dart\\dart-sdk` to the location of your Dart SDK.
+4. Make sure there is a DART_SDK environment  variable pointing to `dart_sdk` directory. Optionally add its bin directory to PATH (if not already).
 
-4) In a terminal window or command prompt, run `dart analyzer`.
+5. In a terminal window or command prompt, run `dart analyzer`.
 
 This will run through the Flutter SDK and create an equivalent *.cs files.
 
