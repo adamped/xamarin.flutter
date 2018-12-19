@@ -44,7 +44,7 @@ class Constructors {
           body = '{ throw new NotImplementedException(); }';
 
         // Add auto assignments if any
-        var autoAssignment = Methods.printAutoParameters(constructor);
+        var autoAssignment = Methods.printAutoParameters(constructor, className);
         if (autoAssignment.isNotEmpty)
           body = '{\n' + autoAssignment + '\n' + body.substring(2);
 

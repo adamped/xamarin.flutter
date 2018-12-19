@@ -86,8 +86,19 @@ class Types {
         throw new AssertionError(
             'Never accounted for elementType to have more than 1 newPrune value.');
       }
+
       var typeName = elementType.newPrune[0].displayName;
-      return addNamespace(elementType, typeName);
+
+      var typeAndNamespace = addNamespace(elementType, typeName);
+
+      if (elementType.typeArguments.length > 0) {
+        var typeParameters = elementType.typeArguments.map((p) {         
+          return p.displayName;
+        }).join(',');
+        typeAndNamespace = '$typeAndNamespace<${typeParameters}>';
+      }
+
+      return typeAndNamespace;
     }
     // Type did not have newPrune, resolve the func or action manually
 
@@ -146,6 +157,10 @@ class Types {
           method.parameters.indexWhere((x) => x.name == parameter.name)];
     }
 
+    if (parameter.toString().toLowerCase().contains('onchanged')) {
+      parameter.toString();
+    }
+
     var parameterType =
         getVariableType(parameter, VariableType.Parameter).split(" ").last;
 
@@ -171,12 +186,9 @@ class Types {
         .any((ignored) => firstEntityName == ignored)) {
       childEntities = childEntities.skip(1);
     }
-  
+
     // this first element should be the element, that represents the type
     var expectedTypeEntity = childEntities.elementAt(0);
-
-    // if (expectedTypeEntity is !SimpleFormalParameter)
-    //   expectedTypeEntity = expectedTypeEntity.parent
 
     // One child entity, parameter might be wrapped
     if (childEntities.length == 1) {
@@ -216,18 +228,16 @@ class Types {
       if (field != null && field is FieldElementImpl) {
         var computed = field.computeNode();
         var parent = computed.parent;
-        if (parent is VariableDeclarationList)
-        {
+        if (parent is VariableDeclarationList) {
           var type = parent.type;
-          if (type is TypeName)
-            return Implementation.processEntity(type);
+
+          if (type is TypeName) return Implementation.processEntity(type);
         }
         return getDartTypeName(field.type);
       } else {
         throw new AssertionError(
             "Could not find field for initialization parameter.");
       }
-
       // Check if the extra entities contain the default value
     } else if (parameter.isOptional) {
       if (expectedTypeEntity is TypeName) {

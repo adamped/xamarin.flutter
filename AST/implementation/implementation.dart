@@ -764,7 +764,8 @@ class Implementation {
 
   static String processTypeName(TypeName name) {
     var csharp = '';
-
+    if (name.toString().toLowerCase().contains('valuechanged'))
+    name = name;
     for (var entity in name.childEntities) csharp += processEntity(entity);
     return csharp;
   }

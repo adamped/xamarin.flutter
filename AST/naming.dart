@@ -163,7 +163,7 @@ class Naming {
 
     return text;
   }
- 
+
   static String getTypeParameterName(TypeParameterElement element) {
     String typeName = "object";
 
@@ -228,10 +228,13 @@ class Naming {
     } else if (formattedName == "-") {
       formattedName = "subtractOperator";
     } else {
-      var reAddUnderscore = formattedName.startsWith("_");
-      formattedName = formattedName.replaceAll("_", "").replaceAll("-", "");
-      if (reAddUnderscore) {
-        formattedName = "_" + formattedName;
+      // We can't do this for names with namespaces already, since it doesn't quite work.
+      if (!formattedName.contains('.')) {
+        var reAddUnderscore = formattedName.startsWith("_");
+        formattedName = formattedName.replaceAll("_", "").replaceAll("-", "");
+        if (reAddUnderscore) {
+          formattedName = "_" + formattedName;
+        }
       }
     }
     if (style != NameStyle.LeadingUnderscoreLowerCamelCase) {
@@ -264,11 +267,31 @@ class Naming {
   }
 
   static String lowerCamelCase(String name) {
-    return name[0].toLowerCase() + name.replaceRange(0, 1, "");
+    if (name.length == 1) return name;
+
+    var underscore = name.startsWith('_');
+
+    if (underscore) name = name.substring(1);
+
+    var newName = name[0].toLowerCase() + name.replaceRange(0, 1, "");
+
+    if (underscore) newName = '_' + newName;
+
+    return newName;
   }
 
   static String upperCamelCase(String name) {
-    return name[0].toUpperCase() + name.replaceRange(0, 1, "");
+    if (name.length == 1) return name;
+
+    var underscore = name.startsWith('_');
+
+    if (underscore) name = name.substring(1);
+
+    var newName = name[0].toUpperCase() + name.replaceRange(0, 1, "");
+
+    if (underscore) newName = '_' + newName;
+
+    return newName;
   }
 
   static String escapeFixedWords(String word) {

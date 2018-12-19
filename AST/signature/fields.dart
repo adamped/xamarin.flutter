@@ -95,8 +95,7 @@ class Fields {
         if (implementedGetter)
           code.write("set { ${Implementation.fieldBody(element.setter)} }");
         else
-          code.write(
-              "private set;"); // For static auto initialization of variables
+          code.write("set;"); // For static auto initialization of variables
       }
       code.write("}");
     } else
@@ -151,7 +150,7 @@ class Fields {
       if (hasSetter) {
         code.write("set => ${implementedFieldName}.${name} = value;");
       } else {
-        code.write("private set => ${implementedFieldName}.${name} = value;");
+        code.write("set => ${implementedFieldName}.${name} = value;");
       }
       code.write("}");
     } else
@@ -187,10 +186,12 @@ class Fields {
   }
 
   static String printTypeAndName(FieldElement element) {
-    var type = Types.getVariableType(element, VariableType.Field);
     var name = getFieldName(element);
     if (name == Naming.nameWithTypeParameters(element.enclosingElement, false))
       name = name + "Value";
+
+    var type = Types.getVariableType(element, VariableType.Field);
+
     return "${type} ${name}";
   }
 

@@ -181,7 +181,8 @@ class Methods {
     return "${returnTypeName} ${methodName}${typeParameter}(${parameter})";
   }
 
-  static String printAutoParameters(FunctionTypedElement element) {
+  static String printAutoParameters(
+      FunctionTypedElement element, String className) {
     return element.parameters.where((x) {
       return x.isInitializingFormal == true;
     }).map((p) {
@@ -192,6 +193,9 @@ class Methods {
       else
         variableName =
             Naming.getFormattedName(p.name, NameStyle.UpperCamelCase);
+
+      // I don't really like renaming variables, but not sure what other choice we have atm.
+      if (variableName == className) variableName += 'Value';
 
       return 'this.$variableName = ' +
           Naming.getFormattedName(p.name, NameStyle.LowerCamelCase) +
@@ -220,10 +224,7 @@ class Methods {
           Naming.getFormattedName(p.name, NameStyle.LowerCamelCase);
       if (parameterName == "")
         parameterName = "p" + (method.parameters.indexOf(p) + 1).toString();
-
-
-      if (parameterName.toLowerCase().contains('onswitchedtrain'))
-      parameterName = parameterName;
+      
       var parameterType =
           Types.getParameterType(p, method, overridenMethod, implementedClass);
 
