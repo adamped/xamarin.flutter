@@ -80,6 +80,8 @@ class Methods {
     else if (element.hasOverride == false && element.isPrivate == false)
       code.write("virtual ");
 
+    
+
     code.write(
         methodSignature(baseMethod, element, null, isOverride, inheritedType));
     code.writeln(Implementation.MethodBody(element.computeNode().body));
@@ -218,20 +220,22 @@ class Methods {
   static String printParameter(FunctionTypedElement method,
       FunctionTypedElement overridenMethod, InterfaceType implementedClass) {
     // Parameter
-    var parameters = method.parameters.map((p) {
+
+    var highestMethod = overridenMethod;
+
+    if (highestMethod == null) {
+      highestMethod = method;
+    }
+
+    var parameters = highestMethod.parameters.map((p) {
       // Name
       var parameterName =
           Naming.getFormattedName(p.name, NameStyle.LowerCamelCase);
       if (parameterName == "")
         parameterName = "p" + (method.parameters.indexOf(p) + 1).toString();
-      
+
       var parameterType =
           Types.getParameterType(p, method, overridenMethod, implementedClass);
-
-      if (parameterType == 'T')
-      parameterType.toString();
-
-     // parameterType = Naming.getFormattedTypeName(parameterType);
 
       if (parameterType == null) {
         parameterType = "object";

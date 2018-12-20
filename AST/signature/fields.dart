@@ -133,7 +133,8 @@ class Fields {
         code.write('${type.name} $name');
       else {
         // Override hacks
-        if (element.type.name == 'ChildType')
+        if (element.type.name == 'ChildType'
+        || element.type.name == 'E')
           code.write("${type.name} $name");
         else
           code.write("${element.type.name}<${type.name}> $name");
@@ -196,6 +197,24 @@ class Fields {
       name = name + "Value";
 
     var type = Types.getVariableType(element, VariableType.Field);
+
+    if (type == 'object')
+    {
+      // Manual overriding hacks
+      // because I can't find out how to get the proper value;
+      switch (name)
+      {
+        case '_topLeft' :
+        case '_topRight':
+        case '_bottomLeft':
+        case '_bottomRight':
+        case '_topStart':
+        case '_topEnd':
+        case '_bottomStart':
+        case '_bottomEnd':
+          type = 'Radius';
+      }
+    }
 
     return "${type} ${name}";
   }

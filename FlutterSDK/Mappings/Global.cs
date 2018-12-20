@@ -61,6 +61,20 @@ namespace FlutterSDK
 
     }
 
+    public class Comparable<T>
+    {
+        public Comparable<T> Compare(Comparable<T> a, Comparable<T> b)
+        {
+            return null;
+        }
+    }
+
+
+    public class Int64List
+    {
+
+    }
+
     public class Float64List
     {
 
@@ -92,6 +106,7 @@ namespace FlutterSDK
 
     public class Radius
     { }
+
 
 
     public class Completer<T> // todo
@@ -168,15 +183,23 @@ namespace FlutterSDK
     public class ByteData //TODO
     { }
 
-    public class Future : Task
+    public class Future
     {
-        public Future(Action action) : base(action) { }
+        public Future(Action action) { }
     }
 
-    public class Future<T> : Task<T>
+    public class Future<T>
     {
-        public Future(Func<T> func) : base(func) { }
+    public Future(Func<T> func) { }
     }
+
+    public interface IFuture<T> { }
+
+    public class FutureOr<T>
+    {
+
+    }
+
 
     public class HashSet<T> : System.Collections.Generic.HashSet<T>
     {

@@ -37,14 +37,15 @@ class Types {
   static String getVariableType(VariableElement element, VariableType type) {
     String typeName = "object";
     var elementType = element.type;
-
+    
     // Function type
     if (elementType is FunctionTypeImpl) {
       return handleFunctionType(elementType);
       // Interface type
     } else if (elementType is InterfaceType) {
       typeName = Naming.nameWithTypeArguments(element.type, false);
-    } else if (elementType is TypeParameterType) {
+    } else if (elementType is TypeParameterType) {  
+            
       typeName = elementType.displayName;
     } else if (element.computeNode() != null) {
       switch (type) {
@@ -92,7 +93,7 @@ class Types {
       var typeAndNamespace = addNamespace(elementType, typeName);
 
       if (elementType.typeArguments.length > 0) {
-        var typeParameters = elementType.typeArguments.map((p) {         
+        var typeParameters = elementType.typeArguments.map((p) {
           return p.displayName;
         }).join(',');
         typeAndNamespace = '$typeAndNamespace<${typeParameters}>';
@@ -100,8 +101,8 @@ class Types {
 
       return typeAndNamespace;
     }
-    // Type did not have newPrune, resolve the func or action manually
 
+    // Type did not have newPrune, resolve the func or action manually
     var parameterTypes = '';
     if (elementType.normalParameterTypes == null)
       throw new AssertionError('Its null');
