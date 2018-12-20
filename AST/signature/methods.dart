@@ -80,8 +80,6 @@ class Methods {
     else if (element.hasOverride == false && element.isPrivate == false)
       code.write("virtual ");
 
-    
-
     code.write(
         methodSignature(baseMethod, element, null, isOverride, inheritedType));
     code.writeln(Implementation.MethodBody(element.computeNode().body));
@@ -139,6 +137,12 @@ class Methods {
       InterfaceType implementedClass,
       bool isOverride,
       [String inheritedType = '']) {
+
+  var highestMethod = overridenElement;
+
+  if (highestMethod == null)
+  highestMethod = element;
+
     var methodName = Naming.nameWithTypeParameters(element, false);
     if (methodName ==
         Naming.nameWithTypeParameters(element.enclosingElement, false))
@@ -151,8 +155,8 @@ class Methods {
             : NameStyle.UpperCamelCase);
 
     var parameter = printParameter(element, overridenElement, implementedClass);
-    var returnTypeName = Naming.getReturnType(element);
-    var returnType = element.returnType;
+    var returnTypeName = Naming.getReturnType(highestMethod);
+    var returnType = highestMethod.returnType;
     var typeParameter = "";
 
     // Check if the method has a generic return value

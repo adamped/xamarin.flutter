@@ -190,7 +190,8 @@ namespace FlutterSDK
 
     public class Future<T>
     {
-    public Future(Func<T> func) { }
+        public Future() { }
+        public Future(Func<T> func) { }
     }
 
     public interface IFuture<T> { }
