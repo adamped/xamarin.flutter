@@ -58,7 +58,8 @@ class Frame {
         .where((i) => i.importedLibrary != null)) {
       AddImport(import.importedLibrary, imports);
     }
-    return imports.map((import) => "using ${import};").join("\n");
+    // HACK: Remove Cupertino, while in Alpha
+    return imports.where((x) { return !x.contains('Cupertino');}).map((import) => "using ${import};").join("\n");
   }
 
   static void AddImport(LibraryElement import, List<String> allImports) { 
@@ -108,9 +109,11 @@ class Frame {
     code.writeln("");
     Comments.appendComment(code, element);
 
-    if (element.hasProtected == true || element.isPrivate == true)
-      code.write("internal ");
-    if (element.isPublic == true) code.write("public ");
+    // if (element.hasProtected == true || element.isPrivate == true)
+    //   code.write("internal ");
+    // if (element.isPublic == true) 
+    // HACK: Making all public for the moment
+    code.write("public ");
 
     code.writeln("enum ${name}{");
     code.writeln("");

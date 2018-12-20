@@ -2,6 +2,7 @@
 using FlutterSDK.Widgets.Framework;
 using FlutterSDK.Widgets.Navigator;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
@@ -64,6 +65,12 @@ namespace FlutterSDK
     {
 
     }
+
+    public class Uint8List: List<ushort>
+    {
+
+    }
+
     public enum TextDirection
     {
         ltr,
@@ -227,8 +234,43 @@ namespace FlutterSDK
     {
     }
 
-    public class Iterator<T> : Iterable<T>
-    { }
+    public class Iterator<T> : Iterable<T>, IIterator<T>
+    {
+        public T Current { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+    }
+
+    public interface IIterator<E>
+    {
+           E Current { get; set; }
+    }
+
+
+    public class IterableBase<E> : Iterator<E>, IEnumerable<E>
+    {
+        public virtual Iterable<T> Map<T>(Func<T, E> f) { throw new NotImplementedException(); }
+
+
+        public virtual Iterable<E> Where(Func<bool, E> test) { throw new NotImplementedException(); }
+
+
+        public virtual Iterable<T> Expand<T>(Func<Iterable<T>, E> f) { throw new NotImplementedException(); }
+
+
+        public virtual Iterable<E> Take(int count) { throw new NotImplementedException(); }
+
+
+        public virtual Iterable<E> TakeWhile(Func<bool, E> test) { throw new NotImplementedException(); }
+
+
+        public virtual Iterable<E> Skip(int count) { throw new NotImplementedException(); }
+
+
+        public virtual Iterable<E> SkipWhile(Func<bool, E> test) { throw new NotImplementedException(); }
+
+
+        public virtual List<E> ToList(bool growable = default(bool)) { throw new NotImplementedException(); }
+    }
+
 
     public class Error : Exception { }
 

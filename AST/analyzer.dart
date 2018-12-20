@@ -48,7 +48,8 @@ main() async {
   // Iterate trough all files
   // Each file is transpiled and written as one file with its own namespace
   // the file contains all classes, interfaces, enums and delegates of the source file
-  for (var item in contents) {
+  // HACK: just removing Cupertino for initial alpha version
+  for (var item in contents.where((x) { return !x.toString().contains('cupertino'); })) {
     FileSystemEntityType type = await FileSystemEntity.type(item.path);
     if (type == FileSystemEntityType.file && item.path.endsWith('dart')) {
       print(item.path);

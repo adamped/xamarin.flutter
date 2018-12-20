@@ -7,7 +7,7 @@ import '../config.dart';
 
 class Constructors {
   static void printConstructor(
-      StringBuffer code, ConstructorElement constructor) {
+      StringBuffer code, ConstructorElement constructor, String generics) {
     if (constructor.enclosingElement is ClassElement) {
       var isStatic = false;
       var className = constructor.enclosingElement.name;
@@ -53,12 +53,13 @@ class Constructors {
 
         if (isStatic) {
           code.writeln(
-              'public static ${className} ${Naming.upperCamelCase(constructor.name)}($parameters)');
+              'public static ${className}$generics ${Naming.upperCamelCase(constructor.name)}($parameters)');
           var parameterNames = Methods.printParameterNames(constructor);
           // Call private constructor
           code.writeln(
-              '{\nvar instance = new ${className}($parameterNames);\nreturn instance;\n}\n');
+              '{\nvar instance = new ${className}$generics($parameterNames);\nreturn instance;\n}\n');
         }
+        
       } else
         code.writeln('{ }');
     } else

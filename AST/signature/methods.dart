@@ -228,6 +228,11 @@ class Methods {
       var parameterType =
           Types.getParameterType(p, method, overridenMethod, implementedClass);
 
+      if (parameterType == 'T')
+      parameterType.toString();
+
+     // parameterType = Naming.getFormattedTypeName(parameterType);
+
       if (parameterType == null) {
         parameterType = "object";
       }

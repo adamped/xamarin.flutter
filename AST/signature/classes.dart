@@ -6,7 +6,6 @@ import '../naming.dart';
 import 'constructors.dart';
 import 'fields.dart';
 import 'methods.dart';
-import '../implementation/implementation.dart';
 
 class Classes {
   static String printClass(ClassElement element) {
@@ -24,6 +23,10 @@ class Classes {
     if (element.hasSealed == true) code.write("sealed ");
 
     code.write("class ${name}");
+
+    var generics = '';
+    if (name.contains('<'))
+    generics = name.substring(name.indexOf('<'), name.lastIndexOf('>') + 1);
 
     // Add base class, interfaces, mixin interfaces
     var hasBaseClass =
@@ -75,7 +78,7 @@ class Classes {
 
     // Add constructors
     for (var constructor in element.constructors) {
-      Constructors.printConstructor(code, constructor);
+      Constructors.printConstructor(code, constructor, generics);
     }
     code.writeln("#endregion\n");
 

@@ -131,8 +131,13 @@ class Fields {
       //but so far seems to be working well.
       if (type.name == 'T')
         code.write('${type.name} $name');
-      else
-        code.write("${element.type.name}<${type.name}> $name");
+      else {
+        // Override hacks
+        if (element.type.name == 'ChildType')
+          code.write("${type.name} $name");
+        else
+          code.write("${element.type.name}<${type.name}> $name");
+      }
     } else {
       code.write(printTypeAndName(element));
     }

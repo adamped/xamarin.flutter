@@ -209,6 +209,10 @@ class Naming {
         return "Future";
       case "iterable":
         return "List";
+      case "clip":
+        return "FlutterBinding.UI.Clip";
+      case "paragraph":
+        return "FlutterBinding.UI.Paragraph";
       default:
         formattedName =
             getFormattedName(formattedName, NameStyle.UpperCamelCase);
