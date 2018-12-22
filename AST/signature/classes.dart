@@ -1,5 +1,6 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
+import 'package:analyzer/src/dart/element/member.dart';
 
 import '../comments.dart';
 import '../naming.dart';
@@ -26,7 +27,7 @@ class Classes {
 
     var generics = '';
     if (name.contains('<'))
-    generics = name.substring(name.indexOf('<'), name.lastIndexOf('>') + 1);
+      generics = name.substring(name.indexOf('<'), name.lastIndexOf('>') + 1);
 
     // Add base class, interfaces, mixin interfaces
     var hasBaseClass =
@@ -103,6 +104,7 @@ class Classes {
       var sortedMixins = element.mixins.reversed;
       for (var implementedMixin in sortedMixins) {
         code.writeln("#region inherited from ${implementedMixin.name}");
+
         // Add the methods of the mixin and all its base methods
         code.writeln(implementedInstanceName(implementedMixin));
         addMixinImplementations(
@@ -294,6 +296,16 @@ class Classes {
 
     for (var field in element.fields
         .where((field) => field.isPublic || field.hasProtected)) {
+      // if (field.displayName == 'clipBehavior' && name == 'IChipAttributes') {
+      //   if (field is FieldMember) {
+      //     var node = field.computeNode();
+      //     node.toString();
+      //   } else
+      //   {
+      //      var node = field.computeNode();
+      //     node.toString();
+      //   }
+      // }
       var baseField = Fields.getBaseFieldInClass(field);
       code.writeln(Fields.getFieldSignature(baseField));
     }

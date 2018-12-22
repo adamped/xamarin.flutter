@@ -1,11 +1,6 @@
-import 'package:analyzer/analyzer.dart';
 import 'package:analyzer/src/dart/element/member.dart';
-import 'package:analyzer/src/dart/element/element.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
-import 'package:analyzer/dart/ast/ast.dart';
-import 'package:front_end/src/scanner/token.dart';
-
 import '../implementation/implementation.dart';
 import '../comments.dart';
 import '../naming.dart';
@@ -60,6 +55,10 @@ class Methods {
   static String printMethod(
       MethodElement element, bool insideMixin, bool isOverride,
       [String inheritedType = '']) {
+
+    // HACK: ignoring all ToString() methods at the moment.
+    if (element.name == 'toString') return "";
+
     var baseMethod = getBaseMethodInClass(element);
 
     var code = new StringBuffer();
@@ -73,7 +72,12 @@ class Methods {
     else if (element.hasProtected == true || (element.isPrivate && isOverride))
       code.write("protected ");
     else if (element.isPrivate == true) code.write("private ");
-    if (isOverride) code.write("override ");
+    if (isOverride) 
+    {
+      // HACK: normally just use 'override' but use new incase return type mismatch
+      // Because C# doesn't support return type covariance (yet anyway, its a proposed feature).
+      code.write("new ");
+    }
     if (element.hasSealed == true)
       code.write("sealed ");
     // Add virtual as default key if method is not already an override since all methods are virtual in dart
@@ -137,11 +141,9 @@ class Methods {
       InterfaceType implementedClass,
       bool isOverride,
       [String inheritedType = '']) {
+    var highestMethod = overridenElement;
 
-  var highestMethod = overridenElement;
-
-  if (highestMethod == null)
-  highestMethod = element;
+    if (highestMethod == null) highestMethod = element;
 
     var methodName = Naming.nameWithTypeParameters(element, false);
     if (methodName ==

@@ -37,15 +37,14 @@ class Types {
   static String getVariableType(VariableElement element, VariableType type) {
     String typeName = "object";
     var elementType = element.type;
-    
+
     // Function type
     if (elementType is FunctionTypeImpl) {
       return handleFunctionType(elementType);
       // Interface type
     } else if (elementType is InterfaceType) {
       typeName = Naming.nameWithTypeArguments(element.type, false);
-    } else if (elementType is TypeParameterType) {  
-            
+    } else if (elementType is TypeParameterType) {
       typeName = elementType.displayName;
     } else if (element.computeNode() != null) {
       switch (type) {
@@ -133,11 +132,29 @@ class Types {
         return 'Action<$parameterTypes>';
     } else {
       // This is a Function
-      var returnType = elementType.returnType.name;
-      if (parameterTypes.isNotEmpty)
-        return 'Func<$returnType,$parameterTypes>';
+
+      // TODO: really need a single function that can do this recursively for all
+      // return types and parameter types.
+
+      var returnType = elementType.returnType;
+      var returnTypeName = elementType.returnType.name;
+      if (returnType.toString() == 'Future<void>')
+        returnTypeName = 'Future';
+      else if (returnType is InterfaceType) {
+        if (returnType.typeArguments.length > 0) {
+          var types = returnType.typeArguments.map((p) {
+            return Naming.getFormattedTypeName(p.name);
+          }).join(',');
+          returnTypeName += '<$types>';
+        }
+      }
+
+     // if (returnType == 'FutureOr') returnType.toString();
+
+      if (parameterTypes.isNotEmpty && parameterTypes != 'void')
+        return 'Func<$returnTypeName,$parameterTypes>';
       else
-        return 'Func<$returnType>';
+        return 'Func<$returnTypeName>';
     }
   }
 

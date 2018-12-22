@@ -41,6 +41,7 @@ class Frame {
     // Classes
     for (var type in element.types) {
       if (type.name == "_WidgetInspectorService") continue;
+     
       code.writeln(Classes.printClass(type));
     }
     // Enums

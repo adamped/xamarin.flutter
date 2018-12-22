@@ -40,7 +40,7 @@ class Fields {
 
     if (fieldInSupertype != null) {
       return getBaseFieldInClass(fieldInSupertype);
-    } else if (element is FieldMember) {
+    } else if (element is FieldMember) {      
       return element.baseElement;
     } else
       return element;
@@ -110,6 +110,7 @@ class Fields {
       InterfaceType implementedClass,
       String implementedFieldName) {
     var code = new StringBuffer();
+
     var elementForSignature =
         overridingElement != null ? overridingElement : element;
 
@@ -118,13 +119,14 @@ class Fields {
     code.write("virtual ");
 
     // type + name
-    var name = getFieldName(element);
-    if (name == Naming.nameWithTypeParameters(element.enclosingElement, false))
+    var name = getFieldName(elementForSignature);
+
+    if (name == Naming.nameWithTypeParameters(elementForSignature.enclosingElement, false))
       name = name + "Value";
 
-    if (containsGenericPart(element.type)) {
-      var typeParameter = implementedClass.typeParameters.firstWhere(
-          (tp) => element.type.displayName.contains(tp.type.displayName));
+    if (containsGenericPart(elementForSignature.type)) {
+      var typeParameter = implementedClass.typeParameters.firstWhere((tp) =>
+          elementForSignature.type.displayName.contains(tp.type.displayName));
       var type = implementedClass.typeArguments[
           implementedClass.typeParameters.indexOf(typeParameter)];
       //TODO: Not sure if this is 100% correct, could have false positives,
@@ -133,14 +135,14 @@ class Fields {
         code.write('${type.name} $name');
       else {
         // Override hacks
-        if (element.type.name == 'ChildType'
-        || element.type.name == 'E')
+        if (elementForSignature.name == 'ChildType' ||
+            elementForSignature.name == 'E')
           code.write("${type.name} $name");
         else
-          code.write("${element.type.name}<${type.name}> $name");
+          code.write("${elementForSignature.name}<${type.name}> $name");
       }
     } else {
-      code.write(printTypeAndName(element));
+      code.write(printTypeAndName(elementForSignature));
     }
 
     var hasGetter = elementForSignature.getter != null;
@@ -150,6 +152,8 @@ class Fields {
       code.write("{");
       // getter
       if (hasGetter) {
+        if (implementedFieldName == 'TickerProviderStateMixin' && name == 'Widget')
+        name.toString();
         code.write("get => ${implementedFieldName}.${name};");
       }
       // setter
@@ -198,13 +202,11 @@ class Fields {
 
     var type = Types.getVariableType(element, VariableType.Field);
 
-    if (type == 'object')
-    {
+    if (type == 'object') {
       // Manual overriding hacks
       // because I can't find out how to get the proper value;
-      switch (name)
-      {
-        case '_topLeft' :
+      switch (name) {
+        case '_topLeft':
         case '_topRight':
         case '_bottomLeft':
         case '_bottomRight':
@@ -215,7 +217,7 @@ class Fields {
           type = 'Radius';
       }
     }
-
+ 
     return "${type} ${name}";
   }
 
@@ -226,6 +228,7 @@ class Fields {
     if (name == Naming.nameWithTypeParameters(element.enclosingElement, false))
       name = name + "Value";
 
+    
     return "${type} ${name}";
   }
 

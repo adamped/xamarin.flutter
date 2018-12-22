@@ -51,6 +51,10 @@ namespace FlutterSDK
 
     }
 
+    public class Pattern
+    { }
+
+
     public class Float32List
     {
 
@@ -185,11 +189,24 @@ namespace FlutterSDK
 
     public class Future
     {
-        public Future(Action action) { }
+
+       
+
     }
 
-    public class Future<T>
+    public class Future<T>: Future
     {
+        public virtual Future<List<T>> Wait<T>(Iterable<Future<T>> futures, bool eagerError = default(bool), Action<T> cleanUp = default(Action<T>)) { throw new NotImplementedException(); }
+
+
+        public virtual Future<T> Any<T>(Iterable<Future<T>> futures) { throw new NotImplementedException(); }
+
+
+        public virtual Future<T> ForEach<T>(Iterable<T> elements, Func<FutureOr<T>, T> action) { throw new NotImplementedException(); }
+
+
+        public virtual Future<T> DoWhile(Func<FutureOr<bool>> action) { throw new NotImplementedException(); }
+
         public Future() { }
         public Future(Func<T> func) { }
     }

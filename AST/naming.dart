@@ -2,7 +2,6 @@ import 'package:analyzer/analyzer.dart';
 import 'package:analyzer/dart/ast/token.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:analyzer/dart/element/element.dart';
-import 'package:analyzer/src/dart/element/type.dart';
 
 import 'config.dart';
 import 'types.dart';
@@ -193,6 +192,10 @@ class Naming {
         return "SKShader";
       case "enginelayer":
         return "NativeEngineLayer";
+      case "frameinfo":
+        return "SKCodecFrameInfo";
+        case "codec":
+        return "SKCodec";
       case "void":
       case "bool":
       case "int":
