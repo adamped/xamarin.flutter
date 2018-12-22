@@ -119,6 +119,13 @@ class Naming {
         returnName = t.name.name;
       }
     }
+    else if (test is FunctionDeclaration)
+    {
+       if (test.returnType is TypeName) {
+        var t = test.returnType as TypeName;
+        returnName = t.name.name;
+      }
+    }
 
     var formattedName = getFormattedTypeName(returnName);
 

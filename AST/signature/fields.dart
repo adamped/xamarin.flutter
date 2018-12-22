@@ -63,10 +63,6 @@ class Fields {
       code.write(printTypeAndName(baseField));
     }
 
-    if (code.toString().contains("UiKitViewController")) {
-      print("ouch");
-    }
-
     var hasGetter = element.getter != null;
     var hasSetter = element.setter != null;
 
@@ -129,18 +125,10 @@ class Fields {
           elementForSignature.type.displayName.contains(tp.type.displayName));
       var type = implementedClass.typeArguments[
           implementedClass.typeParameters.indexOf(typeParameter)];
-      //TODO: Not sure if this is 100% correct, could have false positives,
-      //but so far seems to be working well.
-      if (type.name == 'T')
-        code.write('${type.name} $name');
-      else {
-        // Override hacks
-        if (elementForSignature.name == 'ChildType' ||
-            elementForSignature.name == 'E')
+     
+     // TODO: Might want to put this through a formatter of some kind
           code.write("${type.name} $name");
-        else
-          code.write("${elementForSignature.name}<${type.name}> $name");
-      }
+   
     } else {
       code.write(printTypeAndName(elementForSignature));
     }
@@ -218,6 +206,10 @@ class Fields {
       }
     }
  
+    
+    if (type.contains('child<RenderBox>'))
+      type.toString();
+
     return "${type} ${name}";
   }
 
@@ -228,6 +220,8 @@ class Fields {
     if (name == Naming.nameWithTypeParameters(element.enclosingElement, false))
       name = name + "Value";
 
+ if (type.contains('child<RenderBox>'))
+      type.toString();
     
     return "${type} ${name}";
   }
