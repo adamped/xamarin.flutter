@@ -39,7 +39,7 @@ _PackageInfo _findPackages(ResourceProvider provider, String projectFolder) {
   Packages packages;
   Map<String, List<Folder>> packageMap;
 
-  String packageConfigPath = '$projectFolder\\.packages';
+  String packageConfigPath = '$projectFolder\\..\\.packages';
   Uri fileUri = new Uri.file(packageConfigPath);
   try {
     io.File configFile = new io.File.fromUri(fileUri).absolute;
