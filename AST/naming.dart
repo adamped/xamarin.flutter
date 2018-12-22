@@ -2,9 +2,9 @@ import 'package:analyzer/analyzer.dart';
 import 'package:analyzer/dart/ast/token.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:analyzer/dart/element/element.dart';
-import 'package:analyzer/src/dart/element/type.dart';
 
 import 'config.dart';
+import 'types.dart';
 
 class Naming {
   static List<String> namespacePartsFromIdentifier(String identifier) {
@@ -43,7 +43,7 @@ class Naming {
     if (isInterface) name = "I" + name;
     var typeArguments = new List<String>();
     for (var argument in type.typeArguments) {
-      typeArguments.add(getDartTypeName(argument));
+      typeArguments.add(Types.getDartTypeName(argument));
     }
     if (typeArguments.length > 0) {
       name += "<${typeArguments.join(",")}>";
@@ -60,7 +60,7 @@ class Naming {
     // }
     var typeArguments = new List<String>();
     for (var argument in type.typeArguments) {
-      typeArguments.add(getDartTypeName(argument));
+      typeArguments.add(Types.getDartTypeName(argument));
     }
     if (typeArguments.length > 0) {
       name += "<${typeArguments.join(",")}>";
@@ -163,100 +163,6 @@ class Naming {
     return text;
   }
 
-  static String getDartTypeName(DartType type) {
-    String typeName = "object";
-    if (type is InterfaceType) {
-      typeName = nameWithTypeArguments(type, false);
-    } else if (type is TypeParameterType) {
-      typeName = type.displayName;
-    }
-    var formattedName = getFormattedTypeName(typeName);
-
-    if (!(type is TypeParameterType) && type.element != null) {
-      var library = type.element.library;
-      if (library != null &&
-          !Config.ignoredImports.contains(library.identifier) &&
-          formattedName != "object") {
-        var namespace = namespaceFromIdentifier(library.identifier);
-        formattedName = namespace + "." + formattedName;
-      }
-    }
-
-    return formattedName;
-  }
-
-  static String getVariableType(VariableElement element, VariableType type) {
-    String typeName = "object";
-    var elementType = element.type;
-    if (elementType is FunctionTypeImpl) {
-      var parameterTypes = '';
-      if (elementType.normalParameterTypes == null)
-        throw new AssertionError('Its null');
-      if (elementType.normalParameterTypes != null) {
-        parameterTypes = elementType.normalParameterTypes.map((p) {
-          if (p is InterfaceType) {
-            var type = getFormattedTypeName(p.name);
-            var typeArguments = p.typeArguments.map((t) {
-              return getFormattedTypeName(t.displayName);
-            }).join(',');
-            if (typeArguments.isEmpty)
-              return type;
-            else
-              return type + '<$typeArguments>';
-          } else
-            return getFormattedTypeName(p.displayName);
-        }).join(',');
-      }
-
-      // Remove all spaces
-      parameterTypes = parameterTypes.replaceAll(' ', '');
-
-      if (elementType.returnType is VoidType) {
-        // This is an Action
-        if (parameterTypes.isEmpty)
-          return 'Action';
-        else
-          return 'Action<$parameterTypes>';
-      } else {
-        // This is a Function
-        var returnType = elementType.returnType.name;
-        if (parameterTypes.isNotEmpty)
-          return 'Func<$returnType,$parameterTypes>';
-        else
-          return 'Func<$returnType>';
-      }
-    } else if (elementType is InterfaceType) {
-      typeName = nameWithTypeArguments(element.type, false);
-    } else if (elementType is TypeParameterType) {
-      typeName = elementType.displayName;
-    } else if (element.computeNode() != null) {
-      switch (type) {
-        case VariableType.Field:
-          typeName =
-              tokenToText(element.computeNode().beginToken.previous, true)
-                  .split(" ")
-                  .first;
-          break;
-        case VariableType.Parameter:
-          typeName = tokenToText(element.computeNode().endToken.previous, true)
-              .split(" ")
-              .last;
-          break;
-      }
-    }
-    var formattedName = getFormattedTypeName(typeName);
-    var library = elementType.element.library;
-    if (!(element.type is TypeParameterType) &&
-        library != null &&
-        !Config.ignoredImports.contains(library.identifier) &&
-        formattedName != "object") {
-      var namespace = namespaceFromIdentifier(library.identifier);
-      formattedName = namespace + "." + formattedName;
-    }
-
-    return formattedName;
-  }
-
   static String getTypeParameterName(TypeParameterElement element) {
     String typeName = "object";
 
@@ -286,6 +192,10 @@ class Naming {
         return "SKShader";
       case "enginelayer":
         return "NativeEngineLayer";
+      case "frameinfo":
+        return "SKCodecFrameInfo";
+        case "codec":
+        return "SKCodec";
       case "void":
       case "bool":
       case "int":
@@ -302,6 +212,10 @@ class Naming {
         return "Future";
       case "iterable":
         return "List";
+      case "clip":
+        return "FlutterBinding.UI.Clip";
+      case "paragraph":
+        return "FlutterBinding.UI.Paragraph";
       default:
         formattedName =
             getFormattedName(formattedName, NameStyle.UpperCamelCase);
@@ -321,10 +235,13 @@ class Naming {
     } else if (formattedName == "-") {
       formattedName = "subtractOperator";
     } else {
-      var reAddUnderscore = formattedName.startsWith("_");
-      formattedName = formattedName.replaceAll("_", "").replaceAll("-", "");
-      if (reAddUnderscore) {
-        formattedName = "_" + formattedName;
+      // We can't do this for names with namespaces already, since it doesn't quite work.
+      if (!formattedName.contains('.')) {
+        var reAddUnderscore = formattedName.startsWith("_");
+        formattedName = formattedName.replaceAll("_", "").replaceAll("-", "");
+        if (reAddUnderscore) {
+          formattedName = "_" + formattedName;
+        }
       }
     }
     if (style != NameStyle.LeadingUnderscoreLowerCamelCase) {
@@ -357,11 +274,31 @@ class Naming {
   }
 
   static String lowerCamelCase(String name) {
-    return name[0].toLowerCase() + name.replaceRange(0, 1, "");
+    if (name.length == 1) return name;
+
+    var underscore = name.startsWith('_');
+
+    if (underscore) name = name.substring(1);
+
+    var newName = name[0].toLowerCase() + name.replaceRange(0, 1, "");
+
+    if (underscore) newName = '_' + newName;
+
+    return newName;
   }
 
   static String upperCamelCase(String name) {
-    return name[0].toUpperCase() + name.replaceRange(0, 1, "");
+    if (name.length == 1) return name;
+
+    var underscore = name.startsWith('_');
+
+    if (underscore) name = name.substring(1);
+
+    var newName = name[0].toUpperCase() + name.replaceRange(0, 1, "");
+
+    if (underscore) newName = '_' + newName;
+
+    return newName;
   }
 
   static String escapeFixedWords(String word) {
@@ -374,7 +311,8 @@ class Naming {
       "fixed",
       "checked",
       "base",
-      "decimal"
+      "decimal",
+      "byte"
     ].any((x) => lowerName == x))
       return "@" + word;
     else

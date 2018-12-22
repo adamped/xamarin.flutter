@@ -2,6 +2,7 @@
 using FlutterSDK.Widgets.Framework;
 using FlutterSDK.Widgets.Navigator;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
@@ -50,6 +51,10 @@ namespace FlutterSDK
 
     }
 
+    public class Pattern
+    { }
+
+
     public class Float32List
     {
 
@@ -60,10 +65,30 @@ namespace FlutterSDK
 
     }
 
+    public class Comparable<T>
+    {
+        public Comparable<T> Compare(Comparable<T> a, Comparable<T> b)
+        {
+            return null;
+        }
+    }
+
+
+    public class Int64List
+    {
+
+    }
+
     public class Float64List
     {
 
     }
+
+    public class Uint8List: List<ushort>
+    {
+
+    }
+
     public enum TextDirection
     {
         ltr,
@@ -85,6 +110,7 @@ namespace FlutterSDK
 
     public class Radius
     { }
+
 
 
     public class Completer<T> // todo
@@ -161,15 +187,37 @@ namespace FlutterSDK
     public class ByteData //TODO
     { }
 
-    public class Future : Task
+    public class Future
     {
-        public Future(Action action) : base(action) { }
+
+       
+
     }
 
-    public class Future<T> : Task<T>
+    public class Future<T>: Future
     {
-        public Future(Func<T> func) : base(func) { }
+        public virtual Future<List<T>> Wait<T>(Iterable<Future<T>> futures, bool eagerError = default(bool), Action<T> cleanUp = default(Action<T>)) { throw new NotImplementedException(); }
+
+
+        public virtual Future<T> Any<T>(Iterable<Future<T>> futures) { throw new NotImplementedException(); }
+
+
+        public virtual Future<T> ForEach<T>(Iterable<T> elements, Func<FutureOr<T>, T> action) { throw new NotImplementedException(); }
+
+
+        public virtual Future<T> DoWhile(Func<FutureOr<bool>> action) { throw new NotImplementedException(); }
+
+        public Future() { }
+        public Future(Func<T> func) { }
     }
+
+    public interface IFuture<T> { }
+
+    public class FutureOr<T>
+    {
+
+    }
+
 
     public class HashSet<T> : System.Collections.Generic.HashSet<T>
     {
@@ -227,8 +275,43 @@ namespace FlutterSDK
     {
     }
 
-    public class Iterator<T> : Iterable<T>
-    { }
+    public class Iterator<T> : Iterable<T>, IIterator<T>
+    {
+        public T Current { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+    }
+
+    public interface IIterator<E>
+    {
+           E Current { get; set; }
+    }
+
+
+    public class IterableBase<E> : Iterator<E>, IEnumerable<E>
+    {
+        public virtual Iterable<T> Map<T>(Func<T, E> f) { throw new NotImplementedException(); }
+
+
+        public virtual Iterable<E> Where(Func<bool, E> test) { throw new NotImplementedException(); }
+
+
+        public virtual Iterable<T> Expand<T>(Func<Iterable<T>, E> f) { throw new NotImplementedException(); }
+
+
+        public virtual Iterable<E> Take(int count) { throw new NotImplementedException(); }
+
+
+        public virtual Iterable<E> TakeWhile(Func<bool, E> test) { throw new NotImplementedException(); }
+
+
+        public virtual Iterable<E> Skip(int count) { throw new NotImplementedException(); }
+
+
+        public virtual Iterable<E> SkipWhile(Func<bool, E> test) { throw new NotImplementedException(); }
+
+
+        public virtual List<E> ToList(bool growable = default(bool)) { throw new NotImplementedException(); }
+    }
+
 
     public class Error : Exception { }
 

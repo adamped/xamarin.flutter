@@ -2,17 +2,27 @@ import 'dart:io';
 
 class Config {
 
-  static bool includeImplementations = false;
-
+  static bool includeMethodImplementations = false;
+  static bool includeConstructorImplementations = false;
+  static bool includeFieldImplementations = false;
+  
   // Path to the flutter src directory
   static String flutterSourcePath = Directory('..\\flutter\\lib\\src')
       .absolute
       .path
       .replaceAll('\\AST\\..', '');
 
-  // Absolute path to the dart-sdk directory
-  static String DartSdkPath = "C:\\Program Files\\Dart\\dart-sdk";
+  // This is just a quick test bed, if you want to try out specific
+  // Dart related functionality without running it on the whole transpiler
 
+  // static String flutterSourcePath = Directory('..\\testbed')
+  //     .absolute
+  //     .path
+  //     .replaceAll('\\AST\\..', '');
+
+  // Absolute path to the dart-sdk directory
+  //static String DartSdkPath = "D:\\Dart\\dart-sdk";
+  static String DartSdkPath = "C:\\Program Files\\Dart\\dart-sdk";
   // Root namespace the transpiled namespaces will start with
   static String rootNamespace = "FlutterSDK";
 

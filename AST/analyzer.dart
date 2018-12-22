@@ -25,17 +25,17 @@ main() async {
   var contents = await dirContents(Directory(Config.flutterSourcePath));
 
   PhysicalResourceProvider resourceProvider = PhysicalResourceProvider.INSTANCE;
-  DartSdk sdk = new FolderBasedDartSdk(resourceProvider,
-      resourceProvider.getFolder(Config.DartSdkPath));
+  DartSdk sdk = new FolderBasedDartSdk(
+      resourceProvider, resourceProvider.getFolder(Config.DartSdkPath));
+  var flutterSdk = Config.flutterSourcePath
+      .substring(0, Config.flutterSourcePath.lastIndexOf('\\'));
 
   var resolvers = [
     new DartUriResolver(sdk),
+    new DartUriResolver(embeddedResolver(resourceProvider, flutterSdk)),
     new ResourceUriResolver(resourceProvider),
     packageResolver(
-        resourceProvider,
-        'flutter',
-        resourceProvider.getFolder(Config.flutterSourcePath
-            .substring(0, Config.flutterSourcePath.lastIndexOf('\\'))))
+        resourceProvider, 'flutter', resourceProvider.getFolder(flutterSdk)),
   ];
 
   AnalysisContext context = AnalysisEngine.instance.createAnalysisContext()
@@ -48,7 +48,10 @@ main() async {
   // Iterate trough all files
   // Each file is transpiled and written as one file with its own namespace
   // the file contains all classes, interfaces, enums and delegates of the source file
-  for (var item in contents) {
+  // HACK: just removing Cupertino for initial alpha version
+  for (var item in contents.where((x) {
+    return !x.toString().contains('cupertino');
+  })) {
     FileSystemEntityType type = await FileSystemEntity.type(item.path);
     if (type == FileSystemEntityType.file && item.path.endsWith('dart')) {
       print(item.path);
@@ -61,7 +64,7 @@ main() async {
 
       var element = resolvedUnit.declaredElement;
       var namespaceParts =
-          Naming.namespacePartsFromIdentifier(element.library.identifier); 
+          Naming.namespacePartsFromIdentifier(element.library.identifier);
       var namespaceDartName =
           Naming.namespaceFromIdentifier(element.library.identifier);
       var code = Frame.printNamespace(element, namespaceDartName);
@@ -87,7 +90,7 @@ Future<List<FileSystemEntity>> dirContents(Directory directory) async {
         .list(recursive: true, followLinks: false)
         .listen((FileSystemEntity entity) {
       files.add(entity);
-    }); 
+    });
 
     stream.onDone(() => completer.complete(files));
   }

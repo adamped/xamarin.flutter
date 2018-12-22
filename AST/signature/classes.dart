@@ -1,11 +1,12 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
+import 'package:analyzer/src/dart/element/member.dart';
 
 import '../comments.dart';
 import '../naming.dart';
+import 'constructors.dart';
 import 'fields.dart';
 import 'methods.dart';
-import '../implementation/implementation.dart';
 
 class Classes {
   static String printClass(ClassElement element) {
@@ -23,6 +24,10 @@ class Classes {
     if (element.hasSealed == true) code.write("sealed ");
 
     code.write("class ${name}");
+
+    var generics = '';
+    if (name.contains('<'))
+      generics = name.substring(name.indexOf('<'), name.lastIndexOf('>') + 1);
 
     // Add base class, interfaces, mixin interfaces
     var hasBaseClass =
@@ -57,88 +62,36 @@ class Classes {
 
     if (inheritions.length > 0) code.write(" : " + inheritions.join(","));
 
+    var inheritedType = '';
+    // HACK: Inherited Generic Type Parameter
+    // This is a hack because we should be applying this to the specific
+    // methods its overriding, but seeing if I can get away with this for the moment.
+    if (inheritions.length == 1) {
+      var value = inheritions[0];
+      if (value.contains('<'))
+        inheritedType =
+            value.substring(value.indexOf('<') + 1, value.indexOf('>'));
+    }
+
     code.writeln("\n{");
 
     code.writeln("#region constructors");
 
-    // Add private named constructor
-    var className = element.name;
-
-    code.writeln(
-        'private ${className}(string named = "") {\n // Just here to create blank instance \n}');
-
     // Add constructors
     for (var constructor in element.constructors) {
-      printConstructor(code, constructor);
+      Constructors.printConstructor(code, constructor, generics);
     }
     code.writeln("#endregion\n");
 
     // Add fields and methods
-    printFieldsAndMethods(code, element, implementWithInterface);
+    printFieldsAndMethods(code, element, implementWithInterface, inheritedType);
 
     code.writeln("}");
     return code.toString();
   }
 
-  static void printConstructor(
-      StringBuffer code, ConstructorElement constructor) {
-    if (constructor.enclosingElement is ClassElement) {
-      var isStatic = false;
-      var className = constructor.enclosingElement.name;
-    
-      var parameters = Methods.printParameter(constructor, null, null);
-      if (constructor.name == '')
-        code.writeln('public ${className}($parameters)');
-      else if (constructor.name == '_')
-        code.writeln('internal ${className}($parameters)');
-      else if (constructor.name.startsWith('_'))
-        code.writeln('internal ${className}($parameters)');
-      else // I'm named, hence we are turing into static methods that return an instance
-      {
-        isStatic = true;
-        code.writeln(
-            'public static ${className} ${Naming.upperCamelCase(constructor.name)}($parameters)');
-      }
-
-      // Base class call
-      if (constructor.redirectedConstructor != null) {
-        var baseCall = constructor.redirectedConstructor;
-        var baseParameters = Methods.printParameterNames(baseCall);
-
-        code.writeln(': base($baseParameters)');
-      }
-
-      // Fill out Constructor body
-      var node = constructor.computeNode();
-      if (node != null) {
-        var body =
-            Implementation.MethodBody(node.body, overrideIncludeConfig: true);
-
-        // Add auto assignments if any
-        var autoAssignment = Methods.printAutoParameters(constructor);
-        if (autoAssignment.isNotEmpty) body = '{' + autoAssignment + '\n' + body.substring(2);
-
-        if (isStatic) {
-          var parameterNames = Methods.printParameterNames(constructor);
-          // Call private constructor
-          code.writeln(
-              '{\nvar instance = new ${className}(named:"${Naming.upperCamelCase(constructor.name)}"); \ninstance.${Naming.upperCamelCase(constructor.name)}Constructor($parameterNames);\nreturn instance;\n}\n');
-
-          code.writeln(
-              'private void ${Naming.upperCamelCase(constructor.name)}Constructor($parameters) $body');
-        } else {
-          // Normal constructor body
-          code.writeln(body);
-        }
-      } else
-        code.writeln('{ }');
-    } else
-      throw new AssertionError(
-          'A constructor is not inside a ClassElement, that should not happen.');
-  }
-
-  static void printFieldsAndMethods(
-      StringBuffer code, ClassElement element, bool implementWithInterface) {
+  static void printFieldsAndMethods(StringBuffer code, ClassElement element,
+      bool implementWithInterface, String inheritedType) {
     // Add mixin fields and method implementations
     code.writeln("#region inherited methods and fields");
     var overridenImplementations = new List<ClassMemberElement>();
@@ -151,6 +104,7 @@ class Classes {
       var sortedMixins = element.mixins.reversed;
       for (var implementedMixin in sortedMixins) {
         code.writeln("#region inherited from ${implementedMixin.name}");
+
         // Add the methods of the mixin and all its base methods
         code.writeln(implementedInstanceName(implementedMixin));
         addMixinImplementations(
@@ -201,7 +155,7 @@ class Classes {
         !overridenImplementations.any((x) => x.name == m.name) &&
         !implementedVariables.any((x) => x.name == m.name))) {
       code.writeln(Methods.printMethod(method, implementWithInterface,
-          Methods.overridesParentBaseMethod(method, element)));
+          Methods.overridesParentBaseMethod(method, element), inheritedType));
     }
     code.writeln("#endregion");
   }
@@ -336,11 +290,22 @@ class Classes {
     for (var method in element.methods
         .where((method) => method.isPublic || method.hasProtected)) {
       var baseMethod = Methods.getBaseMethodInClass(method);
-      code.writeln(Methods.methodSignature(baseMethod, method, null) + ";");
+      code.writeln(
+          Methods.methodSignature(baseMethod, method, null, false) + ";");
     }
 
     for (var field in element.fields
         .where((field) => field.isPublic || field.hasProtected)) {
+      // if (field.displayName == 'clipBehavior' && name == 'IChipAttributes') {
+      //   if (field is FieldMember) {
+      //     var node = field.computeNode();
+      //     node.toString();
+      //   } else
+      //   {
+      //      var node = field.computeNode();
+      //     node.toString();
+      //   }
+      // }
       var baseField = Fields.getBaseFieldInClass(field);
       code.writeln(Fields.getFieldSignature(baseField));
     }

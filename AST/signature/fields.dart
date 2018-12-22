@@ -3,6 +3,7 @@ import 'package:analyzer/dart/element/type.dart';
 import 'package:analyzer/src/dart/element/member.dart';
 import '../implementation/implementation.dart';
 import '../naming.dart';
+import '../types.dart';
 
 class Fields {
   static bool containsGenericPart(DartType type) {
@@ -39,7 +40,7 @@ class Fields {
 
     if (fieldInSupertype != null) {
       return getBaseFieldInClass(fieldInSupertype);
-    } else if (element is FieldMember) {
+    } else if (element is FieldMember) {      
       return element.baseElement;
     } else
       return element;
@@ -94,8 +95,7 @@ class Fields {
         if (implementedGetter)
           code.write("set { ${Implementation.fieldBody(element.setter)} }");
         else
-          code.write(
-              "private set;"); // For static auto initialization of variables
+          code.write("set;"); // For static auto initialization of variables
       }
       code.write("}");
     } else
@@ -110,6 +110,7 @@ class Fields {
       InterfaceType implementedClass,
       String implementedFieldName) {
     var code = new StringBuffer();
+
     var elementForSignature =
         overridingElement != null ? overridingElement : element;
 
@@ -118,18 +119,30 @@ class Fields {
     code.write("virtual ");
 
     // type + name
-    var name = getFieldName(element);
-    if (name == Naming.nameWithTypeParameters(element.enclosingElement, false))
+    var name = getFieldName(elementForSignature);
+
+    if (name == Naming.nameWithTypeParameters(elementForSignature.enclosingElement, false))
       name = name + "Value";
 
-    if (containsGenericPart(element.type)) {
-      var typeParameter = implementedClass.typeParameters.firstWhere(
-          (tp) => element.type.displayName.contains(tp.type.displayName));
+    if (containsGenericPart(elementForSignature.type)) {
+      var typeParameter = implementedClass.typeParameters.firstWhere((tp) =>
+          elementForSignature.type.displayName.contains(tp.type.displayName));
       var type = implementedClass.typeArguments[
           implementedClass.typeParameters.indexOf(typeParameter)];
-      code.write("${type} ${name}");
+      //TODO: Not sure if this is 100% correct, could have false positives,
+      //but so far seems to be working well.
+      if (type.name == 'T')
+        code.write('${type.name} $name');
+      else {
+        // Override hacks
+        if (elementForSignature.name == 'ChildType' ||
+            elementForSignature.name == 'E')
+          code.write("${type.name} $name");
+        else
+          code.write("${elementForSignature.name}<${type.name}> $name");
+      }
     } else {
-      code.write(printTypeAndName(element));
+      code.write(printTypeAndName(elementForSignature));
     }
 
     var hasGetter = elementForSignature.getter != null;
@@ -139,13 +152,15 @@ class Fields {
       code.write("{");
       // getter
       if (hasGetter) {
+        if (implementedFieldName == 'TickerProviderStateMixin' && name == 'Widget')
+        name.toString();
         code.write("get => ${implementedFieldName}.${name};");
       }
       // setter
       if (hasSetter) {
         code.write("set => ${implementedFieldName}.${name} = value;");
       } else {
-        code.write("private set => ${implementedFieldName}.${name} = value;");
+        code.write("set => ${implementedFieldName}.${name} = value;");
       }
       code.write("}");
     } else
@@ -181,21 +196,39 @@ class Fields {
   }
 
   static String printTypeAndName(FieldElement element) {
-    var type = Naming.getVariableType(element, VariableType.Field);
     var name = getFieldName(element);
     if (name == Naming.nameWithTypeParameters(element.enclosingElement, false))
       name = name + "Value";
 
+    var type = Types.getVariableType(element, VariableType.Field);
+
+    if (type == 'object') {
+      // Manual overriding hacks
+      // because I can't find out how to get the proper value;
+      switch (name) {
+        case '_topLeft':
+        case '_topRight':
+        case '_bottomLeft':
+        case '_bottomRight':
+        case '_topStart':
+        case '_topEnd':
+        case '_bottomStart':
+        case '_bottomEnd':
+          type = 'Radius';
+      }
+    }
+ 
     return "${type} ${name}";
   }
 
   static String printImplementedTypeAndName(
       FieldElement element, ClassElement supertypeThatProvidesField) {
-    var type = Naming.getVariableType(element, VariableType.Field);
+    var type = Types.getVariableType(element, VariableType.Field);
     var name = getFieldName(element);
     if (name == Naming.nameWithTypeParameters(element.enclosingElement, false))
       name = name + "Value";
 
+    
     return "${type} ${name}";
   }
 

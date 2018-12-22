@@ -1,14 +1,15 @@
 import 'package:analyzer/src/dart/element/member.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
-
 import '../implementation/implementation.dart';
 import '../comments.dart';
 import '../naming.dart';
+import '../types.dart';
 
 class Methods {
   static bool isSameSignature(MethodElement m1, MethodElement m2) {
-    return methodSignature(m1, m1, null) == methodSignature(m2, m2, null);
+    return methodSignature(m1, m1, null, false) ==
+        methodSignature(m2, m2, null, false);
   }
 
   static bool overridesBaseMethod(MethodElement method, ClassElement element) {
@@ -44,15 +45,20 @@ class Methods {
 
   static bool overridesParentBaseMethod(
       MethodElement method, ClassElement element) {
-    for (var superType
-        in element.allSupertypes.where((st) => !element.mixins.contains(st))) {
+    for (var superType in element.allSupertypes.where(
+        (st) => st.displayName != "Object" && !element.mixins.contains(st))) {
       if (overridesBaseMethod(method, superType.element)) return true;
     }
     return false;
   }
 
   static String printMethod(
-      MethodElement element, bool insideMixin, bool isOverride) {
+      MethodElement element, bool insideMixin, bool isOverride,
+      [String inheritedType = '']) {
+
+    // HACK: ignoring all ToString() methods at the moment.
+    if (element.name == 'toString') return "";
+
     var baseMethod = getBaseMethodInClass(element);
 
     var code = new StringBuffer();
@@ -66,14 +72,20 @@ class Methods {
     else if (element.hasProtected == true || (element.isPrivate && isOverride))
       code.write("protected ");
     else if (element.isPrivate == true) code.write("private ");
-    if (isOverride) code.write("override ");
+    if (isOverride) 
+    {
+      // HACK: normally just use 'override' but use new incase return type mismatch
+      // Because C# doesn't support return type covariance (yet anyway, its a proposed feature).
+      code.write("new ");
+    }
     if (element.hasSealed == true)
       code.write("sealed ");
     // Add virtual as default key if method is not already an override since all methods are virtual in dart
     else if (element.hasOverride == false && element.isPrivate == false)
       code.write("virtual ");
 
-    code.write(methodSignature(baseMethod, element, null));
+    code.write(
+        methodSignature(baseMethod, element, null, isOverride, inheritedType));
     code.writeln(Implementation.MethodBody(element.computeNode().body));
 
     return code.toString();
@@ -99,7 +111,7 @@ class Methods {
     if (element.hasSealed == true) code.write("sealed ");
     code.write("virtual ");
 
-    code.write(methodSignature(baseMethod, element, implementedClass));
+    code.write(methodSignature(baseMethod, element, implementedClass, false));
 
     if (overrideMethod == null) {
       code.write("{");
@@ -123,8 +135,16 @@ class Methods {
     return false;
   }
 
-  static String methodSignature(MethodElement element,
-      MethodElement overridenElement, InterfaceType implementedClass) {
+  static String methodSignature(
+      MethodElement element,
+      MethodElement overridenElement,
+      InterfaceType implementedClass,
+      bool isOverride,
+      [String inheritedType = '']) {
+    var highestMethod = overridenElement;
+
+    if (highestMethod == null) highestMethod = element;
+
     var methodName = Naming.nameWithTypeParameters(element, false);
     if (methodName ==
         Naming.nameWithTypeParameters(element.enclosingElement, false))
@@ -137,14 +157,15 @@ class Methods {
             : NameStyle.UpperCamelCase);
 
     var parameter = printParameter(element, overridenElement, implementedClass);
-    var returnTypeName = Naming.getReturnType(element);
-    var returnType = element.returnType;
+    var returnTypeName = Naming.getReturnType(highestMethod);
+    var returnType = highestMethod.returnType;
     var typeParameter = "";
 
     // Check if the method has a generic return value
     if (returnType is TypeParameterElement) {
-      returnTypeName = Naming.getDartTypeName(overridenElement.returnType);
+      returnTypeName = Types.getDartTypeName(overridenElement.returnType);
     }
+
     // Check if the method return type has type arguments with generic values
     if (returnType is InterfaceType) {
       var hasTypedTypeArguments = returnType.typeArguments
@@ -154,15 +175,22 @@ class Methods {
       }
     }
 
-    if(returnTypeName.contains("List<FlutterSDK.Widgets.Widgetinspector.LocationCount>") ||
-    returnTypeName.contains("List<FlutterSDK.Widgets.Widgetinspector.DiagnosticsPathNode>")){
-          print("ups");
-        }
+    if (returnTypeName.contains(
+            "List<FlutterSDK.Widgets.Widgetinspector.LocationCount>") ||
+        returnTypeName.contains(
+            "List<FlutterSDK.Widgets.Widgetinspector.DiagnosticsPathNode>")) {
+      print("ups");
+    }
+
+    if (isOverride && returnTypeName == 'T') {
+      returnTypeName = inheritedType;
+    }
 
     return "${returnTypeName} ${methodName}${typeParameter}(${parameter})";
   }
 
-  static String printAutoParameters(FunctionTypedElement element) {
+  static String printAutoParameters(
+      FunctionTypedElement element, String className) {
     return element.parameters.where((x) {
       return x.isInitializingFormal == true;
     }).map((p) {
@@ -173,6 +201,9 @@ class Methods {
       else
         variableName =
             Naming.getFormattedName(p.name, NameStyle.UpperCamelCase);
+
+      // I don't really like renaming variables, but not sure what other choice we have atm.
+      if (variableName == className) variableName += 'Value';
 
       return 'this.$variableName = ' +
           Naming.getFormattedName(p.name, NameStyle.LowerCamelCase) +
@@ -188,55 +219,52 @@ class Methods {
       if (parameterName == "")
         parameterName = "p" + (element.parameters.indexOf(p) + 1).toString();
 
-      if (parameterName == 'decimal') parameterName = '@decimal';
-      if (parameterName == 'object') parameterName = '@object';
-      if (parameterName == 'byte') parameterName == '@byte';
-
       return parameterName;
     }).join(', ');
   }
 
-  static String printParameter(FunctionTypedElement element,
-      FunctionTypedElement overridenElement, InterfaceType implementedClass) {
+  static String printParameter(FunctionTypedElement method,
+      FunctionTypedElement overridenMethod, InterfaceType implementedClass) {
     // Parameter
-    var parameters = element.parameters.map((p) {
+
+    var highestMethod = overridenMethod;
+
+    if (highestMethod == null) {
+      highestMethod = method;
+    }
+
+    var parameters = highestMethod.parameters.map((p) {
       // Name
       var parameterName =
           Naming.getFormattedName(p.name, NameStyle.LowerCamelCase);
       if (parameterName == "")
-        parameterName = "p" + (element.parameters.indexOf(p) + 1).toString();
+        parameterName = "p" + (method.parameters.indexOf(p) + 1).toString();
 
-      if (parameterName == 'decimal') parameterName = '@decimal';
-      if (parameterName == 'object') parameterName = '@object';
-      if (parameterName == 'byte') parameterName == '@byte';
-
-      // Type
       var parameterType =
-          Naming.getVariableType(p, VariableType.Parameter).split(" ").last;
+          Types.getParameterType(p, method, overridenMethod, implementedClass);
 
-      if (parameterType == 'object' && !p.toString().contains('dynamic'))
-        parameterType = '';
-
-      if (p.type.element is TypeParameterElement && overridenElement != null) {
-        var actualParameterSignature = overridenElement
-            .parameters[element.parameters.indexWhere((x) => x.name == p.name)];
-        parameterType = Naming.getVariableType(
-                actualParameterSignature, VariableType.Parameter)
-            .split(" ")
-            .last;
-      }
-
-      if (parameterType == "@") {
+      if (parameterType == null) {
         parameterType = "object";
       }
+
       var parameterSignature = parameterType + " " + parameterName;
 
-      if (p.hasRequired) {
+      // Add keys
+      // Required
+      if (p.hasRequired || p.toString().contains("@required")) {
         parameterSignature = "[NotNull] " + parameterSignature;
       }
 
+      // Optional
       if (p.isOptional) {
-        parameterSignature += " = default(${parameterType})";
+        var defaultValue = "default(${parameterType})";
+
+        // Get correct default value
+        //if (p is ConstVariableElement && p.defaultValueCode != null) {
+        //   defaultValue = p.defaultValueCode;
+        // }
+
+        parameterSignature += " = ${defaultValue}";
       }
       return parameterSignature;
     });
