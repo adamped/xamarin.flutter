@@ -1,6 +1,7 @@
 ﻿using FlutterSDK.Animation.Animation;
 using FlutterSDK.Widgets.Framework;
 using FlutterSDK.Widgets.Navigator;
+using SkiaSharp;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -50,7 +51,7 @@ namespace FlutterSDK
     {
 
     }
-
+    
     public class Pattern
     { }
 
@@ -111,7 +112,7 @@ namespace FlutterSDK
     public class Radius
     { }
 
-
+    public class LinkedHashSet<T> : HashSet<T> { }
 
     public class Completer<T> // todo
     {
@@ -178,7 +179,7 @@ namespace FlutterSDK
         public Offset() { }
         public Offset(double? one, double? two) { }
 
-        public static Offset zero => new Offset();
+        public static Offset Zero => new Offset();
 
         public double? dx { get; set; }
         public double? dy { get; set; }

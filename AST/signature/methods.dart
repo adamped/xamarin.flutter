@@ -74,7 +74,7 @@ class Methods {
     else if (element.isPrivate == true) code.write("private ");
     if (isOverride) 
     {
-      // HACK: normally just use 'override' but use new incase return type mismatch
+      // HACK: normally use 'override' but use `new` in case return type mismatch
       // Because C# doesn't support return type covariance (yet anyway, its a proposed feature).
       code.write("new ");
     }
@@ -96,7 +96,8 @@ class Methods {
       String implementationInstanceName,
       InterfaceType implementedClass,
       MethodElement overrideMethod,
-      ClassElement classElement) {
+      ClassElement classElement,
+      InterfaceType originalMixin) {
     var baseMethod = implementedClass.element.isMixin
         ? element
         : getBaseMethodInClass(element);
@@ -111,7 +112,7 @@ class Methods {
     if (element.hasSealed == true) code.write("sealed ");
     code.write("virtual ");
 
-    code.write(methodSignature(baseMethod, element, implementedClass, false));
+    code.write(methodSignature(baseMethod, element, implementedClass, false, '', originalMixin));
 
     if (overrideMethod == null) {
       code.write("{");
@@ -140,7 +141,7 @@ class Methods {
       MethodElement overridenElement,
       InterfaceType implementedClass,
       bool isOverride,
-      [String inheritedType = '']) {
+      [String inheritedType = '', InterfaceType originalMixin = null]) {
     var highestMethod = overridenElement;
 
     if (highestMethod == null) highestMethod = element;
@@ -156,7 +157,7 @@ class Methods {
             ? NameStyle.LeadingUnderscoreLowerCamelCase
             : NameStyle.UpperCamelCase);
 
-    var parameter = printParameter(element, overridenElement, implementedClass);
+    var parameter = printParameter(element, overridenElement, implementedClass, originalMixin);
     var returnTypeName = Naming.getReturnType(highestMethod);
     var returnType = highestMethod.returnType;
     var typeParameter = "";
@@ -173,13 +174,6 @@ class Methods {
       if (hasTypedTypeArguments) {
         returnTypeName = Naming.nameWithTypeArguments(returnType, false);
       }
-    }
-
-    if (returnTypeName.contains(
-            "List<FlutterSDK.Widgets.Widgetinspector.LocationCount>") ||
-        returnTypeName.contains(
-            "List<FlutterSDK.Widgets.Widgetinspector.DiagnosticsPathNode>")) {
-      print("ups");
     }
 
     if (isOverride && returnTypeName == 'T') {
@@ -224,7 +218,7 @@ class Methods {
   }
 
   static String printParameter(FunctionTypedElement method,
-      FunctionTypedElement overridenMethod, InterfaceType implementedClass) {
+      FunctionTypedElement overridenMethod, InterfaceType implementedClass, InterfaceType originalMixin) {
     // Parameter
 
     var highestMethod = overridenMethod;
@@ -246,7 +240,13 @@ class Methods {
       if (parameterType == null) {
         parameterType = "object";
       }
-
+      
+      if (parameterType == 'T' && originalMixin != null)
+      {
+        if (originalMixin.typeArguments[0].name.isNotEmpty)
+          parameterType = originalMixin.typeArguments[0].name;
+      }
+     
       var parameterSignature = parameterType + " " + parameterName;
 
       // Add keys
@@ -258,11 +258,6 @@ class Methods {
       // Optional
       if (p.isOptional) {
         var defaultValue = "default(${parameterType})";
-
-        // Get correct default value
-        //if (p is ConstVariableElement && p.defaultValueCode != null) {
-        //   defaultValue = p.defaultValueCode;
-        // }
 
         parameterSignature += " = ${defaultValue}";
       }

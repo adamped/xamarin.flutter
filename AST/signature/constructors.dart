@@ -12,7 +12,7 @@ class Constructors {
       var isStatic = false;
       var className = constructor.enclosingElement.name;
 
-      var parameters = Methods.printParameter(constructor, null, null);
+      var parameters = Methods.printParameter(constructor, null, null, null);
       if (constructor.name == '')
         code.writeln('public ${className}($parameters)');
       else if (constructor.name == '_')

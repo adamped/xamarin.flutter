@@ -104,12 +104,20 @@ class Fields {
       FieldElement element,
       FieldElement overridingElement,
       InterfaceType implementedClass,
-      String implementedFieldName) {
+      String implementedFieldName,
+      ClassElement implementingType,
+      InterfaceType originalMixin) {
     var code = new StringBuffer();
 
-    var elementForSignature =
-        overridingElement != null ? overridingElement : element;
+    var elementForSignature = element;
 
+// HACK: For some reason, just in Animation and Tween, we want the overridingElement
+// but everywhere else we want the element
+  if (overridingElement != null && overridingElement.type.displayName == 'Animation<double>')
+    elementForSignature = overridingElement;
+
+        //overridingElement != null ? overridingElement : element;
+  
     if (elementForSignature.hasProtected == true) code.write("protected ");
     if (elementForSignature.isPublic == true) code.write("public ");
     code.write("virtual ");
@@ -120,18 +128,29 @@ class Fields {
     if (name == Naming.nameWithTypeParameters(elementForSignature.enclosingElement, false))
       name = name + "Value";
 
+      // TODO: need to get mixin typeArgument
+    if (implementedFieldName == 'SemanticsBinding' && name == 'Instance')
+        name.toString();
+
     if (containsGenericPart(elementForSignature.type)) {
       var typeParameter = implementedClass.typeParameters.firstWhere((tp) =>
           elementForSignature.type.displayName.contains(tp.type.displayName));
       var type = implementedClass.typeArguments[
           implementedClass.typeParameters.indexOf(typeParameter)];
      
+     var typeName = type.name;
+    
      // TODO: Might want to put this through a formatter of some kind
-          code.write("${type.name} $name");
+     if (typeName == 'T' && originalMixin != null)
+      typeName = originalMixin.typeArguments[0].name;
+    
+    code.write("${typeName} $name");
    
     } else {
       code.write(printTypeAndName(elementForSignature));
     }
+
+  
 
     var hasGetter = elementForSignature.getter != null;
     var hasSetter = elementForSignature.setter != null;
@@ -140,8 +159,7 @@ class Fields {
       code.write("{");
       // getter
       if (hasGetter) {
-        if (implementedFieldName == 'TickerProviderStateMixin' && name == 'Widget')
-        name.toString();
+       
         code.write("get => ${implementedFieldName}.${name};");
       }
       // setter
@@ -206,10 +224,6 @@ class Fields {
       }
     }
  
-    
-    if (type.contains('child<RenderBox>'))
-      type.toString();
-
     return "${type} ${name}";
   }
 
@@ -219,9 +233,6 @@ class Fields {
     var name = getFieldName(element);
     if (name == Naming.nameWithTypeParameters(element.enclosingElement, false))
       name = name + "Value";
-
- if (type.contains('child<RenderBox>'))
-      type.toString();
     
     return "${type} ${name}";
   }
