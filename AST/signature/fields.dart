@@ -109,9 +109,15 @@ class Fields {
       InterfaceType originalMixin) {
     var code = new StringBuffer();
 
-    var elementForSignature =
-        overridingElement != null ? overridingElement : element;
+    var elementForSignature = element;
 
+// HACK: For some reason, just in Animation and Tween, we want the overridingElement
+// but everywhere else we want the element
+  if (overridingElement != null && overridingElement.type.displayName == 'Animation<double>')
+    elementForSignature = overridingElement;
+
+        //overridingElement != null ? overridingElement : element;
+  
     if (elementForSignature.hasProtected == true) code.write("protected ");
     if (elementForSignature.isPublic == true) code.write("public ");
     code.write("virtual ");
@@ -122,8 +128,8 @@ class Fields {
     if (name == Naming.nameWithTypeParameters(elementForSignature.enclosingElement, false))
       name = name + "Value";
 
-    // TODO: need to get mixin typeArgument
-    if (implementedFieldName == 'SingleTickerProviderStateMixin' && name == 'Widget')
+      // TODO: need to get mixin typeArgument
+    if (implementedFieldName == 'SemanticsBinding' && name == 'Instance')
         name.toString();
 
     if (containsGenericPart(elementForSignature.type)) {
@@ -143,6 +149,8 @@ class Fields {
     } else {
       code.write(printTypeAndName(elementForSignature));
     }
+
+  
 
     var hasGetter = elementForSignature.getter != null;
     var hasSetter = elementForSignature.setter != null;
@@ -216,10 +224,6 @@ class Fields {
       }
     }
  
-    
-    if (type.contains('child<RenderBox>'))
-      type.toString();
-
     return "${type} ${name}";
   }
 
@@ -229,9 +233,6 @@ class Fields {
     var name = getFieldName(element);
     if (name == Naming.nameWithTypeParameters(element.enclosingElement, false))
       name = name + "Value";
-
- if (type.contains('child<RenderBox>'))
-      type.toString();
     
     return "${type} ${name}";
   }

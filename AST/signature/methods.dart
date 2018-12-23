@@ -240,13 +240,13 @@ class Methods {
       if (parameterType == null) {
         parameterType = "object";
       }
-
+      
       if (parameterType == 'T' && originalMixin != null)
       {
         if (originalMixin.typeArguments[0].name.isNotEmpty)
           parameterType = originalMixin.typeArguments[0].name;
       }
-      
+     
       var parameterSignature = parameterType + " " + parameterName;
 
       // Add keys

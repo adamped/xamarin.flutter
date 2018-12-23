@@ -175,10 +175,6 @@ class Types {
           method.parameters.indexWhere((x) => x.name == parameter.name)];
     }
 
-    if (parameter.toString().toLowerCase().contains('onchanged')) {
-      parameter.toString();
-    }
-
     var parameterType =
         getVariableType(parameter, VariableType.Parameter).split(" ").last;
 
@@ -192,7 +188,7 @@ class Types {
       parameterType = getTypeFromComputedNodeEntities(
           parameter, computedParameter.childEntities, false);
     }
-
+     
     return parameterType;
   }
 

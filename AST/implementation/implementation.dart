@@ -564,8 +564,12 @@ class Implementation {
 
       while (parentEntity != null &&
           (parentEntity is! VariableDeclaration &&
-              parentEntity is! AssignmentExpression))
+              parentEntity is! AssignmentExpression 
+              && parentEntity is! CascadeExpression))
         parentEntity = parentEntity.parent;
+
+      if (parentEntity == null)
+      parentEntity.toString();
 
       String processedEntity =
           processEntity(parentEntity.childEntities.toList()[0]);
@@ -771,8 +775,9 @@ class Implementation {
   }
 
   static String fieldBody(PropertyAccessorElement element) {
-    if (Config.includeFieldImplementations) {
+    if (Config.includeFieldImplementations && element != null) {
       // TODO: this is all messed up anyway
+     
       var body = element.computeNode();
       var bodyLines = Naming.tokenToText(body.beginToken, false).split("\n");
       var rawBody = bodyLines.map((l) => "${l}\n").join();

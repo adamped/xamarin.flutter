@@ -112,7 +112,7 @@ namespace FlutterSDK
     public class Radius
     { }
 
-
+    public class LinkedHashSet<T> : HashSet<T> { }
 
     public class Completer<T> // todo
     {
@@ -179,7 +179,7 @@ namespace FlutterSDK
         public Offset() { }
         public Offset(double? one, double? two) { }
 
-        public static Offset zero => new Offset();
+        public static Offset Zero => new Offset();
 
         public double? dx { get; set; }
         public double? dy { get; set; }

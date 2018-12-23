@@ -35,11 +35,6 @@ class Naming {
     var name = type.name;
     name = getFormattedName(name, NameStyle.UpperCamelCase);
 
-    // Can't do this, because then constructors and method bodies all have issues.
-    // if (type.name.startsWith("_") && type.element is ClassElement) {
-    //   name = "Internal" + name;
-    // }
-
     if (isInterface) name = "I" + name;
     var typeArguments = new List<String>();
     for (var argument in type.typeArguments) {
@@ -54,10 +49,7 @@ class Naming {
   static String interfaceTypeName(InterfaceType type) {
     var name = type.name;
     name = getFormattedName(name, NameStyle.UpperCamelCase);
-    // Can't do this, because then constructors and method bodies all have issues.
-    // if (type.name.startsWith("_") && type.element is ClassElement) {
-    //   name = "Internal" + name;
-    // }
+   
     var typeArguments = new List<String>();
     for (var argument in type.typeArguments) {
       typeArguments.add(Types.getDartTypeName(argument));
@@ -219,8 +211,8 @@ class Naming {
       case "future<void>":
       case "future<null>":
         return "Future";
-      case "iterable":
-        return "List";
+      // case "iterable":
+      //   return "List";
       case "clip":
         return "FlutterBinding.UI.Clip";
       case "paragraph":
