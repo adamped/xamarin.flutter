@@ -104,7 +104,9 @@ class Fields {
       FieldElement element,
       FieldElement overridingElement,
       InterfaceType implementedClass,
-      String implementedFieldName) {
+      String implementedFieldName,
+      ClassElement implementingType,
+      InterfaceType originalMixin) {
     var code = new StringBuffer();
 
     var elementForSignature =
@@ -120,14 +122,23 @@ class Fields {
     if (name == Naming.nameWithTypeParameters(elementForSignature.enclosingElement, false))
       name = name + "Value";
 
+    // TODO: need to get mixin typeArgument
+    if (implementedFieldName == 'SingleTickerProviderStateMixin' && name == 'Widget')
+        name.toString();
+
     if (containsGenericPart(elementForSignature.type)) {
       var typeParameter = implementedClass.typeParameters.firstWhere((tp) =>
           elementForSignature.type.displayName.contains(tp.type.displayName));
       var type = implementedClass.typeArguments[
           implementedClass.typeParameters.indexOf(typeParameter)];
      
+     var typeName = type.name;
+    
      // TODO: Might want to put this through a formatter of some kind
-          code.write("${type.name} $name");
+     if (typeName == 'T' && originalMixin != null)
+      typeName = originalMixin.typeArguments[0].name;
+    
+    code.write("${typeName} $name");
    
     } else {
       code.write(printTypeAndName(elementForSignature));
@@ -140,8 +151,7 @@ class Fields {
       code.write("{");
       // getter
       if (hasGetter) {
-        if (implementedFieldName == 'TickerProviderStateMixin' && name == 'Widget')
-        name.toString();
+       
         code.write("get => ${implementedFieldName}.${name};");
       }
       // setter

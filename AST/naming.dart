@@ -197,6 +197,8 @@ class Naming {
         return "HttpResponseMessage";
       case "shader":
         return "SKShader";
+      case "image":
+        return "SKImage";
       case "enginelayer":
         return "NativeEngineLayer";
       case "frameinfo":

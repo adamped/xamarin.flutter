@@ -107,6 +107,7 @@ class Classes {
 
         // Add the methods of the mixin and all its base methods
         code.writeln(implementedInstanceName(implementedMixin));
+
         addMixinImplementations(
             element,
             implementedMixin.name,
@@ -168,9 +169,9 @@ class Classes {
       List<ClassMemberElement> implementedVariables,
       List<ClassMemberElement> overridenImplementations) {
     addImplementedFields(code, implementationInstanceName, implementedMixin,
-        element, implementedVariables, overridenImplementations);
+        element, implementedVariables, overridenImplementations, null);
     addImplementedMethods(code, implementationInstanceName, implementedMixin,
-        element, implementedVariables, overridenImplementations);
+        element, implementedVariables, overridenImplementations, null);
 
     for (var supertype in implementedMixin.element.allSupertypes.where((c) =>
         c.displayName != "@Object" &&
@@ -187,18 +188,20 @@ class Classes {
       InterfaceType implementedMixin,
       StringBuffer code,
       List<ClassMemberElement> implementedVariables,
-      List<ClassMemberElement> overridenImplementations) {
+      List<ClassMemberElement> overridenImplementations,
+      [InterfaceType originalMixin = null]) {
+
     addImplementedFields(code, mixinInstanceName, implementedMixin, element,
-        implementedVariables, overridenImplementations);
+        implementedVariables, overridenImplementations, originalMixin);
     addImplementedMethods(code, mixinInstanceName, implementedMixin, element,
-        implementedVariables, overridenImplementations);
+        implementedVariables, overridenImplementations, originalMixin);
     for (var supertype in implementedMixin.element.superclassConstraints.where(
         (c) =>
             c.displayName != "@Object" &&
             c.displayName != "object" &&
             c.displayName != "Object")) {
       addMixinImplementations(element, mixinInstanceName, supertype, code,
-          implementedVariables, overridenImplementations);
+          implementedVariables, overridenImplementations, implementedMixin);
     }
   }
 
@@ -216,7 +219,8 @@ class Classes {
       InterfaceType implementedType,
       ClassElement implementingType,
       List<ClassMemberElement> addedByMixins,
-      List<ClassMemberElement> addedByImplementations) {
+      List<ClassMemberElement> addedByImplementations,
+      InterfaceType originalMixin) {
     for (var implementedField in implementedType.element.fields.where((field) =>
         field.isPublic &&
         !addedByImplementations.any((existingMethod) =>
@@ -237,7 +241,7 @@ class Classes {
       code.writeln(
           // Pass the overriden element to get the correct field signature
           Fields.printImplementedField(implementedField, overrideElement,
-              implementedType, implementationInstanceName));
+              implementedType, implementationInstanceName, implementingType, originalMixin));
     }
   }
 
@@ -247,7 +251,8 @@ class Classes {
       InterfaceType implementedType,
       ClassElement implementingType,
       List<ClassMemberElement> addedByMxins,
-      List<ClassMemberElement> addByInterfaces) {
+      List<ClassMemberElement> addByInterfaces,
+      InterfaceType originalMixin) {
     for (var implementedMethod in implementedType.methods.where((method) =>
         method.isPublic &&
         !addByInterfaces.any((existingMethod) =>
@@ -271,7 +276,8 @@ class Classes {
           implementationInstanceName,
           implementedType,
           overridingMethod,
-          implementingType));
+          implementingType,
+          originalMixin));
     }
   }
 

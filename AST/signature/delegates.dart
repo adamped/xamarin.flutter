@@ -7,7 +7,7 @@ class Delegates {
   static String printDelegate(FunctionTypeAliasElement element) { 
     var returnType = Naming.getReturnType(element);
     var methodName = Naming.nameWithTypeParameters(element, false);
-    var parameter = Methods.printParameter(element, element, null); 
+    var parameter = Methods.printParameter(element, element, null, null); 
     return "public delegate ${returnType} ${methodName}(${parameter});";
   }
 }

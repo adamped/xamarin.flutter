@@ -1,6 +1,7 @@
 ﻿using FlutterSDK.Animation.Animation;
 using FlutterSDK.Widgets.Framework;
 using FlutterSDK.Widgets.Navigator;
+using SkiaSharp;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -50,7 +51,7 @@ namespace FlutterSDK
     {
 
     }
-
+    
     public class Pattern
     { }
 
