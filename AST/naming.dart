@@ -289,7 +289,7 @@ class Naming {
   }
 
   static String upperCamelCase(String name) {
-    if (name.length == 1) return name;
+    if (name.length <= 1) return name;
 
     var underscore = name.startsWith('_');
 

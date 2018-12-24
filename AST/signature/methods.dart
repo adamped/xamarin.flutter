@@ -184,7 +184,7 @@ class Methods {
   }
 
   static String printAutoParameters(
-      FunctionTypedElement element, String className) {
+      FunctionTypedElement element, String className, {String instanceName = "this"}) {
     return element.parameters.where((x) {
       return x.isInitializingFormal == true;
     }).map((p) {
@@ -199,7 +199,7 @@ class Methods {
       // I don't really like renaming variables, but not sure what other choice we have atm.
       if (variableName == className) variableName += 'Value';
 
-      return 'this.$variableName = ' +
+      return '$instanceName.$variableName = ' +
           Naming.getFormattedName(p.name, NameStyle.LowerCamelCase) +
           ';';
     }).join('\n');
