@@ -92,6 +92,13 @@ class Classes {
     code.writeln("");
 
     var rawName = name.substring(1); // Name without `I` at front
+    var generics = '';
+
+    if (rawName.contains('<'))
+    {
+      generics = rawName.substring(rawName.indexOf('<'));
+      rawName = rawName.substring(0, rawName.indexOf('<'));
+    }
 
     // Start Mixin Interface
     code.write("public interface $name");
@@ -109,7 +116,7 @@ class Classes {
     // Start Instance class 
     var mixinInstanceInheritance = element.allSupertypes.where((x) { return x.displayName != 'Object';}).map((f) { return Naming.nameWithTypeParameters(f.element, true).substring(1); }).join(',');
     
-    code.write('public class ${rawName}'); 
+    code.write('public class ${rawName}$generics'); 
 
     if (mixinInstanceInheritance.isNotEmpty)
       code.write(': $mixinInstanceInheritance');
@@ -133,10 +140,24 @@ class Classes {
     code.writeln('}'); // End Instance Class
 
     // Mixin static extensions class 
-    code.writeln('public static class ${name}Mixin {');
+    code.writeln('public static class ${rawName}Mixin {');
 
     // Instance holding for mixins
-    code.writeln('static System.Runtime.CompilerServices.ConditionalWeakTable<$name, $rawName> _table = new System.Runtime.CompilerServices.ConditionalWeakTable<$name, $rawName>();');
+    if (generics.isEmpty) // No Generics
+      code.writeln('static System.Runtime.CompilerServices.ConditionalWeakTable<$name, $rawName> _table = new System.Runtime.CompilerServices.ConditionalWeakTable<$name, $rawName>();');
+    else // With generics we can't have an unbounded generic as type definition, so we revert to object's and cast later.
+      code.writeln('static System.Runtime.CompilerServices.ConditionalWeakTable<object, object> _table = new System.Runtime.CompilerServices.ConditionalWeakTable<object, object>();');
+
+    // Get Or Create Value
+    code.writeln('static $rawName$generics GetOrCreate$generics($name instance)');
+    code.writeln('{');
+    code.writeln('if (!_table.TryGetValue(instance, out var value))');
+    code.writeln('{');
+    code.writeln('value = new $rawName$generics();');
+    code.writeln('_table.Add(instance, value);');
+    code.writeln('}');
+    code.writeln('return ($rawName$generics)value;');
+    code.writeln('}');
 
     // Extension Methods
 
@@ -145,16 +166,17 @@ class Classes {
         in element.fields.where((x) { return x.isPublic; })) {
           var typeAndName = Fields.printTypeAndName(field);
           var fieldName = Fields.getFieldName(field);
-      code.writeln('public static ${typeAndName}Property(this $name instance) => _table.GetOrCreateValue(instance).$fieldName;');
+
+      code.writeln('public static ${typeAndName}Property$generics(this $name instance) => GetOrCreate(instance).$fieldName;');
     }
 
      // Add Methods
     for (var method
         in element.methods.where((x) { return x.isPublic; })) {
           var methodName = Methods.getMethodName(method);
-          var signature = Methods.methodSignature(method, null, false, '', null, 'this $name instance');
-          
-          code.writeln('public static ${signature} => _table.GetOrCreateValue(instance).$methodName();');     
+          var signature = Methods.methodSignature(method, null, false, '', null, 'this $name instance', generics);
+        
+          code.writeln('public static ${signature} => GetOrCreate(instance).$methodName();');     
     }
 
     code.writeln('}'); // End Mixin Class

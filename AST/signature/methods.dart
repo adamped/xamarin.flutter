@@ -157,7 +157,7 @@ static String getMethodName(
       MethodElement element,
       MethodElement overridenElement,
       bool isOverride,
-      [String inheritedType = '', InterfaceType originalMixin = null, String additionalParameter = '']) {
+      [String inheritedType = '', InterfaceType originalMixin = null, String additionalParameter = '', String generics = '']) {
     var highestMethod = overridenElement;
 
     if (highestMethod == null) highestMethod = element;
@@ -190,7 +190,7 @@ static String getMethodName(
     if (additionalParameter.isNotEmpty && parameter.isNotEmpty)
     additionalParameter += ',';
 
-    return "${returnTypeName} ${methodName}${typeParameter}($additionalParameter${parameter})";
+    return "${returnTypeName} ${methodName}${typeParameter}$generics($additionalParameter${parameter})";
   }
 
   static String printAutoParameters(
