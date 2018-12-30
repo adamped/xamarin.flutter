@@ -161,8 +161,7 @@ class Types {
   static String getParameterType(
       ParameterElement parameter,
       FunctionTypedElement method,
-      FunctionTypedElement overridenMethod,
-      InterfaceType implementedClass) {
+      FunctionTypedElement overridenMethod) {
     // Type
 
     //if (parameterType == 'object' && !parameter.toString().contains('dynamic'))

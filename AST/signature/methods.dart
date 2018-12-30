@@ -8,8 +8,8 @@ import '../types.dart';
 
 class Methods {
   static bool isSameSignature(MethodElement m1, MethodElement m2) {
-    return methodSignature(m1, m1, null, false) ==
-        methodSignature(m2, m2, null, false);
+    return methodSignature(m1, m1, false) ==
+        methodSignature(m2, m2, false);
   }
 
   static bool overridesBaseMethod(MethodElement method, ClassElement element) {
@@ -53,7 +53,7 @@ class Methods {
   }
 
   static String printMethod(
-      MethodElement element, bool insideMixin, bool isOverride,
+      MethodElement element, bool isOverride,
       [String inheritedType = '']) {
 
     // HACK: ignoring all ToString() methods at the moment.
@@ -85,7 +85,7 @@ class Methods {
       code.write("virtual ");
 
     code.write(
-        methodSignature(baseMethod, element, null, isOverride, inheritedType));
+        methodSignature(baseMethod, element, isOverride, inheritedType));
     code.writeln(Implementation.MethodBody(element.computeNode().body));
 
     return code.toString();
@@ -112,7 +112,7 @@ class Methods {
     if (element.hasSealed == true) code.write("sealed ");
     code.write("virtual ");
 
-    code.write(methodSignature(baseMethod, element, implementedClass, false, '', originalMixin));
+    code.write(methodSignature(baseMethod, element, false, '', originalMixin));
 
     if (overrideMethod == null) {
       code.write("{");
@@ -136,17 +136,10 @@ class Methods {
     return false;
   }
 
-  static String methodSignature(
-      MethodElement element,
-      MethodElement overridenElement,
-      InterfaceType implementedClass,
-      bool isOverride,
-      [String inheritedType = '', InterfaceType originalMixin = null]) {
-    var highestMethod = overridenElement;
-
-    if (highestMethod == null) highestMethod = element;
-
-    var methodName = Naming.nameWithTypeParameters(element, false);
+static String getMethodName(
+      MethodElement element)
+      {
+         var methodName = Naming.nameWithTypeParameters(element, false);
     if (methodName ==
         Naming.nameWithTypeParameters(element.enclosingElement, false))
       methodName = "Self" + methodName;
@@ -157,7 +150,21 @@ class Methods {
             ? NameStyle.LeadingUnderscoreLowerCamelCase
             : NameStyle.UpperCamelCase);
 
-    var parameter = printParameter(element, overridenElement, implementedClass, originalMixin);
+            return methodName;
+      }
+
+  static String methodSignature(
+      MethodElement element,
+      MethodElement overridenElement,
+      bool isOverride,
+      [String inheritedType = '', InterfaceType originalMixin = null, String additionalParameter = '']) {
+    var highestMethod = overridenElement;
+
+    if (highestMethod == null) highestMethod = element;
+
+   var methodName = getMethodName(element);
+
+    var parameter = printParameter(element, overridenElement, originalMixin);
     var returnTypeName = Naming.getReturnType(highestMethod);
     var returnType = highestMethod.returnType;
     var typeParameter = "";
@@ -180,7 +187,10 @@ class Methods {
       returnTypeName = inheritedType;
     }
 
-    return "${returnTypeName} ${methodName}${typeParameter}(${parameter})";
+    if (additionalParameter.isNotEmpty && parameter.isNotEmpty)
+    additionalParameter += ',';
+
+    return "${returnTypeName} ${methodName}${typeParameter}($additionalParameter${parameter})";
   }
 
   static String printAutoParameters(
@@ -218,7 +228,7 @@ class Methods {
   }
 
   static String printParameter(FunctionTypedElement method,
-      FunctionTypedElement overridenMethod, InterfaceType implementedClass, InterfaceType originalMixin) {
+      FunctionTypedElement overridenMethod, InterfaceType originalMixin) {
     // Parameter
 
     var highestMethod = overridenMethod;
@@ -235,7 +245,7 @@ class Methods {
         parameterName = "p" + (method.parameters.indexOf(p) + 1).toString();
 
       var parameterType =
-          Types.getParameterType(p, method, overridenMethod, implementedClass);
+          Types.getParameterType(p, method, overridenMethod);
 
       if (parameterType == null) {
         parameterType = "object";

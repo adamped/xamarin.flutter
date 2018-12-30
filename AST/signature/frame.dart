@@ -34,8 +34,7 @@ class Frame {
 
     // Add mixins and their interfaces
     for (var mxin in element.mixins) {
-      code.writeln(Classes.printInterface(mxin));
-      code.writeln(Classes.printClass(mxin));
+      code.writeln(Classes.printMixin(mxin));
     }
 
     // Classes

@@ -26,7 +26,7 @@ class Functions {
             ? NameStyle.LeadingUnderscoreLowerCamelCase
             : NameStyle.UpperCamelCase);
 
-    var parameter = Methods.printParameter(element, element, null, null);
+    var parameter = Methods.printParameter(element, element, null);
     var returnType = Naming.getReturnType(element);
 
     if (returnType.contains("() → dynamic")) {

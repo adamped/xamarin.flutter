@@ -88,12 +88,7 @@ class Naming {
     }
     return name;
   }
-
-  static String mixinInterfaceName(ClassElement mxin) {
-    var name = nameWithTypeParameters(mxin, true);
-    return name;
-  }
-
+ 
   static String getReturnType(FunctionTypedElement element) {
     var returnType = element.returnType;
     var returnName = returnType.displayName;
