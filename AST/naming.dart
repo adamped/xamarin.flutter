@@ -10,7 +10,7 @@ class Naming {
   static List<String> namespacePartsFromIdentifier(String identifier) {
     var namespacePath = identifier
         .replaceAll(
-            "file:///" + Config.flutterSourcePath.replaceAll("\\", "/") + "/",
+            "file:///" + Config.sourcePath.replaceAll("\\", "/") + "/",
             "")
         .replaceAll(".dart", "")
         .replaceAll("package:flutter/src/", "");
@@ -25,8 +25,6 @@ class Naming {
   static String namespaceFromIdentifier(String identifier) {
     var parts = namespacePartsFromIdentifier(identifier);
 
-    //Dont include the filename in the namespace
-    //parts.removeLast();
     return Config.rootNamespace + "." + parts.join(".");
   }
 
@@ -64,10 +62,7 @@ class Naming {
       TypeParameterizedElement element, bool isInterface) {
     var name = element.name;
     name = getFormattedName(name, NameStyle.UpperCamelCase);
-    // Can't do this, because then constructors and method bodies all have issues.
-    // if (type.name.startsWith("_") && type.element is ClassElement) {
-    //   name = "Internal" + name;
-    // }
+    
     if (isInterface) name = "I" + name;
     var typeArguments = new List<String>();
     for (var argument in element.typeParameters) {
@@ -204,7 +199,7 @@ class Naming {
       case "double":
       case "string":
         return formattedName.toLowerCase();
-      case "dynamic": //TODO: we need to fix this. Dynamic is normally hiding a proper type.
+      case "dynamic": //TODO: we need to fix this. Dynamic is normally hiding a proper type. (AP - Might have fixed, will have to check later)
         return "object";
       case "duration":
         return "TimeSpan";
@@ -229,9 +224,7 @@ class Naming {
 
   static String getFormattedName(String originalName, NameStyle style) {
     var formattedName = originalName;
-    if (formattedName == null || formattedName.length == 0) {
-      // Readd this once underscores are handled everywhere
-      //  || formattedName == "_") {
+    if (formattedName == null || formattedName.length == 0) {  
       return "";
     } else if (formattedName == "-") {
       formattedName = "subtractOperator";

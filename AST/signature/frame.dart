@@ -96,7 +96,7 @@ class Frame {
     if (import != null &&
         import.identifier
             .replaceAll("/", "\\")
-            .contains(Config.flutterSourcePath)) {
+            .contains(Config.sourcePath)) {
       name = Naming.namespaceFromIdentifier(import.identifier);
     }
 

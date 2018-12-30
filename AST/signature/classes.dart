@@ -1,4 +1,5 @@
 import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/src/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:analyzer/src/dart/element/member.dart';
 
@@ -226,9 +227,10 @@ class Classes {
         !addedByImplementations.any((existingMethod) =>
             existingMethod.displayName == field.displayName) &&
         !addedByMixins.any((existingMethod) =>
-            existingMethod.displayName == field.displayName))) {
+            (existingMethod.displayName == field.displayName 
+           )))) {
       // Store which methods are already implemented to avoid multiple declarations of the same method
-      addedByMixins.add(implementedField);
+      //addedByMixins.add(implementedField);
 
       // Check if a field in this class overrides the implemented method
       // Use the method body of the overriding field in this case
@@ -236,7 +238,7 @@ class Classes {
           (method) => method.name == implementedField.name,
           orElse: () => null);
       // Store the overriding field to avoid adding it again when adding the other fields
-      if (overrideElement != null) addedByImplementations.add(overrideElement);
+      //if (overrideElement != null) addedByImplementations.add(overrideElement);
 
       code.writeln(
           // Pass the overriden element to get the correct field signature
@@ -302,16 +304,7 @@ class Classes {
 
     for (var field in element.fields
         .where((field) => field.isPublic || field.hasProtected)) {
-      // if (field.displayName == 'clipBehavior' && name == 'IChipAttributes') {
-      //   if (field is FieldMember) {
-      //     var node = field.computeNode();
-      //     node.toString();
-      //   } else
-      //   {
-      //      var node = field.computeNode();
-      //     node.toString();
-      //   }
-      // }
+      
       var baseField = Fields.getBaseFieldInClass(field);
       code.writeln(Fields.getFieldSignature(baseField));
     }
