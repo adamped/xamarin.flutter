@@ -17,7 +17,7 @@ class Constructors {
       var constructorName = constructor.name;
       var callsBaseCtor = constructor.redirectedConstructor != null;
 
-      var parameters = Methods.printParameter(constructor, null, null, null);
+      var parameters = Methods.printParameter(constructor, null, null);
       // normal constructors do not have any special key chars
       if (constructorName == '')
         code.writeln('public ${className}($parameters)');

@@ -1,5 +1,7 @@
 import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/src/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
+import 'package:analyzer/src/dart/element/type.dart';
 import 'package:analyzer/src/dart/element/member.dart';
 import '../implementation/implementation.dart';
 import '../naming.dart';
@@ -111,26 +113,16 @@ class Fields {
 
     var elementForSignature = element;
 
-// HACK: For some reason, just in Animation and Tween, we want the overridingElement
-// but everywhere else we want the element
-  if (overridingElement != null && overridingElement.type.displayName == 'Animation<double>')
-    elementForSignature = overridingElement;
-
-        //overridingElement != null ? overridingElement : element;
-  
-    if (elementForSignature.hasProtected == true) code.write("protected ");
-    if (elementForSignature.isPublic == true) code.write("public ");
-    code.write("virtual ");
+    // HACK: For some reason, just in Animation and Tween, we want the overridingElement
+    // but everywhere else we want the element. Need to correct this.
+    if (overridingElement != null && overridingElement.type.displayName == 'Animation<double>')
+      elementForSignature = overridingElement;
 
     // type + name
     var name = getFieldName(elementForSignature);
 
     if (name == Naming.nameWithTypeParameters(elementForSignature.enclosingElement, false))
       name = name + "Value";
-
-      // TODO: need to get mixin typeArgument
-    if (implementedFieldName == 'SemanticsBinding' && name == 'Instance')
-        name.toString();
 
     if (containsGenericPart(elementForSignature.type)) {
       var typeParameter = implementedClass.typeParameters.firstWhere((tp) =>
@@ -144,13 +136,11 @@ class Fields {
      if (typeName == 'T' && originalMixin != null)
       typeName = originalMixin.typeArguments[0].name;
     
-    code.write("${typeName} $name");
+    code.write("${typeName} I$implementedFieldName.$name");
    
     } else {
-      code.write(printTypeAndName(elementForSignature));
+      code.write(printTypeAndName(elementForSignature, interfaceName: 'I$implementedFieldName.'));
     }
-
-  
 
     var hasGetter = elementForSignature.getter != null;
     var hasSetter = elementForSignature.setter != null;
@@ -158,16 +148,15 @@ class Fields {
     if (hasGetter || hasSetter) {
       code.write("{");
       // getter
-      if (hasGetter) {
+      if (hasGetter) {       
        
         code.write("get => ${implementedFieldName}.${name};");
       }
       // setter
       if (hasSetter) {
         code.write("set => ${implementedFieldName}.${name} = value;");
-      } else {
-        code.write("set => ${implementedFieldName}.${name} = value;");
       }
+
       code.write("}");
     } else
       code.write(";");
@@ -201,30 +190,14 @@ class Fields {
     return code.toString();
   }
 
-  static String printTypeAndName(FieldElement element) {
+  static String printTypeAndName(FieldElement element, {String interfaceName = ''}) {
     var name = getFieldName(element);
     if (name == Naming.nameWithTypeParameters(element.enclosingElement, false))
       name = name + "Value";
 
     var type = Types.getVariableType(element, VariableType.Field);
 
-    if (type == 'object') {
-      // Manual overriding hacks
-      // because I can't find out how to get the proper value;
-      switch (name) {
-        case '_topLeft':
-        case '_topRight':
-        case '_bottomLeft':
-        case '_bottomRight':
-        case '_topStart':
-        case '_topEnd':
-        case '_bottomStart':
-        case '_bottomEnd':
-          type = 'Radius';
-      }
-    }
- 
-    return "${type} ${name}";
+    return "${type} $interfaceName${name}";
   }
 
   static String printImplementedTypeAndName(
@@ -239,9 +212,6 @@ class Fields {
 
   static String getFieldName(FieldElement element) {
     return Naming.getFormattedName(
-        element.name,
-        element.isPrivate
-            ? NameStyle.LeadingUnderscoreLowerCamelCase
-            : NameStyle.UpperCamelCase);
+        element.name, NameStyle.UpperCamelCase);
   }
 }

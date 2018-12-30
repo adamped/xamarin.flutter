@@ -21,20 +21,20 @@ main() async {
   // 1) Get all directories and all files
   var outputPath = Directory('..\\FlutterSDK\\src');
 
-  print("Directory: " + Config.flutterSourcePath);
-  var contents = await dirContents(Directory(Config.flutterSourcePath));
+  print("Directory: " + Config.sourcePath);
+  var contents = await dirContents(Directory(Config.sourcePath));
 
   PhysicalResourceProvider resourceProvider = PhysicalResourceProvider.INSTANCE;
   DartSdk sdk = new FolderBasedDartSdk(
       resourceProvider, resourceProvider.getFolder(Config.DartSdkPath));
-  var flutterSdk = Config.flutterSourcePath
-      .substring(0, Config.flutterSourcePath.lastIndexOf('\\'));
+  var flutterSdk = Config.sourcePath
+      .substring(0, Config.sourcePath.lastIndexOf('\\'));
 
   var resolvers = [
     new DartUriResolver(sdk),
-    new DartUriResolver(embeddedResolver(resourceProvider, flutterSdk)),
+    Config.isTestbed ? null : new DartUriResolver(embeddedResolver(resourceProvider, flutterSdk)),
     new ResourceUriResolver(resourceProvider),
-    packageResolver(
+    Config.isTestbed ? null :packageResolver(
         resourceProvider, 'flutter', resourceProvider.getFolder(flutterSdk)),
   ];
 
