@@ -5,7 +5,7 @@ class Config {
   static bool includeMethodImplementations = false;
   static bool includeConstructorImplementations = false;
   static bool includeFieldImplementations = false;
-  static bool isTestbed = true;
+  static bool isTestbed = false;
 
   static String sourcePath = Config.isTestbed ? _testbedFlutterSourcePath : _flutterSourcePath;
 
