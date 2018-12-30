@@ -175,8 +175,9 @@ class Classes {
         in element.methods.where((x) { return x.isPublic; })) {
           var methodName = Methods.getMethodName(method);
           var signature = Methods.methodSignature(method, null, false, '', null, 'this $name instance', generics);
-        
-          code.writeln('public static ${signature} => GetOrCreate(instance).$methodName();');     
+          var parameterCalls = Methods.printParameterNames(method);
+
+          code.writeln('public static ${signature} => GetOrCreate(instance).$methodName($parameterCalls);');     
     }
 
     code.writeln('}'); // End Mixin Class

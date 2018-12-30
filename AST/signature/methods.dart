@@ -162,7 +162,7 @@ static String getMethodName(
 
     if (highestMethod == null) highestMethod = element;
 
-   var methodName = getMethodName(element);
+    var methodName = getMethodName(element);
 
     var parameter = printParameter(element, overridenElement, originalMixin);
     var returnTypeName = Naming.getReturnType(highestMethod);
