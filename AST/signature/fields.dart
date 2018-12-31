@@ -55,7 +55,7 @@ class Fields {
     if (element.hasProtected == true) code.write("protected ");
     if (element.isPublic == true) code.write("public ");
     if (element.isPrivate == true) code.write("internal ");
-    if (element.hasOverride == true) code.write("override ");
+    if (element.hasOverride == true) code.write("new "); // Until we figure it out properly
     if (element.hasOverride == false) code.write("virtual ");
 
     // type + name

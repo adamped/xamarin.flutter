@@ -1,25 +1,17 @@
-mixin SchedulerBinding {
+class HitTestTarget {}
+
+mixin DiagnosticableTreeMixin {}
+
+class AbstractNode {}
+
+abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin implements HitTestTarget
+{
+  void debugResetSize() { }
+}
+
+abstract class RenderSliver extends RenderObject { 
   @override
-  void initInstances() {
-  }
-
-  /// The current [SchedulerBinding], if one has been created.
-  static SchedulerBinding get instance => _instance;
-  static SchedulerBinding _instance;
+  void debugResetSize() { }
 }
 
-
-/// The glue between the render tree and the Flutter engine.
-mixin RendererBinding on SchedulerBinding {
-  @override
-  void initInstances() {   
-  }
-
-  /// The current [RendererBinding], if one has been created.
-  static RendererBinding get instance => _instance;
-  static RendererBinding _instance;
-}
-
-class RenderingFlutterBinding with SchedulerBinding, RendererBinding {
-
-}
+abstract class RenderSliverHelpers implements RenderSliver { }

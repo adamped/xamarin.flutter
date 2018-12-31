@@ -183,7 +183,7 @@ static String getMethodName(
       }
     }
 
-    if (isOverride && returnTypeName == 'T') {
+    if (isOverride && returnTypeName == 'T' && inheritedType.isNotEmpty) {
       returnTypeName = inheritedType;
     }
 

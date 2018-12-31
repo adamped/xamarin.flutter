@@ -28,7 +28,7 @@ class Frame {
     code.writeln("}");
 
     // Interfaces abstract classes
-    for (var type in element.types.where((t) => t.isAbstract == true)) {
+    for (var type in element.types.where((t) => t.isAbstract == true && t.isValidMixin == false)) {
       code.writeln(Classes.printInterface(type));
     }
 
@@ -36,11 +36,15 @@ class Frame {
     for (var mxin in element.mixins) {
       code.writeln(Classes.printMixin(mxin));
     }
+    // If its possibly a valid Mixin, we have to treat it as a Mixin.
+    for (var mxin in element.types.where((t) => t.isValidMixin == true))
+    {
+      code.writeln(Classes.printMixin(mxin));
+    }
 
     // Classes
-    for (var type in element.types) {
-      if (type.name == "_WidgetInspectorService") continue;
-     
+    // Where not a valid Mixin, because I already created a class in the Mixin section     
+    for (var type in element.types.where((t) => t.isValidMixin == false)) { 
       code.writeln(Classes.printClass(type));
     }
     // Enums
