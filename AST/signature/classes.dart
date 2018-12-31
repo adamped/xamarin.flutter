@@ -1,7 +1,4 @@
 import 'package:analyzer/dart/element/element.dart';
-import 'package:analyzer/src/dart/element/element.dart';
-import 'package:analyzer/dart/element/type.dart';
-import 'package:analyzer/src/dart/element/member.dart';
 
 import '../comments.dart';
 import '../naming.dart';
@@ -111,7 +108,6 @@ class Classes {
 
     code.writeln('{}\n'); 
     // End Mixin Interface
-
 
     // Start Instance class    
     code.write('public class ${rawName}$generics'); 

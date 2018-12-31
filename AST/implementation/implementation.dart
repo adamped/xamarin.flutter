@@ -327,7 +327,10 @@ class Implementation {
   static String processLabel(Label label) {
     var csharp = "";
     for (var entity in label.childEntities) {
-      csharp += processEntity(entity);
+      if (entity is SimpleIdentifier)
+csharp += Naming.escapeFixedWords(processEntity(entity));
+      else 
+        csharp += processEntity(entity);
     }
     return csharp;
   }
@@ -430,7 +433,10 @@ class Implementation {
   static String processNamedExpression(NamedExpression expression) {
     var csharp = "";
     for (var entity in expression.childEntities) {
-      csharp += processEntity(entity);
+      if (entity is SimpleIdentifier)
+        csharp += Naming.escapeFixedWords(processEntity(entity));
+      else
+        csharp += processEntity(entity);
     }
     return csharp;
   }
