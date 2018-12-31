@@ -1,4 +1,5 @@
 import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/type.dart';
 
 import '../comments.dart';
 import '../naming.dart';
@@ -101,7 +102,10 @@ class Classes {
     code.write("public interface $name");
 
     // Inherits
-    var mixinInheritance = element.allSupertypes.where((x) { return x.displayName != 'Object';}).map((f) { return Naming.nameWithTypeParameters(f.element, true); }).join(',');
+    var mixinInheritance = element.mixins
+                                  .where((x) { return x.displayName != 'Object'; })
+                                  .map((f) { return Naming.nameWithTypeParameters(f.element, true); })
+                                  .join(',');
     
     if (mixinInheritance.isNotEmpty)
       code.write(': $mixinInheritance');
@@ -110,10 +114,21 @@ class Classes {
     // End Mixin Interface
 
     // Start Instance class    
+    var interfaces = element.interfaces
+                            .where((x) { return x.displayName != 'Object' && x is InterfaceType; })
+                            .map((f) { return Naming.nameWithTypeParameters(f.element, true); })
+                            .join(',');
+
     code.write('public class ${rawName}$generics'); 
 
     if (mixinInheritance.isNotEmpty)
+    {
       code.write(': $mixinInheritance');
+      if (interfaces.isNotEmpty)
+        code.write(',$interfaces');
+    }
+    else if (interfaces.isNotEmpty)
+      code.write(':$interfaces');
 
     code.writeln('{');
 

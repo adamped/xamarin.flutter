@@ -37,6 +37,10 @@ namespace FlutterSDK
     /// </summary>
     public delegate Task<Dictionary<string, object>> ServiceExtensionCallback(Dictionary<string, string> parameters);
 
+    public class SendPort { }
+
+    public class Uint8Buffer { }
+
     public class Element
     {
 
