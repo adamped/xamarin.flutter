@@ -113,13 +113,11 @@ class Classes {
     // End Mixin Interface
 
 
-    // Start Instance class 
-    var mixinInstanceInheritance = element.allSupertypes.where((x) { return x.displayName != 'Object';}).map((f) { return Naming.nameWithTypeParameters(f.element, true).substring(1); }).join(',');
-    
+    // Start Instance class    
     code.write('public class ${rawName}$generics'); 
 
-    if (mixinInstanceInheritance.isNotEmpty)
-      code.write(': $mixinInstanceInheritance');
+    if (mixinInheritance.isNotEmpty)
+      code.write(': $mixinInheritance');
 
     code.writeln('{');
 
