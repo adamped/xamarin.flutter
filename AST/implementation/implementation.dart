@@ -542,7 +542,7 @@ csharp += Naming.escapeFixedWords(processEntity(entity));
         expression.childEntities.elementAt(1).toString() == '??') {
       var first = expression.childEntities.elementAt(0);
       var second = expression.childEntities.elementAt(2);
-      if (first is SimpleIdentifier &&
+      if (first is SimpleIdentifier && first.staticType != null &&
           first.staticType.displayName ==
               'double') //TODO: Should cover all non-nullable value types
         return '$first == default(${first.staticType.displayName}) ? $second : $first';

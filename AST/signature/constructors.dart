@@ -85,10 +85,11 @@ class Constructors {
         constructor.constantInitializers.length > 0) {
       // :)
       var constantInitializer = constructor.constantInitializers.first;
-      ArgumentList argumentList = constantInitializer.childEntities
-          .firstWhere((x) => x is ArgumentList, orElse: null);
-      if (argumentList != null) {
-        parameters = argumentList.childEntities
+      var argumentList = constantInitializer.childEntities
+          .where((x) => x is ArgumentList);
+      if (argumentList != null && argumentList.length > 0) {
+        ArgumentList list = argumentList.firstWhere((x) => x is ArgumentList);
+        parameters = list.childEntities
             .where((argument) =>
                 argument is! BeginToken && argument is! SimpleToken)
             .map((argument) => Naming.escapeFixedWords(Implementation.processEntity(argument)))
