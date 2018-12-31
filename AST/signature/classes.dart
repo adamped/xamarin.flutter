@@ -1,7 +1,4 @@
 import 'package:analyzer/dart/element/element.dart';
-import 'package:analyzer/src/dart/element/element.dart';
-import 'package:analyzer/dart/element/type.dart';
-import 'package:analyzer/src/dart/element/member.dart';
 
 import '../comments.dart';
 import '../naming.dart';
@@ -112,14 +109,11 @@ class Classes {
     code.writeln('{}\n'); 
     // End Mixin Interface
 
-
-    // Start Instance class 
-    var mixinInstanceInheritance = element.allSupertypes.where((x) { return x.displayName != 'Object';}).map((f) { return Naming.nameWithTypeParameters(f.element, true).substring(1); }).join(',');
-    
+    // Start Instance class    
     code.write('public class ${rawName}$generics'); 
 
-    if (mixinInstanceInheritance.isNotEmpty)
-      code.write(': $mixinInstanceInheritance');
+    if (mixinInheritance.isNotEmpty)
+      code.write(': $mixinInheritance');
 
     code.writeln('{');
 

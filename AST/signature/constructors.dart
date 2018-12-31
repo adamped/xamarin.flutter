@@ -10,12 +10,12 @@ import 'package:front_end/src/scanner/token.dart';
 
 class Constructors {
   static void printConstructor(
-      StringBuffer code, ConstructorElement constructor, String generics) {
+      StringBuffer code, ConstructorElementImpl constructor, String generics) {
     if (constructor.enclosingElement is ClassElement) {
       var isFactory = false;
       var className = constructor.enclosingElement.name;
       var constructorName = constructor.name;
-      var callsBaseCtor = constructor.redirectedConstructor != null;
+      var callsBaseCtor = constructor.redirectedConstructor != null || (constructor.constantInitializers != null && constructor.constantInitializers.length > 0);
 
       var parameters = Methods.printParameter(constructor, null, null);
       // normal constructors do not have any special key chars
@@ -85,13 +85,14 @@ class Constructors {
         constructor.constantInitializers.length > 0) {
       // :)
       var constantInitializer = constructor.constantInitializers.first;
-      ArgumentList argumentList = constantInitializer.childEntities
-          .firstWhere((x) => x is ArgumentList, orElse: null);
-      if (argumentList != null) {
-        parameters = argumentList.childEntities
+      var argumentList = constantInitializer.childEntities
+          .where((x) => x is ArgumentList);
+      if (argumentList != null && argumentList.length > 0) {
+        ArgumentList list = argumentList.firstWhere((x) => x is ArgumentList);
+        parameters = list.childEntities
             .where((argument) =>
                 argument is! BeginToken && argument is! SimpleToken)
-            .map((argument) => Implementation.processEntity(argument))
+            .map((argument) => Naming.escapeFixedWords(Implementation.processEntity(argument)))
             .join(",");
       }
     }
