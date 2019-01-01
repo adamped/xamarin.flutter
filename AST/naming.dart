@@ -166,11 +166,15 @@ class Naming {
   // Then work from there.
   static String getFormattedTypeName(String typeName) {
     var formattedName = typeName;
+
+    // if (typeName == 'ui.Image' || typeName == 'Image')
+    //   return 'SKImage';
+
     if (formattedName.toLowerCase().startsWith("ui."))
       formattedName = formattedName.substring(3, formattedName.length - 3);
 
-    if (formattedName.startsWith("Set"))
-      formattedName = formattedName.replaceAll("Set", "HashSet");
+    if (formattedName == "Set" || formattedName.startsWith('Set<'))
+      formattedName = 'HashSet' + formattedName.substring(3);
     if (formattedName.startsWith("Map"))
       formattedName = formattedName.replaceAll("Map", "Dictionary");
 
@@ -179,8 +183,8 @@ class Naming {
         return "HttpResponseMessage";
       case "shader":
         return "SKShader";
-      case "image":
-        return "SKImage";
+      // case "image": // This doesn't work properly because there is an Image class in the FlutterSDK. But we do need something here for inside method bodies.
+      //   return "SKImage";
       case "enginelayer":
         return "NativeEngineLayer";
       case "frameinfo":

@@ -69,6 +69,10 @@ class Types {
   static String addNamespace(DartType type, String typeName) {
     var formattedName = Naming.getFormattedTypeName(typeName);
     var library = type.element.library;
+
+    if (library != null && library.displayName == 'dart.ui' && typeName == 'Image')
+    return 'SKImage';
+    
     if (!(type is TypeParameterType) &&
         library != null &&
         !Config.ignoredImports.contains(library.identifier) &&

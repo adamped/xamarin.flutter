@@ -50,10 +50,6 @@ class Constructors {
             var parameters = getBaseParameters(constructor);
             //TODO Get the correct constructor name in case this class does not call its own constructor!
             body += 'new ${className}$generics(${parameters});';
-
-            if (className == "AsyncSnapshot") {
-              print("blub");
-            }
           } else
             body += 'new ${className}$generics();';
         }
@@ -89,10 +85,19 @@ class Constructors {
           .where((x) => x is ArgumentList);
       if (argumentList != null && argumentList.length > 0) {
         ArgumentList list = argumentList.firstWhere((x) => x is ArgumentList);
+        int count = 0;
         parameters = list.childEntities
             .where((argument) =>
                 argument is! BeginToken && argument is! SimpleToken)
-            .map((argument) => Naming.escapeFixedWords(Implementation.processEntity(argument)))
+            .map((argument) {
+              var parameter = Naming.escapeFixedWords(Implementation.processEntity(argument)).trim();
+              if (parameter == 'null' && constructor.redirectedConstructor.parameters[count].type.displayName == 'T')
+              {
+                  parameter = 'default(T)';
+              }
+              count += 1;
+              return parameter;
+               })
             .join(",");
       }
     }

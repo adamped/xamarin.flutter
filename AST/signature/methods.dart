@@ -190,6 +190,14 @@ static String getMethodName(
     if (additionalParameter.isNotEmpty && parameter.isNotEmpty)
     additionalParameter += ',';
 
+    // HACK: A single once off hack because I'm messing something up here and don't know what
+    if (returnTypeName == 'Future<E>' && methodName == 'Then<R>')
+        methodName = 'Then<E>';
+
+    // Cheap Hack
+    if (returnTypeName == 'Future<Image>')
+      returnTypeName = 'Future<SKImage>';
+
     return "${returnTypeName} ${methodName}${typeParameter}$generics($additionalParameter${parameter})";
   }
 
@@ -198,13 +206,7 @@ static String getMethodName(
     return element.parameters.where((x) {
       return x.isInitializingFormal == true;
     }).map((p) {
-      var variableName = '';
-
-      if (p.name.startsWith('_'))
-        variableName = p.name;
-      else
-        variableName =
-            Naming.getFormattedName(p.name, NameStyle.UpperCamelCase);
+      var variableName = Naming.getFormattedName(p.name, NameStyle.UpperCamelCase);
 
       // I don't really like renaming variables, but not sure what other choice we have atm.
       if (variableName == className) variableName += 'Value';
