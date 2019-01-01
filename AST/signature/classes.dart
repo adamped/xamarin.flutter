@@ -34,8 +34,11 @@ class Classes {
     }
 
     // Add interfaces
+    List<InterfaceType> interfacesToImplement = new List<InterfaceType>(); 
     for (var interface in element.interfaces) {
       inheritions.add(Naming.nameWithTypeArguments(interface, true));
+      if (interface.element.isValidMixin == false)
+        interfacesToImplement.add(interface);
     }
 
     // Add mixin interfaces
@@ -58,7 +61,46 @@ class Classes {
     // Add fields and methods
     printFieldsAndMethods(code, element, implementWithInterface);
 
+    //Add Implemented Fields and Methods
+    for (var interface in interfacesToImplement)
+      code.write(interfaceFieldAndMethods(interface, element));
+
     code.writeln("}");
+    return code.toString();
+  }
+
+  // There are some interfaces that are not valid Mixin's but are used as Mixin's?
+  // Maybe I am missing something?? If I am, this should be removed.
+  static String interfaceFieldAndMethods(InterfaceType interface, ClassElement element)
+  {
+    var code = new StringBuffer();
+    var instanceName = interface.displayName;
+
+    var anyToImplement = interface.methods.any((x) => element.methods.where((y) => y.displayName == x.displayName).length == 0)
+                        || interface.element.fields.any((x) => element.fields.where((y) => y.displayName == x.displayName).length == 0);
+
+    if (!anyToImplement)
+      return '';
+      
+    code.writeln('$instanceName _${instanceName}Instance = new $instanceName();');
+   
+    for (var method in interface.methods.where((x) => element.methods.where((y) => y.displayName == x.displayName).length == 0 ))
+    {
+       var methodName = Methods.getMethodName(method);
+       var signature = Methods.methodSignature(method, null, false, '', null, '', '');
+       var parameterCalls = Methods.printParameterNames(method);
+      
+      code.writeln('public $signature => _${instanceName}Instance.$methodName($parameterCalls);');
+    }
+
+    for (var field in interface.element.fields.where((x) => element.fields.where((y) => y.displayName == x.displayName).length == 0 ))
+    {
+       var typeAndName = Fields.printTypeAndName(field);
+          var fieldName = Fields.getFieldName(field);
+      
+      code.writeln('public $typeAndName => _${instanceName}Instance.$fieldName;');
+    }
+
     return code.toString();
   }
 

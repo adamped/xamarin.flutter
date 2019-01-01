@@ -37,8 +37,7 @@ class Frame {
       code.writeln(Classes.printMixin(mxin));
     }
     // If its possibly a valid Mixin, we have to treat it as a Mixin.
-    for (var mxin in element.types.where((t) => t.isValidMixin == true))
-    {
+    for (var mxin in element.types.where((t) => t.isValidMixin == true)) {
       code.writeln(Classes.printMixin(mxin));
     }
 
