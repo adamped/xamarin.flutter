@@ -86,9 +86,47 @@ class Methods {
 
     code.write(
         methodSignature(baseMethod, element, isOverride, inheritedType));
+
     code.writeln(Implementation.MethodBody(element.computeNode().body));
 
+
+    // HACK: Covariant type used, hence need to implement the exact interface type
+    // In method bodies, we need to convert and redirect this to the actual method above.
+    var isCovariant = false;
+    for (var parameter in baseMethod.parameters)
+    {
+      if (parameter.isCovariant) isCovariant = true;
+    }
+
+    if (isCovariant && typesDifferent(element.parameters, baseMethod.parameters))
+    {
+      code.write("public new ");
+
+      code.write(
+        methodSignature(baseMethod, null, isOverride, inheritedType));
+
+      code.writeln(Implementation.MethodBody(element.computeNode().body));    
+
+    }
+
     return code.toString();
+  }
+
+  static bool typesDifferent(List<ParameterElement> first, List<ParameterElement> other)
+  {
+      if (first.length != other.length) return true;
+
+      var count = 0;
+      for (var item in first)
+      {
+        if ((item.type.displayName != other[count].type.displayName)
+           && other[count].type.displayName != 'T' && item.type.displayName != 'T'
+           && !other[count].type.displayName.contains('<T>') && !item.type.displayName.contains('<T>'))
+        return true;
+        count += 1;
+      }
+
+    return false;
   }
 
   static String printImplementedMethod(
@@ -170,7 +208,7 @@ static String getMethodName(
     var typeParameter = "";
 
     // Check if the method has a generic return value
-    if (returnType is TypeParameterElement) {
+    if (returnType is TypeParameterElement && overridenElement != null) {
       returnTypeName = Types.getDartTypeName(overridenElement.returnType);
     }
 

@@ -93,6 +93,7 @@ class Constructors {
               var parameter = Naming.escapeFixedWords(Implementation.processEntity(argument)).trim();
               if (parameter == 'null' && constructor.redirectedConstructor.parameters[count].type.displayName == 'T')
               {
+                  // Can't pass null to generic type in C# (you can in Dart).
                   parameter = 'default(T)';
               }
               count += 1;

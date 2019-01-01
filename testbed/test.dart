@@ -1,17 +1,18 @@
-class HitTestTarget {}
+abstract class Listenable { }
 
-mixin DiagnosticableTreeMixin {}
+class ChangeNotifier {}
 
-class AbstractNode {}
+abstract class CustomPainter extends Listenable {
 
-abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin implements HitTestTarget
-{
-  void debugResetSize() { }
+bool shouldRepaint(covariant CustomPainter oldDelegate);
+
+
 }
 
-abstract class RenderSliver extends RenderObject { 
-  @override
-  void debugResetSize() { }
-}
 
-abstract class RenderSliverHelpers implements RenderSliver { }
+
+class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
+
+@override
+  bool shouldRepaint(CustomPainter old) { return true; }
+}
