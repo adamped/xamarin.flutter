@@ -145,6 +145,17 @@ class Classes {
       code.writeln(Methods.printMethod(method,
           Methods.overridesParentBaseMethod(method, element)));
     }    
+
+    // Implement interface based fields and methods (e.g. Dart using an `implements`)
+    for (var interface in element.interfaces
+                            .where((x) { return x.displayName != 'Object' && x is InterfaceType; }))
+    {
+      for (var field in interface.element.fields.where((x) => element.fields.where((y) => y.displayName == x.displayName).length == 0))
+        code.writeln(Fields.printField(field));
+
+      for (var method in interface.element.methods.where((x) => element.methods.where((y) => y.displayName == x.displayName).length == 0))
+        code.writeln(Methods.printMethod(method, false));
+    }
    
     code.writeln('}'); // End Instance Class
 

@@ -86,9 +86,47 @@ class Methods {
 
     code.write(
         methodSignature(baseMethod, element, isOverride, inheritedType));
+
     code.writeln(Implementation.MethodBody(element.computeNode().body));
 
+
+    // HACK: Covariant type used, hence need to implement the exact interface type
+    // In method bodies, we need to convert and redirect this to the actual method above.
+    var isCovariant = false;
+    for (var parameter in baseMethod.parameters)
+    {
+      if (parameter.isCovariant) isCovariant = true;
+    }
+
+    if (isCovariant && typesDifferent(element.parameters, baseMethod.parameters))
+    {
+      code.write("public new ");
+
+      code.write(
+        methodSignature(baseMethod, null, isOverride, inheritedType));
+
+      code.writeln(Implementation.MethodBody(element.computeNode().body));    
+
+    }
+
     return code.toString();
+  }
+
+  static bool typesDifferent(List<ParameterElement> first, List<ParameterElement> other)
+  {
+      if (first.length != other.length) return true;
+
+      var count = 0;
+      for (var item in first)
+      {
+        if ((item.type.displayName != other[count].type.displayName)
+           && other[count].type.displayName != 'T' && item.type.displayName != 'T'
+           && !other[count].type.displayName.contains('<T>') && !item.type.displayName.contains('<T>'))
+        return true;
+        count += 1;
+      }
+
+    return false;
   }
 
   static String printImplementedMethod(
@@ -170,7 +208,7 @@ static String getMethodName(
     var typeParameter = "";
 
     // Check if the method has a generic return value
-    if (returnType is TypeParameterElement) {
+    if (returnType is TypeParameterElement && overridenElement != null) {
       returnTypeName = Types.getDartTypeName(overridenElement.returnType);
     }
 
@@ -190,6 +228,14 @@ static String getMethodName(
     if (additionalParameter.isNotEmpty && parameter.isNotEmpty)
     additionalParameter += ',';
 
+    // HACK: A single once off hack because I'm messing something up here and don't know what
+    if (returnTypeName == 'Future<E>' && methodName == 'Then<R>')
+        methodName = 'Then<E>';
+
+    // Cheap Hack
+    if (returnTypeName == 'Future<Image>')
+      returnTypeName = 'Future<SKImage>';
+
     return "${returnTypeName} ${methodName}${typeParameter}$generics($additionalParameter${parameter})";
   }
 
@@ -198,13 +244,7 @@ static String getMethodName(
     return element.parameters.where((x) {
       return x.isInitializingFormal == true;
     }).map((p) {
-      var variableName = '';
-
-      if (p.name.startsWith('_'))
-        variableName = p.name;
-      else
-        variableName =
-            Naming.getFormattedName(p.name, NameStyle.UpperCamelCase);
+      var variableName = Naming.getFormattedName(p.name, NameStyle.UpperCamelCase);
 
       // I don't really like renaming variables, but not sure what other choice we have atm.
       if (variableName == className) variableName += 'Value';

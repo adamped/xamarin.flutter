@@ -37,6 +37,20 @@ namespace FlutterSDK
     /// </summary>
     public delegate Task<Dictionary<string, object>> ServiceExtensionCallback(Dictionary<string, string> parameters);
 
+    public interface IException { }
+
+    public class RegExp
+    {
+
+    }
+    public class StreamSubscription<T> { }
+    public class File
+    {
+
+    }
+
+    public class SplayTreeMap<K, V> : Dictionary<K, V> { }
+
     public class SendPort { }
 
     public class Uint8Buffer { }
