@@ -33,6 +33,14 @@ class Naming {
     name = getFormattedName(name, NameStyle.UpperCamelCase);
 
     if (isInterface) name = "I" + name;
+
+    // TODO: Need to sort this out, so it does it for all, not just this particular one.
+    if (name == 'IObstructingPreferredSizeWidget')
+    {
+      var namespace = namespaceFromIdentifier(type.element.library.identifier);
+      name = namespace + "." + name;
+    }
+
     var typeArguments = new List<String>();
     for (var argument in type.typeArguments) {
       typeArguments.add(Types.getDartTypeName(argument));
@@ -163,9 +171,6 @@ class Naming {
   // Then work from there.
   static String getFormattedTypeName(String typeName) {
     var formattedName = typeName;
-
-    // if (typeName == 'ui.Image' || typeName == 'Image')
-    //   return 'SKImage';
 
     if (formattedName.toLowerCase().startsWith("ui."))
       formattedName = formattedName.substring(3, formattedName.length - 3);

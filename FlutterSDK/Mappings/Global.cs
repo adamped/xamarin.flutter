@@ -48,6 +48,7 @@ namespace FlutterSDK
     {
 
     }
+    
 
     public class SplayTreeMap<K, V> : Dictionary<K, V> { }
 
