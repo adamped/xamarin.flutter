@@ -8,8 +8,7 @@ import '../types.dart';
 
 class Methods {
   static bool isSameSignature(MethodElement m1, MethodElement m2) {
-    return methodSignature(m1, m1, false) ==
-        methodSignature(m2, m2, false);
+    return methodSignature(m1, m1, false) == methodSignature(m2, m2, false);
   }
 
   static bool overridesBaseMethod(MethodElement method, ClassElement element) {
@@ -52,10 +51,8 @@ class Methods {
     return false;
   }
 
-  static String printMethod(
-      MethodElement element, bool isOverride,
+  static String printMethod(MethodElement element, bool isOverride,
       [String inheritedType = '']) {
-
     // HACK: ignoring all ToString() methods at the moment.
     if (element.name == 'toString') return "";
 
@@ -72,8 +69,7 @@ class Methods {
     else if (element.hasProtected == true || (element.isPrivate && isOverride))
       code.write("protected ");
     else if (element.isPrivate == true) code.write("private ");
-    if (isOverride) 
-    {
+    if (isOverride) {
       // HACK: normally use 'override' but use `new` in case return type mismatch
       // Because C# doesn't support return type covariance (yet anyway, its a proposed feature).
       code.write("new ");
@@ -84,47 +80,42 @@ class Methods {
     else if (element.hasOverride == false && element.isPrivate == false)
       code.write("virtual ");
 
-    code.write(
-        methodSignature(baseMethod, element, isOverride, inheritedType));
+    code.write(methodSignature(baseMethod, element, isOverride, inheritedType));
 
     code.writeln(Implementation.MethodBody(element.computeNode().body));
-
 
     // HACK: Covariant type used, hence need to implement the exact interface type
     // In method bodies, we need to convert and redirect this to the actual method above.
     var isCovariant = false;
-    for (var parameter in baseMethod.parameters)
-    {
+    for (var parameter in baseMethod.parameters) {
       if (parameter.isCovariant) isCovariant = true;
     }
 
-    if (isCovariant && typesDifferent(element.parameters, baseMethod.parameters))
-    {
+    if (isCovariant &&
+        typesDifferent(element.parameters, baseMethod.parameters)) {
       code.write("public new ");
 
-      code.write(
-        methodSignature(baseMethod, null, isOverride, inheritedType));
+      code.write(methodSignature(baseMethod, null, isOverride, inheritedType));
 
-      code.writeln(Implementation.MethodBody(element.computeNode().body));    
-
+      code.writeln(Implementation.MethodBody(element.computeNode().body));
     }
 
     return code.toString();
   }
 
-  static bool typesDifferent(List<ParameterElement> first, List<ParameterElement> other)
-  {
-      if (first.length != other.length) return true;
+  static bool typesDifferent(
+      List<ParameterElement> first, List<ParameterElement> other) {
+    if (first.length != other.length) return true;
 
-      var count = 0;
-      for (var item in first)
-      {
-        if ((item.type.displayName != other[count].type.displayName)
-           && other[count].type.displayName != 'T' && item.type.displayName != 'T'
-           && !other[count].type.displayName.contains('<T>') && !item.type.displayName.contains('<T>'))
-        return true;
-        count += 1;
-      }
+    var count = 0;
+    for (var item in first) {
+      if ((item.type.displayName != other[count].type.displayName) &&
+          other[count].type.displayName != 'T' &&
+          item.type.displayName != 'T' &&
+          !other[count].type.displayName.contains('<T>') &&
+          !item.type.displayName.contains('<T>')) return true;
+      count += 1;
+    }
 
     return false;
   }
@@ -174,10 +165,8 @@ class Methods {
     return false;
   }
 
-static String getMethodName(
-      MethodElement element)
-      {
-         var methodName = Naming.nameWithTypeParameters(element, false);
+  static String getMethodName(MethodElement element) {
+    var methodName = Naming.nameWithTypeParameters(element, false);
     if (methodName ==
         Naming.nameWithTypeParameters(element.enclosingElement, false))
       methodName = "Self" + methodName;
@@ -188,14 +177,15 @@ static String getMethodName(
             ? NameStyle.LeadingUnderscoreLowerCamelCase
             : NameStyle.UpperCamelCase);
 
-            return methodName;
-      }
+    return methodName;
+  }
 
   static String methodSignature(
-      MethodElement element,
-      MethodElement overridenElement,
-      bool isOverride,
-      [String inheritedType = '', InterfaceType originalMixin = null, String additionalParameter = '', String generics = '']) {
+      MethodElement element, MethodElement overridenElement, bool isOverride,
+      [String inheritedType = '',
+      InterfaceType originalMixin = null,
+      String additionalParameter = '',
+      String generics = '']) {
     var highestMethod = overridenElement;
 
     if (highestMethod == null) highestMethod = element;
@@ -226,25 +216,26 @@ static String getMethodName(
     }
 
     if (additionalParameter.isNotEmpty && parameter.isNotEmpty)
-    additionalParameter += ',';
+      additionalParameter += ',';
 
     // HACK: A single once off hack because I'm messing something up here and don't know what
     if (returnTypeName == 'Future<E>' && methodName == 'Then<R>')
-        methodName = 'Then<E>';
+      methodName = 'Then<E>';
 
     // Cheap Hack
-    if (returnTypeName == 'Future<Image>')
-      returnTypeName = 'Future<SKImage>';
+    if (returnTypeName == 'Future<Image>') returnTypeName = 'Future<SKImage>'; 
 
     return "${returnTypeName} ${methodName}${typeParameter}$generics($additionalParameter${parameter})";
   }
 
   static String printAutoParameters(
-      FunctionTypedElement element, String className, {String instanceName = "this"}) {
+      FunctionTypedElement element, String className,
+      {String instanceName = "this"}) {
     return element.parameters.where((x) {
       return x.isInitializingFormal == true;
     }).map((p) {
-      var variableName = Naming.getFormattedName(p.name, NameStyle.UpperCamelCase);
+      var variableName =
+          Naming.getFormattedName(p.name, NameStyle.UpperCamelCase);
 
       // I don't really like renaming variables, but not sure what other choice we have atm.
       if (variableName == className) variableName += 'Value';
@@ -284,19 +275,20 @@ static String getMethodName(
       if (parameterName == "")
         parameterName = "p" + (method.parameters.indexOf(p) + 1).toString();
 
-      var parameterType =
-          Types.getParameterType(p, method, overridenMethod);
+      var parameterType = Types.getParameterType(p, method, overridenMethod);
 
       if (parameterType == null) {
         parameterType = "object";
       }
-      
-      if (parameterType == 'T' && originalMixin != null)
-      {
+
+      if (parameterType == 'T' && originalMixin != null) {
         if (originalMixin.typeArguments[0].name.isNotEmpty)
           parameterType = originalMixin.typeArguments[0].name;
       }
-     
+
+      // This is a workaround, the namespace should be added automatically
+      if (parameterType == 'List<Offset>') parameterType = 'List<FlutterBinding.UI.Offset>';
+
       var parameterSignature = parameterType + " " + parameterName;
 
       // Add keys
@@ -308,6 +300,17 @@ static String getMethodName(
       // Optional
       if (p.isOptional) {
         var defaultValue = "default(${parameterType})";
+
+        var unmodifiedDefaultValue = p.defaultValueCode;
+        if (unmodifiedDefaultValue != null &&
+            unmodifiedDefaultValue != "" &&
+            (unmodifiedDefaultValue == "true" ||
+                unmodifiedDefaultValue == "false" // bool
+                ||
+                double.tryParse(unmodifiedDefaultValue) != null)) {
+          // numeric
+          defaultValue = p.defaultValueCode;
+        }
 
         parameterSignature += " = ${defaultValue}";
       }

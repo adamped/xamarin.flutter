@@ -28,9 +28,11 @@ class Frame {
     }
     code.writeln("}");
 
-    // Interfaces abstract classes
-    for (var type in element.types.where((t) => t.isAbstract == true && t.isValidMixin == false)) {
-      code.writeln(Classes.printInterface(type));
+    // Interfaces for abstract classes
+    for (var type in element.types.where((t) => t.isAbstract == true && t.isValidMixin == false 
+	  // Workaround for classes that are not correctly picked up as interfaces
+	  || ["PageMetrics","FixedExtentMetrics","GestureArenaEntry"].contains(t.name))) {
+        code.writeln(Classes.printInterface(type));
     }
 
     // Add mixins and their interfaces

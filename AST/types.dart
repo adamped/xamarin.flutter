@@ -70,8 +70,32 @@ class Types {
     var formattedName = Naming.getFormattedTypeName(typeName);
     var library = type.element.library;
 
+    if (library != null && library.displayName == 'dart.ui'){
+      switch(typeName){
+        case "Image":
+        case "Paint":
+        case "Picture":
+        case "Vertices":
+         return "SK" + typeName;
+        case "TextStyle": 
+        case "PointMode":
+        case "RRect":
+        case "Paragraph":
+        case "Offset":
+        case "BlendMode":
+        case "Rect":
+        case "Color":
+          return "FlutterBinding.UI." + typeName;
+        case "List<Offset>":
+          return "List<FlutterBinding.UI.Offset>";
+      }
+    }
+
     if (library != null && library.displayName == 'dart.ui' && typeName == 'Image')
     return 'SKImage';
+
+    if (library != null && library.displayName == 'dart.ui' && typeName == 'TextStyle')
+    return 'FlutterBinding.UI.TextStyle';
     
     if (!(type is TypeParameterType) &&
         library != null &&
