@@ -11,7 +11,8 @@ class Frame {
   static String printNamespace(
       CompilationUnitElement element, String namespace) {
     var code = new StringBuffer();
-    code.writeln(printImports(element));
+    code.writeln(printImports(element)); 
+
     code.writeln("namespace ${namespace}{");
 
     // Add delegates
@@ -61,6 +62,16 @@ class Frame {
         .where((i) => i.importedLibrary != null)) {
       AddImport(import.importedLibrary, imports);
     }
+
+    // This is a workaround since files in the material\animated_icons folder are utilizing the "part of" dart feature
+    // "part of" acts like all files are in the same library and imports are not used here
+    // Since we actually need the usings in c# and cant just put the files in one namespace (that would break other references)
+    // we add the missing usings manually
+    if(element.enclosingElement.identifier.contains("material/animated_icons")){
+      imports.add("FlutterSDK.Material.Animatedicons.Animatedicons");
+      imports.add("FlutterSDK.Material.Animatedicons.Animatediconsdata");
+    }
+    
     // HACK: Remove Cupertino, while in Alpha
     return imports.where((x) { return !x.contains('Cupertino');}).map((import) => "using ${import};").join("\n");
   }
