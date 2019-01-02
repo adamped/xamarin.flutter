@@ -121,7 +121,7 @@ class Types {
 
       if (elementType.typeArguments.length > 0) {
         var typeParameters = elementType.typeArguments.map((p) {
-          return p.displayName;
+          return Naming.getFormattedTypeName(p.displayName);
         }).join(',');
         typeAndNamespace = '$typeAndNamespace<${typeParameters}>';
       }

@@ -164,9 +164,6 @@ class Naming {
   static String getFormattedTypeName(String typeName) {
     var formattedName = typeName;
 
-    // if (typeName == 'ui.Image' || typeName == 'Image')
-    //   return 'SKImage';
-
     if (formattedName.toLowerCase().startsWith("ui."))
       formattedName = formattedName.substring(3, formattedName.length - 3);
 
