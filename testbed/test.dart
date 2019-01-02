@@ -1,34 +1,23 @@
-
-abstract class RenderAbstractViewport extends RenderObject {
- 
-  static RenderAbstractViewport of(RenderObject object) {  
-    return null;
-  }
-
-  final double offset;
-
+class Widget {}
+class Row {
+  Row(<Widget> children) {}
+ }
 }
 
-abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMixin<RenderSliver>>
-    extends RenderBox with ContainerRenderObjectMixin<RenderSliver, ParentDataClass>
-    implements RenderAbstractViewport {
-
+class OutlineButton {
+  OutlineButton({Row child});
 }
 
-class DiagnosticableTreeMixin {}
-
-class HitTestTarget {}
-
-abstract class AbstractNode<T> {}
-
-abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin implements HitTestTarget {}
-
-mixin ContainerParentDataMixin<ChildType extends RenderObject> on ParentData {}
-
-
-class RenderBox {}
-class RenderSilver {}
-class ParentDataClass {}
-class ParentDataType {}
-mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType extends ContainerParentDataMixin<ChildType>> on RenderObject {}
-
+class _OutlineButtonWithIcon extends OutlineButton {
+  _OutlineButtonWithIcon({@required Widget icon,
+    @required Widget label,
+  }) : super(
+         child: Row(
+           children: <Widget>[
+             icon,
+             const SizedBox(width: 8.0),
+             label,
+           ],
+         ),
+       );
+}

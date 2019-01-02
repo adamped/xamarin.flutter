@@ -74,13 +74,14 @@ class Literals {
       else if (entity.toString() == ']') {
         var length = args == true ? 2 : 0;
         csharp = csharp.substring(0, csharp.length - length) + '}';
-      } else if (entity is SimpleStringLiteral) {
+      }
+      else if (entity is TypeArgumentList)
+      {
+        csharp += Implementation.processEntity(entity) + '()';
+      } else {
         csharp += Implementation.processEntity(entity) + ', ';
         args = true;
-      } else
-        csharp += Implementation.processEntity(entity);
-
-      if (entity is TypeArgumentList) csharp += '()';
+      }       
     }
     return csharp;
   }
