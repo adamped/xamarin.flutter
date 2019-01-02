@@ -68,7 +68,7 @@ main() async {
       var namespaceDartName =
           Naming.namespaceFromIdentifier(element.library.identifier);
       var code = Frame.printNamespace(element, namespaceDartName);
-
+      
       var file = new File(
           "${outputPath.absolute.path}\\${namespaceParts.join("\\")}.cs");
       if (!await file.exists()) await file.create(recursive: true);

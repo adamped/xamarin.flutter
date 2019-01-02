@@ -11,6 +11,11 @@ class Classes {
   static String printClass(ClassElement element) {
     var implementWithInterface = element.isMixin || element.isAbstract;
     var name = Naming.nameWithTypeParameters(element, false);
+
+    // Workaround for classes that are not correctly picked up as interfaces
+    if( ["PageMetrics","FixedExtentMetrics","GestureArenaEntry"].contains(name))
+      implementWithInterface = true;
+    
     var code = new StringBuffer();
     code.writeln("");
     Comments.appendComment(code, element);    
@@ -76,15 +81,19 @@ class Classes {
     var code = new StringBuffer();
     var instanceName = interface.displayName;
 
-    var anyToImplement = interface.methods.any((x) => element.methods.where((y) => y.displayName == x.displayName).length == 0)
-                        || interface.element.fields.any((x) => element.fields.where((y) => y.displayName == x.displayName).length == 0);
+    var fieldsToImplement = interface.element.fields.where((x) => !x.isPrivate && 
+        element.fields.where((y) => y.displayName == x.displayName).length == 0 );
+    var methodsToImplement = interface.methods.where((x) => !x.isPrivate && element.methods.where((y) => y.displayName == x.displayName).length == 0 );
+    
+    var anyToImplement = methodsToImplement.length > 0
+                        || fieldsToImplement.length > 0;
 
     if (!anyToImplement)
       return '';
       
     code.writeln('$instanceName _${instanceName}Instance = new $instanceName();');
    
-    for (var method in interface.methods.where((x) => element.methods.where((y) => y.displayName == x.displayName).length == 0 ))
+    for (var method in methodsToImplement)
     {
        var methodName = Methods.getMethodName(method);
        var signature = Methods.methodSignature(method, null, false, '', null, '', '');
@@ -93,7 +102,7 @@ class Classes {
       code.writeln('public $signature => _${instanceName}Instance.$methodName($parameterCalls);');
     }
 
-    for (var field in interface.element.fields.where((x) => element.fields.where((y) => y.displayName == x.displayName).length == 0 ))
+    for (var field in fieldsToImplement)
     {
        var typeAndName = Fields.printTypeAndName(field);
           var fieldName = Fields.getFieldName(field);

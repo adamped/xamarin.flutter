@@ -10,8 +10,7 @@ class Naming {
   static List<String> namespacePartsFromIdentifier(String identifier) {
     var namespacePath = identifier
         .replaceAll(
-            "file:///" + Config.sourcePath.replaceAll("\\", "/") + "/",
-            "")
+            "file:///" + Config.sourcePath.replaceAll("\\", "/") + "/", "")
         .replaceAll(".dart", "")
         .replaceAll("package:flutter/src/", "");
 
@@ -47,7 +46,7 @@ class Naming {
   static String interfaceTypeName(InterfaceType type) {
     var name = type.name;
     name = getFormattedName(name, NameStyle.UpperCamelCase);
-   
+
     var typeArguments = new List<String>();
     for (var argument in type.typeArguments) {
       typeArguments.add(Types.getDartTypeName(argument));
@@ -62,7 +61,7 @@ class Naming {
       TypeParameterizedElement element, bool isInterface) {
     var name = element.name;
     name = getFormattedName(name, NameStyle.UpperCamelCase);
-    
+
     if (isInterface) name = "I" + name;
     var typeArguments = new List<String>();
     for (var argument in element.typeParameters) {
@@ -88,7 +87,7 @@ class Naming {
     }
     return name;
   }
- 
+
   static String getReturnType(FunctionTypedElement element) {
     var returnType = element.returnType;
     var returnName = returnType.displayName;
@@ -100,10 +99,8 @@ class Naming {
         var t = test.returnType as TypeName;
         returnName = t.name.name;
       }
-    }
-    else if (test is FunctionDeclaration)
-    {
-       if (test.returnType is TypeName) {
+    } else if (test is FunctionDeclaration) {
+      if (test.returnType is TypeName) {
         var t = test.returnType as TypeName;
         returnName = t.name.name;
       }
@@ -179,6 +176,14 @@ class Naming {
       formattedName = formattedName.replaceAll("Map", "Dictionary");
 
     switch (formattedName.toLowerCase()) {
+      case "float8list":
+      case "float16list":
+      case "float32list":
+        return "List<double>";
+      case "float64list":
+        return "List<float>";
+      case "int32list":
+        return "List<uint>";
       case "httpclientresponse":
         return "HttpResponseMessage";
       case "shader":
@@ -189,7 +194,7 @@ class Naming {
         return "NativeEngineLayer";
       case "frameinfo":
         return "SKCodecFrameInfo";
-        case "codec":
+      case "codec":
         return "SKCodec";
       case "void":
       case "bool":
@@ -223,7 +228,7 @@ class Naming {
 
   static String getFormattedName(String originalName, NameStyle style) {
     var formattedName = originalName;
-    if (formattedName == null || formattedName.length == 0) {  
+    if (formattedName == null || formattedName.length == 0) {
       return "";
     } else if (formattedName == "-") {
       formattedName = "subtractOperator";
