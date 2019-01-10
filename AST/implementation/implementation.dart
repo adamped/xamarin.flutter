@@ -518,12 +518,15 @@ csharp += Naming.escapeFixedWords(processEntity(entity));
   static String processInstanceCreationExpression(
       InstanceCreationExpression expression) {
     var csharp = "";
+    var isNamedConstructor = expression.staticElement.name != "";
     for (var entity in expression.childEntities) {
       csharp += processEntity(entity);
     }
+    
     // TODO: No such thing as named constructors in C#
     // Will need to look at Static Method calls without the new.
-    //if (!csharp.startsWith('new ')) csharp = 'new ' + csharp;
+    if (!csharp.startsWith('new ') && !isNamedConstructor) 
+      csharp = 'new ' + csharp;
     return csharp;
   }
 
