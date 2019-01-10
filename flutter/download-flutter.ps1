@@ -1,29 +1,31 @@
-echo "test"
-$webclient = New-Object System.Net.WebClient
+Write-Output "test"
 $url = "https://github.com/flutter/flutter/archive/master.zip"
 $zip = "flutter.zip"
-echo "download $url to $zip"
-$webclient.DownloadFile($url,$zip)
-echo "finished download"
+$ScriptDir = Split-Path $script:MyInvocation.MyCommand.Path
 
-echo "unzipping file"  
+Write-Output "download $url to $zip"
+Invoke-WebRequest -Uri $url -OutFile $zip
+Write-Output "finished download"
+
+Write-Output "unzipping file"  
 $subfolder = 'flutter-master\packages\flutter'  # path in the zip
 $shellApp = New-Object -ComObject Shell.Application 
 $path = $shellApp.namespace("$PSScriptRoot\$zip\$subfolder") # complete subfolder path
-$destination = $shellApp.namespace("$PSScriptRoot") #destination
+$destinationDirectory = (Get-Item $ScriptDir).Parent
+$destination = $shellApp.namespace($destinationDirectory.FullName) #destination
 $destination.CopyHere($path)
 
-Move-Item -Path "flutter\*" -Destination ""
+Write-Output "cleaning up"
+Remove-Item $zip
+Write-Output "finished downloading flutter" 
 
-echo "cleaning up"
-rm -r -fo "flutter"
-rm $zip
-echo "finished downloading flutter" 
-echo "attempt to run flutter package get"
+Write-Output "attempt to run flutter package get"
+
 if (Get-Command flutter -errorAction SilentlyContinue)
 {  
     flutter packages get
 }
 else{
-    echo "cmdlet flutter is not available" 
-} 
+    Write-Output "cmdlet flutter is not available"
+}
+
