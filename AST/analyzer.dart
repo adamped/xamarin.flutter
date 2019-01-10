@@ -25,6 +25,10 @@ main() async {
   var contents = await dirContents(Directory(Config.sourcePath));
 
   PhysicalResourceProvider resourceProvider = PhysicalResourceProvider.INSTANCE;
+    if (!Config.IsDartSdkPathAvailable) {
+    print("Missing $Config.dartSdkEnvVariableName environment variable");
+    exit(1);
+  }
   DartSdk sdk = new FolderBasedDartSdk(
       resourceProvider, resourceProvider.getFolder(Config.DartSdkPath));
   var flutterSdk = Config.sourcePath
@@ -82,6 +86,7 @@ Future<List<FileSystemEntity>> dirContents(Directory directory) async {
   print(directory);
 
   var exists = await directory.exists();
+  
   if (exists) {
     var stream = directory
         .list(recursive: true, followLinks: false)
@@ -90,6 +95,10 @@ Future<List<FileSystemEntity>> dirContents(Directory directory) async {
     });
 
     stream.onDone(() => completer.complete(files));
+  }
+  else
+  {
+    completer.completeError("Directory doesn't exist");
   }
 
   return completer.future;

@@ -2,6 +2,7 @@ import 'dart:io';
 
 class Config {
 
+  static const dartSdkEnvVariableName = "DART_SDK";
   static bool includeMethodImplementations = false;
   static bool includeConstructorImplementations = false;
   static bool includeFieldImplementations = false;
@@ -22,9 +23,11 @@ class Config {
       .path
       .replaceAll('\\AST\\..', '');
 
+  static bool IsDartSdkPathAvailable = Platform.environment.containsKey(dartSdkEnvVariableName);
+  
   // Absolute path to the dart-sdk directory
-  static String DartSdkPath = "C:\\Program Files\\Dart\\dart-sdk";
-  //static String DartSdkPath = "C:\\Program Files\\Dart\\dart-sdk";
+  static String DartSdkPath = Platform.environment[dartSdkEnvVariableName];
+  
   // Root namespace the transpiled namespaces will start with
   static String rootNamespace = "FlutterSDK";
 
