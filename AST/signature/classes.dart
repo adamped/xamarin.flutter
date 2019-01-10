@@ -69,7 +69,7 @@ class Classes {
     //Add Implemented Fields and Methods
     for (var interface in interfacesToImplement)
       code.write(interfaceFieldAndMethods(interface, element));
-
+ 
     code.writeln("}");
     return code.toString();
   }
