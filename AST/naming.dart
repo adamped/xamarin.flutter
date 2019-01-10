@@ -2,16 +2,15 @@ import 'package:analyzer/analyzer.dart';
 import 'package:analyzer/dart/ast/token.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:analyzer/dart/element/element.dart';
-import 'package:analyzer/src/dart/element/type.dart';
 
 import 'config.dart';
+import 'types.dart';
 
 class Naming {
   static List<String> namespacePartsFromIdentifier(String identifier) {
     var namespacePath = identifier
         .replaceAll(
-            "file:///" + Config.flutterSourcePath.replaceAll("\\", "/") + "/",
-            "")
+            "file:///" + Config.sourcePath.replaceAll("\\", "/") + "/", "")
         .replaceAll(".dart", "")
         .replaceAll("package:flutter/src/", "");
 
@@ -25,8 +24,6 @@ class Naming {
   static String namespaceFromIdentifier(String identifier) {
     var parts = namespacePartsFromIdentifier(identifier);
 
-    //Dont include the filename in the namespace
-    //parts.removeLast();
     return Config.rootNamespace + "." + parts.join(".");
   }
 
@@ -35,15 +32,18 @@ class Naming {
     var name = type.name;
     name = getFormattedName(name, NameStyle.UpperCamelCase);
 
-    // Can't do this, because then constructors and method bodies all have issues.
-    // if (type.name.startsWith("_") && type.element is ClassElement) {
-    //   name = "Internal" + name;
-    // }
-
     if (isInterface) name = "I" + name;
+
+    // TODO: Need to sort this out, so it does it for all, not just this particular one.
+    if (name == 'IObstructingPreferredSizeWidget')
+    {
+      var namespace = namespaceFromIdentifier(type.element.library.identifier);
+      name = namespace + "." + name;
+    }
+
     var typeArguments = new List<String>();
     for (var argument in type.typeArguments) {
-      typeArguments.add(getDartTypeName(argument));
+      typeArguments.add(Types.getDartTypeName(argument));
     }
     if (typeArguments.length > 0) {
       name += "<${typeArguments.join(",")}>";
@@ -54,13 +54,10 @@ class Naming {
   static String interfaceTypeName(InterfaceType type) {
     var name = type.name;
     name = getFormattedName(name, NameStyle.UpperCamelCase);
-    // Can't do this, because then constructors and method bodies all have issues.
-    // if (type.name.startsWith("_") && type.element is ClassElement) {
-    //   name = "Internal" + name;
-    // }
+
     var typeArguments = new List<String>();
     for (var argument in type.typeArguments) {
-      typeArguments.add(getDartTypeName(argument));
+      typeArguments.add(Types.getDartTypeName(argument));
     }
     if (typeArguments.length > 0) {
       name += "<${typeArguments.join(",")}>";
@@ -72,10 +69,7 @@ class Naming {
       TypeParameterizedElement element, bool isInterface) {
     var name = element.name;
     name = getFormattedName(name, NameStyle.UpperCamelCase);
-    // Can't do this, because then constructors and method bodies all have issues.
-    // if (type.name.startsWith("_") && type.element is ClassElement) {
-    //   name = "Internal" + name;
-    // }
+
     if (isInterface) name = "I" + name;
     var typeArguments = new List<String>();
     for (var argument in element.typeParameters) {
@@ -102,11 +96,6 @@ class Naming {
     return name;
   }
 
-  static String mixinInterfaceName(ClassElement mxin) {
-    var name = nameWithTypeParameters(mxin, true);
-    return name;
-  }
-
   static String getReturnType(FunctionTypedElement element) {
     var returnType = element.returnType;
     var returnName = returnType.displayName;
@@ -114,6 +103,11 @@ class Naming {
     if (returnType is InterfaceType) {
       returnName = interfaceTypeName(returnType);
     } else if (test is MethodDeclaration) {
+      if (test.returnType is TypeName) {
+        var t = test.returnType as TypeName;
+        returnName = t.name.name;
+      }
+    } else if (test is FunctionDeclaration) {
       if (test.returnType is TypeName) {
         var t = test.returnType as TypeName;
         returnName = t.name.name;
@@ -163,100 +157,6 @@ class Naming {
     return text;
   }
 
-  static String getDartTypeName(DartType type) {
-    String typeName = "object";
-    if (type is InterfaceType) {
-      typeName = nameWithTypeArguments(type, false);
-    } else if (type is TypeParameterType) {
-      typeName = type.displayName;
-    }
-    var formattedName = getFormattedTypeName(typeName);
-
-    if (!(type is TypeParameterType) && type.element != null) {
-      var library = type.element.library;
-      if (library != null &&
-          !Config.ignoredImports.contains(library.identifier) &&
-          formattedName != "object") {
-        var namespace = namespaceFromIdentifier(library.identifier);
-        formattedName = namespace + "." + formattedName;
-      }
-    }
-
-    return formattedName;
-  }
-
-  static String getVariableType(VariableElement element, VariableType type) {
-    String typeName = "object";
-    var elementType = element.type;
-    if (elementType is FunctionTypeImpl) {
-      var parameterTypes = '';
-      if (elementType.normalParameterTypes == null)
-        throw new AssertionError('Its null');
-      if (elementType.normalParameterTypes != null) {
-        parameterTypes = elementType.normalParameterTypes.map((p) {
-          if (p is InterfaceType) {
-            var type = getFormattedTypeName(p.name);
-            var typeArguments = p.typeArguments.map((t) {
-              return getFormattedTypeName(t.displayName);
-            }).join(',');
-            if (typeArguments.isEmpty)
-              return type;
-            else
-              return type + '<$typeArguments>';
-          } else
-            return getFormattedTypeName(p.displayName);
-        }).join(',');
-      }
-
-      // Remove all spaces
-      parameterTypes = parameterTypes.replaceAll(' ', '');
-
-      if (elementType.returnType is VoidType) {
-        // This is an Action
-        if (parameterTypes.isEmpty)
-          return 'Action';
-        else
-          return 'Action<$parameterTypes>';
-      } else {
-        // This is a Function
-        var returnType = elementType.returnType.name;
-        if (parameterTypes.isNotEmpty)
-          return 'Func<$returnType,$parameterTypes>';
-        else
-          return 'Func<$returnType>';
-      }
-    } else if (elementType is InterfaceType) {
-      typeName = nameWithTypeArguments(element.type, false);
-    } else if (elementType is TypeParameterType) {
-      typeName = elementType.displayName;
-    } else if (element.computeNode() != null) {
-      switch (type) {
-        case VariableType.Field:
-          typeName =
-              tokenToText(element.computeNode().beginToken.previous, true)
-                  .split(" ")
-                  .first;
-          break;
-        case VariableType.Parameter:
-          typeName = tokenToText(element.computeNode().endToken.previous, true)
-              .split(" ")
-              .last;
-          break;
-      }
-    }
-    var formattedName = getFormattedTypeName(typeName);
-    var library = elementType.element.library;
-    if (!(element.type is TypeParameterType) &&
-        library != null &&
-        !Config.ignoredImports.contains(library.identifier) &&
-        formattedName != "object") {
-      var namespace = namespaceFromIdentifier(library.identifier);
-      formattedName = namespace + "." + formattedName;
-    }
-
-    return formattedName;
-  }
-
   static String getTypeParameterName(TypeParameterElement element) {
     String typeName = "object";
 
@@ -271,21 +171,36 @@ class Naming {
   // Then work from there.
   static String getFormattedTypeName(String typeName) {
     var formattedName = typeName;
+
     if (formattedName.toLowerCase().startsWith("ui."))
       formattedName = formattedName.substring(3, formattedName.length - 3);
 
-    if (formattedName.startsWith("Set"))
-      formattedName = formattedName.replaceAll("Set", "HashSet");
+    if (formattedName == "Set" || formattedName.startsWith('Set<'))
+      formattedName = 'HashSet' + formattedName.substring(3);
     if (formattedName.startsWith("Map"))
       formattedName = formattedName.replaceAll("Map", "Dictionary");
 
     switch (formattedName.toLowerCase()) {
+      case "float8list":
+      case "float16list":
+      case "float32list":
+        return "List<double>";
+      case "float64list":
+        return "List<float>";
+      case "int32list":
+        return "List<uint>";
       case "httpclientresponse":
         return "HttpResponseMessage";
       case "shader":
         return "SKShader";
+      // case "image": // This doesn't work properly because there is an Image class in the FlutterSDK. But we do need something here for inside method bodies.
+      //   return "SKImage";
       case "enginelayer":
         return "NativeEngineLayer";
+      case "frameinfo":
+        return "SKCodecFrameInfo";
+      case "codec":
+        return "SKCodec";
       case "void":
       case "bool":
       case "int":
@@ -293,15 +208,19 @@ class Naming {
       case "double":
       case "string":
         return formattedName.toLowerCase();
-      case "dynamic": //TODO: we need to fix this. Dynamic is normally hiding a proper type.
+      case "dynamic": //TODO: we need to fix this. Dynamic is normally hiding a proper type. (AP - Might have fixed, will have to check later)
         return "object";
       case "duration":
         return "TimeSpan";
       case "future<void>":
       case "future<null>":
         return "Future";
-      case "iterable":
-        return "List";
+      // case "iterable":
+      //   return "List";
+      case "clip":
+        return "FlutterBinding.UI.Clip";
+      case "paragraph":
+        return "FlutterBinding.UI.Paragraph";
       default:
         formattedName =
             getFormattedName(formattedName, NameStyle.UpperCamelCase);
@@ -315,16 +234,17 @@ class Naming {
   static String getFormattedName(String originalName, NameStyle style) {
     var formattedName = originalName;
     if (formattedName == null || formattedName.length == 0) {
-      // Readd this once underscores are handled everywhere
-      //  || formattedName == "_") {
       return "";
     } else if (formattedName == "-") {
       formattedName = "subtractOperator";
     } else {
-      var reAddUnderscore = formattedName.startsWith("_");
-      formattedName = formattedName.replaceAll("_", "").replaceAll("-", "");
-      if (reAddUnderscore) {
-        formattedName = "_" + formattedName;
+      // We can't do this for names with namespaces already, since it doesn't quite work.
+      if (!formattedName.contains('.')) {
+        var reAddUnderscore = formattedName.startsWith("_");
+        formattedName = formattedName.replaceAll("_", "").replaceAll("-", "");
+        if (reAddUnderscore) {
+          formattedName = "_" + formattedName;
+        }
       }
     }
     if (style != NameStyle.LeadingUnderscoreLowerCamelCase) {
@@ -357,11 +277,31 @@ class Naming {
   }
 
   static String lowerCamelCase(String name) {
-    return name[0].toLowerCase() + name.replaceRange(0, 1, "");
+    if (name.length == 1) return name;
+
+    var underscore = name.startsWith('_');
+
+    if (underscore) name = name.substring(1);
+
+    var newName = name[0].toLowerCase() + name.replaceRange(0, 1, "");
+
+    if (underscore) newName = '_' + newName;
+
+    return newName;
   }
 
   static String upperCamelCase(String name) {
-    return name[0].toUpperCase() + name.replaceRange(0, 1, "");
+    if (name.length <= 1) return name;
+
+    var underscore = name.startsWith('_');
+
+    if (underscore) name = name.substring(1);
+
+    var newName = name[0].toUpperCase() + name.replaceRange(0, 1, "");
+
+    if (underscore) newName = '_' + newName;
+
+    return newName;
   }
 
   static String escapeFixedWords(String word) {
@@ -374,7 +314,8 @@ class Naming {
       "fixed",
       "checked",
       "base",
-      "decimal"
+      "decimal",
+      "byte"
     ].any((x) => lowerName == x))
       return "@" + word;
     else
@@ -389,6 +330,12 @@ class Naming {
             .last +
         "DefaultClass";
     return getFormattedName(name, NameStyle.UpperCamelCase);
+  }
+
+  static String getTopLevelVariableName(TopLevelVariableElement element){
+    var name = element.name;
+    name = name.replaceAll("\$", "");
+    return name;
   }
 }
 

@@ -4,8 +4,8 @@ import 'package:analyzer/dart/ast/syntactic_entity.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/src/dart/element/element.dart';
 import 'package:front_end/src/scanner/token.dart';
-import '../config.dart';
 import '../naming.dart';
+import '../config.dart';
 import 'loops.dart';
 import 'exceptions.dart';
 import 'literals.dart';
@@ -13,63 +13,45 @@ import 'conditionals.dart';
 
 /// Provides methods to transpile the body of elements
 class Implementation {
-  static String MethodBody(FunctionBody body,
-      {bool overrideIncludeConfig = false}) {
-    if (!Config.includeImplementations && !overrideIncludeConfig)
-      return "{\nthrow new NotImplementedException();\n}";
-
-    if (body is EmptyFunctionBody) {
-      var parent = body.parent;
-      if (parent is MethodDeclaration &&
-          parent.returnType != null &&
-          parent.returnType.toString() != 'void')
-        return '{ \nreturn default(${processEntity(parent.returnType)}); \n}';
-      else
-        return '{ \n}'; // No code;
-    } else if (body is BlockFunctionBody) {
-      return processBlockFunction(body,
-          overrideIncludeConfig: overrideIncludeConfig);
-    } else if (body is ExpressionFunctionBody) {
-      return processExpressionFunction(body,
-          overrideIncludeConfig: overrideIncludeConfig);
-    } else {
-      // Nothing comes here, so I have implemented all for now.
-      // But this is here in case something in the future appears
-      // and needs to be accounted for.
-      throw new AssertionError('Function block is not defined');
-    }
+  static String MethodBody(FunctionBody body) {
+    if (Config.includeMethodImplementations) {
+      if (body is EmptyFunctionBody) {
+        var parent = body.parent;
+        if (parent is MethodDeclaration &&
+            parent.returnType != null &&
+            parent.returnType.toString() != 'void')
+          return '{ \nreturn default(${processEntity(parent.returnType)}); \n}';
+        else
+          return '{ \n}'; // No code;
+      } else if (body is BlockFunctionBody) {
+        return processBlockFunction(body);
+      } else if (body is ExpressionFunctionBody) {
+        return processExpressionFunction(body);
+      } else {
+        // Nothing comes here, so I have implemented all for now.
+        // But this is here in case something in the future appears
+        // and needs to be accounted for.
+        throw new AssertionError('Function block is not defined');
+      }
+    } else
+      return '{ throw new NotImplementedException(); }';
   }
 
-  static String processExpressionFunction(ExpressionFunctionBody body,
-      {bool overrideIncludeConfig: false}) {
-    if (!Config.includeImplementations && !overrideIncludeConfig)
-      return "\nthrow new NotImplementedException()";
-
-    var impl = Config.includeImplementations;
-    Config.includeImplementations = true;
+  static String processExpressionFunction(ExpressionFunctionBody body) {
     var rawBody = "";
     for (var child in body.childEntities) {
-      rawBody +=
-          processEntity(child, overrideIncludeConfig: overrideIncludeConfig);
+      rawBody += processEntity(child);
     }
-    Config.includeImplementations = impl;
+
     return rawBody + '\n';
   }
 
-  static String processBlockFunction(BlockFunctionBody body,
-      {bool overrideIncludeConfig: false}) {
-    if (!Config.includeImplementations && !overrideIncludeConfig)
-      return "\nthrow new NotImplementedException();\n";
-
+  static String processBlockFunction(BlockFunctionBody body) {
     var rawBody = "\n";
-    var impl = Config.includeImplementations;
-    Config.includeImplementations = true;
     for (var child in body.childEntities) {
       if (child is Block) {
         for (var entity in child.childEntities) {
-          rawBody += processEntity(entity,
-                  overrideIncludeConfig: overrideIncludeConfig) +
-              "\n";
+          rawBody += processEntity(entity) + "\n";
         }
       } else if (child is KeywordToken) {
         rawBody += child.toString() + "\n";
@@ -78,7 +60,6 @@ class Implementation {
       } else
         rawBody += "\n// Block Function type not dealt with $child";
     }
-    Config.includeImplementations = impl;
 
     return rawBody + "\n";
   }
@@ -98,14 +79,7 @@ class Implementation {
     return '';
   }
 
-  static String processEntity(SyntacticEntity entity,
-      {bool overrideIncludeConfig: false}) {
-    if (!Config.includeImplementations && !overrideIncludeConfig)
-      return "\nthrow new NotImplementedException();\n";
-
-    // if (entity.toString().contains('_TrainHopping'))
-    // entity.toString();
-
+  static String processEntity(SyntacticEntity entity) {
     if (startCastMapping) {
       var castMap = processCastMap(entity);
       if (castMap.isNotEmpty) return castMap;
@@ -247,6 +221,8 @@ class Implementation {
       return processFunctionDeclaration(entity);
     } else if (entity is MapLiteralEntry) {
       return Literals.processMapLiteralEntry(entity);
+    } else if (entity is Annotation) {
+      return ''; // Just ignoring these, because properties in the element determine these annotations, I don't need to parse them.
     } else {
       throw new AssertionError('Unknown entity');
     }
@@ -351,7 +327,10 @@ class Implementation {
   static String processLabel(Label label) {
     var csharp = "";
     for (var entity in label.childEntities) {
-      csharp += processEntity(entity);
+      if (entity is SimpleIdentifier)
+csharp += Naming.escapeFixedWords(processEntity(entity));
+      else 
+        csharp += processEntity(entity);
     }
     return csharp;
   }
@@ -454,7 +433,10 @@ class Implementation {
   static String processNamedExpression(NamedExpression expression) {
     var csharp = "";
     for (var entity in expression.childEntities) {
-      csharp += processEntity(entity);
+      if (entity is SimpleIdentifier)
+        csharp += Naming.escapeFixedWords(processEntity(entity));
+      else
+        csharp += processEntity(entity);
     }
     return csharp;
   }
@@ -541,7 +523,7 @@ class Implementation {
     }
     // TODO: No such thing as named constructors in C#
     // Will need to look at Static Method calls without the new.
-    if (!csharp.startsWith('new ')) csharp = 'new ' + csharp;
+    //if (!csharp.startsWith('new ')) csharp = 'new ' + csharp;
     return csharp;
   }
 
@@ -560,7 +542,7 @@ class Implementation {
         expression.childEntities.elementAt(1).toString() == '??') {
       var first = expression.childEntities.elementAt(0);
       var second = expression.childEntities.elementAt(2);
-      if (first is SimpleIdentifier &&
+      if (first is SimpleIdentifier && first.staticType != null &&
           first.staticType.displayName ==
               'double') //TODO: Should cover all non-nullable value types
         return '$first == default(${first.staticType.displayName}) ? $second : $first';
@@ -588,8 +570,12 @@ class Implementation {
 
       while (parentEntity != null &&
           (parentEntity is! VariableDeclaration &&
-              parentEntity is! AssignmentExpression))
+              parentEntity is! AssignmentExpression 
+              && parentEntity is! CascadeExpression))
         parentEntity = parentEntity.parent;
+
+      if (parentEntity == null)
+      parentEntity.toString();
 
       String processedEntity =
           processEntity(parentEntity.childEntities.toList()[0]);
@@ -614,6 +600,13 @@ class Implementation {
   static String processSimpleIdentifier(SimpleIdentifier identifier) {
     var csharp = '';
 
+    // Check if this is directly inside the namespace and was mapped inside the namespace default class
+    if(identifier.staticElement != null && identifier.staticElement.enclosingElement is CompilationUnitElement && !(identifier.staticElement is EnumElementImpl)) {
+      // add the default class to the call
+      var defaultClass = Naming.DefaultClassName(identifier.staticElement.enclosingElement);
+      csharp += defaultClass + ".";
+    }
+
     // If the identifier is actually a type.
     if (identifier.parent is TypeName)
       return Naming.getFormattedTypeName(identifier.name);
@@ -630,7 +623,7 @@ class Implementation {
     {
       csharp += processMethodElement(identifier.staticElement);
     } else if (identifier.staticElement is EnumElementImpl) {
-      var name = identifier.name;      
+      var name = identifier.name;
       csharp += name;
     } else if (identifier.staticElement is FunctionElement) {
       csharp += processFunctionElement(identifier.staticElement);
@@ -788,23 +781,25 @@ class Implementation {
 
   static String processTypeName(TypeName name) {
     var csharp = '';
-
+    if (name.toString().toLowerCase().contains('valuechanged'))
+    name = name;
     for (var entity in name.childEntities) csharp += processEntity(entity);
     return csharp;
   }
 
   static String fieldBody(PropertyAccessorElement element) {
-    if (!Config.includeImplementations)
-      return "\nthrow new NotImplementedException();\n";
+    if (Config.includeFieldImplementations && element != null) {
+      // TODO: this is all messed up anyway
+     
+      var body = element.computeNode();
+      var bodyLines = Naming.tokenToText(body.beginToken, false).split("\n");
+      var rawBody = bodyLines.map((l) => "${l}\n").join();
 
-    // TODO: this is all messed up anyway
-    var body = element.computeNode();
-    var bodyLines = Naming.tokenToText(body.beginToken, false).split("\n");
-    var rawBody = bodyLines.map((l) => "${l}\n").join();
-
-    // Transpile logic comes here
-    var transpiledBody = "throw new NotImplementedException();";
-    return transpiledBody;
+      // Transpile logic comes here
+      var transpiledBody = "throw new NotImplementedException();";
+      return transpiledBody;
+    } else
+      return 'throw new NotImplementedException();';
   }
 
   static String functionBody(FunctionElement element) {

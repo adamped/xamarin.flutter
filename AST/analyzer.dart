@@ -21,21 +21,25 @@ main() async {
   // 1) Get all directories and all files
   var outputPath = Directory('..\\FlutterSDK\\src');
 
-  print("Directory: " + Config.flutterSourcePath);
-  var contents = await dirContents(Directory(Config.flutterSourcePath));
+  print("Directory: " + Config.sourcePath);
+  var contents = await dirContents(Directory(Config.sourcePath));
 
   PhysicalResourceProvider resourceProvider = PhysicalResourceProvider.INSTANCE;
-  DartSdk sdk = new FolderBasedDartSdk(resourceProvider,
-      resourceProvider.getFolder(Config.DartSdkPath));
+    if (!Config.IsDartSdkPathAvailable) {
+    print("Missing $Config.dartSdkEnvVariableName environment variable");
+    exit(1);
+  }
+  DartSdk sdk = new FolderBasedDartSdk(
+      resourceProvider, resourceProvider.getFolder(Config.DartSdkPath));
+  var flutterSdk = Config.sourcePath
+      .substring(0, Config.sourcePath.lastIndexOf('\\'));
 
   var resolvers = [
     new DartUriResolver(sdk),
+    Config.isTestbed ? null : new DartUriResolver(embeddedResolver(resourceProvider, flutterSdk)),
     new ResourceUriResolver(resourceProvider),
-    packageResolver(
-        resourceProvider,
-        'flutter',
-        resourceProvider.getFolder(Config.flutterSourcePath
-            .substring(0, Config.flutterSourcePath.lastIndexOf('\\'))))
+    Config.isTestbed ? null :packageResolver(
+        resourceProvider, 'flutter', resourceProvider.getFolder(flutterSdk)),
   ];
 
   AnalysisContext context = AnalysisEngine.instance.createAnalysisContext()
@@ -61,11 +65,11 @@ main() async {
 
       var element = resolvedUnit.declaredElement;
       var namespaceParts =
-          Naming.namespacePartsFromIdentifier(element.library.identifier); 
+          Naming.namespacePartsFromIdentifier(element.library.identifier);
       var namespaceDartName =
           Naming.namespaceFromIdentifier(element.library.identifier);
       var code = Frame.printNamespace(element, namespaceDartName);
-
+      
       var file = new File(
           "${outputPath.absolute.path}\\${namespaceParts.join("\\")}.cs");
       if (!await file.exists()) await file.create(recursive: true);
@@ -82,14 +86,19 @@ Future<List<FileSystemEntity>> dirContents(Directory directory) async {
   print(directory);
 
   var exists = await directory.exists();
+  
   if (exists) {
     var stream = directory
         .list(recursive: true, followLinks: false)
         .listen((FileSystemEntity entity) {
       files.add(entity);
-    }); 
+    });
 
     stream.onDone(() => completer.complete(files));
+  }
+  else
+  {
+    completer.completeError("Directory doesn't exist");
   }
 
   return completer.future;

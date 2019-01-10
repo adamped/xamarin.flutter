@@ -20,6 +20,7 @@ Remove-Item $zip
 Write-Output "finished downloading flutter" 
 
 Write-Output "attempt to run flutter package get"
+
 if (Get-Command flutter -errorAction SilentlyContinue)
 {  
     flutter packages get
@@ -27,3 +28,4 @@ if (Get-Command flutter -errorAction SilentlyContinue)
 else{
     Write-Output "cmdlet flutter is not available"
 }
+

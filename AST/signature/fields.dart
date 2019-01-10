@@ -1,8 +1,11 @@
 import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/src/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
+import 'package:analyzer/src/dart/element/type.dart';
 import 'package:analyzer/src/dart/element/member.dart';
 import '../implementation/implementation.dart';
 import '../naming.dart';
+import '../types.dart';
 
 class Fields {
   static bool containsGenericPart(DartType type) {
@@ -39,7 +42,7 @@ class Fields {
 
     if (fieldInSupertype != null) {
       return getBaseFieldInClass(fieldInSupertype);
-    } else if (element is FieldMember) {
+    } else if (element is FieldMember) {      
       return element.baseElement;
     } else
       return element;
@@ -52,7 +55,7 @@ class Fields {
     if (element.hasProtected == true) code.write("protected ");
     if (element.isPublic == true) code.write("public ");
     if (element.isPrivate == true) code.write("internal ");
-    if (element.hasOverride == true) code.write("override ");
+    if (element.hasOverride == true) code.write("new "); // Until we figure it out properly
     if (element.hasOverride == false) code.write("virtual ");
 
     // type + name
@@ -60,10 +63,6 @@ class Fields {
       code.write(printTypeAndName(element));
     } else {
       code.write(printTypeAndName(baseField));
-    }
-
-    if (code.toString().contains("UiKitViewController")) {
-      print("ouch");
     }
 
     var hasGetter = element.getter != null;
@@ -94,8 +93,7 @@ class Fields {
         if (implementedGetter)
           code.write("set { ${Implementation.fieldBody(element.setter)} }");
         else
-          code.write(
-              "private set;"); // For static auto initialization of variables
+          code.write("set;"); // For static auto initialization of variables
       }
       code.write("}");
     } else
@@ -108,28 +106,40 @@ class Fields {
       FieldElement element,
       FieldElement overridingElement,
       InterfaceType implementedClass,
-      String implementedFieldName) {
+      String implementedFieldName,
+      ClassElement implementingType,
+      InterfaceType originalMixin) {
     var code = new StringBuffer();
-    var elementForSignature =
-        overridingElement != null ? overridingElement : element;
 
-    if (elementForSignature.hasProtected == true) code.write("protected ");
-    if (elementForSignature.isPublic == true) code.write("public ");
-    code.write("virtual ");
+    var elementForSignature = element;
+
+    // HACK: For some reason, just in Animation and Tween, we want the overridingElement
+    // but everywhere else we want the element. Need to correct this.
+    if (overridingElement != null && overridingElement.type.displayName == 'Animation<double>')
+      elementForSignature = overridingElement;
 
     // type + name
-    var name = getFieldName(element);
-    if (name == Naming.nameWithTypeParameters(element.enclosingElement, false))
+    var name = getFieldName(elementForSignature);
+
+    if (name == Naming.nameWithTypeParameters(elementForSignature.enclosingElement, false))
       name = name + "Value";
 
-    if (containsGenericPart(element.type)) {
-      var typeParameter = implementedClass.typeParameters.firstWhere(
-          (tp) => element.type.displayName.contains(tp.type.displayName));
+    if (containsGenericPart(elementForSignature.type)) {
+      var typeParameter = implementedClass.typeParameters.firstWhere((tp) =>
+          elementForSignature.type.displayName.contains(tp.type.displayName));
       var type = implementedClass.typeArguments[
           implementedClass.typeParameters.indexOf(typeParameter)];
-      code.write("${type} ${name}");
+     
+     var typeName = type.name;
+    
+     // TODO: Might want to put this through a formatter of some kind
+     if (typeName == 'T' && originalMixin != null)
+      typeName = originalMixin.typeArguments[0].name;
+    
+    code.write("${typeName} I$implementedFieldName.$name");
+   
     } else {
-      code.write(printTypeAndName(element));
+      code.write(printTypeAndName(elementForSignature, interfaceName: 'I$implementedFieldName.'));
     }
 
     var hasGetter = elementForSignature.getter != null;
@@ -138,15 +148,15 @@ class Fields {
     if (hasGetter || hasSetter) {
       code.write("{");
       // getter
-      if (hasGetter) {
+      if (hasGetter) {       
+       
         code.write("get => ${implementedFieldName}.${name};");
       }
       // setter
       if (hasSetter) {
         code.write("set => ${implementedFieldName}.${name} = value;");
-      } else {
-        code.write("private set => ${implementedFieldName}.${name} = value;");
       }
+
       code.write("}");
     } else
       code.write(";");
@@ -180,30 +190,28 @@ class Fields {
     return code.toString();
   }
 
-  static String printTypeAndName(FieldElement element) {
-    var type = Naming.getVariableType(element, VariableType.Field);
+  static String printTypeAndName(FieldElement element, {String interfaceName = ''}) {
     var name = getFieldName(element);
     if (name == Naming.nameWithTypeParameters(element.enclosingElement, false))
       name = name + "Value";
 
-    return "${type} ${name}";
+    var type = Types.getVariableType(element, VariableType.Field);
+
+    return "${type} $interfaceName${name}";
   }
 
   static String printImplementedTypeAndName(
       FieldElement element, ClassElement supertypeThatProvidesField) {
-    var type = Naming.getVariableType(element, VariableType.Field);
+    var type = Types.getVariableType(element, VariableType.Field);
     var name = getFieldName(element);
     if (name == Naming.nameWithTypeParameters(element.enclosingElement, false))
       name = name + "Value";
-
+    
     return "${type} ${name}";
   }
 
   static String getFieldName(FieldElement element) {
     return Naming.getFormattedName(
-        element.name,
-        element.isPrivate
-            ? NameStyle.LeadingUnderscoreLowerCamelCase
-            : NameStyle.UpperCamelCase);
+        element.name, NameStyle.UpperCamelCase);
   }
 }
