@@ -3,26 +3,32 @@ import 'package:analyzer/dart/element/type.dart';
 
 import '../comments.dart';
 import '../naming.dart';
+import 'constructors.dart';
 import 'fields.dart';
 import 'methods.dart';
-import '../implementation/implementation.dart';
 
 class Classes {
   static String printClass(ClassElement element) {
     var implementWithInterface = element.isMixin || element.isAbstract;
     var name = Naming.nameWithTypeParameters(element, false);
+
+    // Workaround for classes that are not correctly picked up as interfaces
+    if( ["PageMetrics","FixedExtentMetrics","GestureArenaEntry"].contains(name))
+      implementWithInterface = true;
+    
     var code = new StringBuffer();
     code.writeln("");
-    Comments.appendComment(code, element);
-    //if (element.hasProtected == true || element.isPrivate == true)
-    //  code.write("internal ");
-    //if (element.isPublic == true)
+    Comments.appendComment(code, element);    
     code.write("public ");
     if (element.isAbstract == true && !implementWithInterface)
       code.write("abstract ");
     if (element.hasSealed == true) code.write("sealed ");
 
     code.write("class ${name}");
+
+    var generics = '';
+    if (name.contains('<'))
+      generics = name.substring(name.indexOf('<'), name.lastIndexOf('>') + 1);
 
     // Add base class, interfaces, mixin interfaces
     var hasBaseClass =
@@ -33,26 +39,16 @@ class Classes {
     }
 
     // Add interfaces
+    List<InterfaceType> interfacesToImplement = new List<InterfaceType>(); 
     for (var interface in element.interfaces) {
       inheritions.add(Naming.nameWithTypeArguments(interface, true));
+      if (interface.element.isValidMixin == false)
+        interfacesToImplement.add(interface);
     }
 
     // Add mixin interfaces
     for (var mxin in element.mixins) {
       inheritions.add(Naming.nameWithTypeArguments(mxin, true));
-    }
-
-    // Add superclasses of mixins as interfaces
-    for (var mixinSuperclass in element.superclassConstraints.where((c) =>
-        c.displayName != "@Object" &&
-        c.displayName != "object" &&
-        c.displayName != "Object")) {
-      inheritions.add(Naming.nameWithTypeArguments(mixinSuperclass, true));
-    }
-
-    // add its interface if class is a mixin
-    if (implementWithInterface) {
-      inheritions.add(Naming.mixinInterfaceName(element));
     }
 
     if (inheritions.length > 0) code.write(" : " + inheritions.join(","));
@@ -61,264 +57,203 @@ class Classes {
 
     code.writeln("#region constructors");
 
-    // Add private named constructor
-    var className = element.name;
-
-    code.writeln(
-        'private ${className}(string named = "") {\n // Just here to create blank instance \n}');
-
     // Add constructors
     for (var constructor in element.constructors) {
-      printConstructor(code, constructor);
+      Constructors.printConstructor(code, constructor, generics);
     }
     code.writeln("#endregion\n");
 
     // Add fields and methods
     printFieldsAndMethods(code, element, implementWithInterface);
 
+    //Add Implemented Fields and Methods
+    for (var interface in interfacesToImplement)
+      code.write(interfaceFieldAndMethods(interface, element));
+ 
     code.writeln("}");
     return code.toString();
   }
 
-  static void printConstructor(
-      StringBuffer code, ConstructorElement constructor) {
-    if (constructor.enclosingElement is ClassElement) {
-      var isStatic = false;
-      var className = constructor.enclosingElement.name;
+  // There are some interfaces that are not valid Mixin's but are used as Mixin's?
+  // Maybe I am missing something?? If I am, this should be removed.
+  static String interfaceFieldAndMethods(InterfaceType interface, ClassElement element)
+  {
+    var code = new StringBuffer();
+    var instanceName = interface.displayName;
+
+    var fieldsToImplement = interface.element.fields.where((x) => !x.isPrivate && 
+        element.fields.where((y) => y.displayName == x.displayName).length == 0 );
+    var methodsToImplement = interface.methods.where((x) => !x.isPrivate && element.methods.where((y) => y.displayName == x.displayName).length == 0 );
     
-      var parameters = Methods.printParameter(constructor, null, null);
-      if (constructor.name == '')
-        code.writeln('public ${className}($parameters)');
-      else if (constructor.name == '_')
-        code.writeln('internal ${className}($parameters)');
-      else if (constructor.name.startsWith('_'))
-        code.writeln('internal ${className}($parameters)');
-      else // I'm named, hence we are turing into static methods that return an instance
-      {
-        isStatic = true;
-        code.writeln(
-            'public static ${className} ${Naming.upperCamelCase(constructor.name)}($parameters)');
-      }
+    var anyToImplement = methodsToImplement.length > 0
+                        || fieldsToImplement.length > 0;
 
-      // Base class call
-      if (constructor.redirectedConstructor != null) {
-        var baseCall = constructor.redirectedConstructor;
-        var baseParameters = Methods.printParameterNames(baseCall);
+    if (!anyToImplement)
+      return '';
+      
+    code.writeln('$instanceName _${instanceName}Instance = new $instanceName();');
+   
+    for (var method in methodsToImplement)
+    {
+       var methodName = Methods.getMethodName(method);
+       var signature = Methods.methodSignature(method, null, false, '', null, '', '');
+       var parameterCalls = Methods.printParameterNames(method);
+      
+      code.writeln('public $signature => _${instanceName}Instance.$methodName($parameterCalls);');
+    }
 
-        code.writeln(': base($baseParameters)');
-      }
+    for (var field in fieldsToImplement)
+    {
+       var typeAndName = Fields.printTypeAndName(field);
+          var fieldName = Fields.getFieldName(field);
+      
+      code.writeln('public $typeAndName => _${instanceName}Instance.$fieldName;');
+    }
 
-      // Fill out Constructor body
-      var node = constructor.computeNode();
-      if (node != null) {
-        var body =
-            Implementation.MethodBody(node.body, overrideIncludeConfig: true);
-
-        // Add auto assignments if any
-        var autoAssignment = Methods.printAutoParameters(constructor);
-        if (autoAssignment.isNotEmpty) body = '{' + autoAssignment + '\n' + body.substring(2);
-
-        if (isStatic) {
-          var parameterNames = Methods.printParameterNames(constructor);
-          // Call private constructor
-          code.writeln(
-              '{\nvar instance = new ${className}(named:"${Naming.upperCamelCase(constructor.name)}"); \ninstance.${Naming.upperCamelCase(constructor.name)}Constructor($parameterNames);\nreturn instance;\n}\n');
-
-          code.writeln(
-              'private void ${Naming.upperCamelCase(constructor.name)}Constructor($parameters) $body');
-        } else {
-          // Normal constructor body
-          code.writeln(body);
-        }
-      } else
-        code.writeln('{ }');
-    } else
-      throw new AssertionError(
-          'A constructor is not inside a ClassElement, that should not happen.');
+    return code.toString();
   }
 
-  static void printFieldsAndMethods(
-      StringBuffer code, ClassElement element, bool implementWithInterface) {
-    // Add mixin fields and method implementations
-    code.writeln("#region inherited methods and fields");
-    var overridenImplementations = new List<ClassMemberElement>();
-    var implementedVariables = new List<ClassMemberElement>();
-
-    // Add mixin implementations
-    if (element.mixins.length > 0) {
-      code.writeln("#region inherited from mixins");
-      // Sort mixin because only the last implementation of a method is used in dart
-      var sortedMixins = element.mixins.reversed;
-      for (var implementedMixin in sortedMixins) {
-        code.writeln("#region inherited from ${implementedMixin.name}");
-        // Add the methods of the mixin and all its base methods
-        code.writeln(implementedInstanceName(implementedMixin));
-        addMixinImplementations(
-            element,
-            implementedMixin.name,
-            implementedMixin,
-            code,
-            implementedVariables,
-            overridenImplementations);
-        code.writeln("#endregion\n");
-      }
-      code.writeln("#endregion\n");
-    }
-
-    // Add interface implementations
-    var extendingClasses = element.interfaces.toList();
-    extendingClasses
-        .addAll(element.superclassConstraints.where((c) => c.name != "Object"));
-    if (extendingClasses.length > 0) {
-      code.writeln("#region inherited from interfaces");
-      for (var implementedClass in extendingClasses.reversed) {
-        code.writeln("#region inherited from ${implementedClass.name}");
-        code.writeln(implementedInstanceName(implementedClass));
-        addInterfaceImplementations(
-            element,
-            implementedClass.name,
-            implementedClass,
-            code,
-            implementedVariables,
-            overridenImplementations);
-        code.writeln("#endregion\n");
-      }
-      code.writeln("#endregion\n");
-    }
-    code.writeln("#endregion\n");
-
+  static void printFieldsAndMethods(StringBuffer code, ClassElement element,
+      bool implementWithInterface) {
+   
     code.writeln("#region fields");
     // Add fields that are not already handled as implementation overrides
     for (var field
-        in element.fields.where((f) => !overridenImplementations.contains(f))) {
+        in element.fields) {
       code.writeln(Fields.printField(field));
     }
     code.writeln("#endregion\n");
 
     code.writeln("#region methods");
+
     // Add methods that are not already handled as implementation overrides
-    for (var method in element.methods.where((m) =>
-        !overridenImplementations.any((x) => x.name == m.name) &&
-        !implementedVariables.any((x) => x.name == m.name))) {
-      code.writeln(Methods.printMethod(method, implementWithInterface,
+    for (var method in element.methods) {
+      code.writeln(Methods.printMethod(method,
           Methods.overridesParentBaseMethod(method, element)));
     }
     code.writeln("#endregion");
   }
+ 
+  static String printMixin(ClassElement element)
+  {
+    var name = Naming.nameWithTypeParameters(element, true);
+    var code = new StringBuffer();
+    code.writeln("");
 
-  static void addInterfaceImplementations(
-      ClassElement element,
-      String implementationInstanceName,
-      InterfaceType implementedMixin,
-      StringBuffer code,
-      List<ClassMemberElement> implementedVariables,
-      List<ClassMemberElement> overridenImplementations) {
-    addImplementedFields(code, implementationInstanceName, implementedMixin,
-        element, implementedVariables, overridenImplementations);
-    addImplementedMethods(code, implementationInstanceName, implementedMixin,
-        element, implementedVariables, overridenImplementations);
+    var rawName = name.substring(1); // Name without `I` at front
+    var generics = '';
 
-    for (var supertype in implementedMixin.element.allSupertypes.where((c) =>
-        c.displayName != "@Object" &&
-        c.displayName != "object" &&
-        c.displayName != "Object")) {
-      addInterfaceImplementations(element, implementationInstanceName,
-          supertype, code, implementedVariables, overridenImplementations);
+    if (rawName.contains('<'))
+    {
+      generics = rawName.substring(rawName.indexOf('<'));
+      rawName = rawName.substring(0, rawName.indexOf('<'));
     }
-  }
 
-  static void addMixinImplementations(
-      ClassElement element,
-      String mixinInstanceName,
-      InterfaceType implementedMixin,
-      StringBuffer code,
-      List<ClassMemberElement> implementedVariables,
-      List<ClassMemberElement> overridenImplementations) {
-    addImplementedFields(code, mixinInstanceName, implementedMixin, element,
-        implementedVariables, overridenImplementations);
-    addImplementedMethods(code, mixinInstanceName, implementedMixin, element,
-        implementedVariables, overridenImplementations);
-    for (var supertype in implementedMixin.element.superclassConstraints.where(
-        (c) =>
-            c.displayName != "@Object" &&
-            c.displayName != "object" &&
-            c.displayName != "Object")) {
-      addMixinImplementations(element, mixinInstanceName, supertype, code,
-          implementedVariables, overridenImplementations);
+    // Start Mixin Interface
+    code.write("public interface $name");
+
+    // Inherits
+    var mixinInheritance = element.mixins
+                                  .where((x) { return x.displayName != 'Object'; })
+                                  .map((f) { return Naming.nameWithTypeParameters(f.element, true); })
+                                  .join(',');
+    
+    if (mixinInheritance.isNotEmpty)
+      code.write(': $mixinInheritance');
+
+    code.writeln('{}\n'); 
+    // End Mixin Interface
+
+    // Start Instance class    
+    var interfaces = element.interfaces
+                            .where((x) { return x.displayName != 'Object' && x is InterfaceType; })
+                            .map((f) { return Naming.nameWithTypeParameters(f.element, true); })
+                            .join(',');
+
+    code.write('public class ${rawName}$generics'); 
+
+    if (mixinInheritance.isNotEmpty)
+    {
+      code.write(': $mixinInheritance');
+      if (interfaces.isNotEmpty)
+        code.write(',$interfaces');
     }
-  }
+    else if (interfaces.isNotEmpty)
+      code.write(':$interfaces');
 
-  static String implementedInstanceName(InterfaceType element) {
-    var implementedTypeName = element.name;
-    var mxinNameWithTypes = Naming.nameWithTypeArguments(element, false);
-    // Add instance of the implemented class
-    // The implementations of the interface will call the methods provided by this instance
-    return "private ${mxinNameWithTypes} ${implementedTypeName} = new ${mxinNameWithTypes}();";
-  }
+    code.writeln('{');
 
-  static void addImplementedFields(
-      StringBuffer code,
-      String implementationInstanceName,
-      InterfaceType implementedType,
-      ClassElement implementingType,
-      List<ClassMemberElement> addedByMixins,
-      List<ClassMemberElement> addedByImplementations) {
-    for (var implementedField in implementedType.element.fields.where((field) =>
-        field.isPublic &&
-        !addedByImplementations.any((existingMethod) =>
-            existingMethod.displayName == field.displayName) &&
-        !addedByMixins.any((existingMethod) =>
-            existingMethod.displayName == field.displayName))) {
-      // Store which methods are already implemented to avoid multiple declarations of the same method
-      addedByMixins.add(implementedField);
-
-      // Check if a field in this class overrides the implemented method
-      // Use the method body of the overriding field in this case
-      var overrideElement = implementingType.fields.firstWhere(
-          (method) => method.name == implementedField.name,
-          orElse: () => null);
-      // Store the overriding field to avoid adding it again when adding the other fields
-      if (overrideElement != null) addedByImplementations.add(overrideElement);
-
-      code.writeln(
-          // Pass the overriden element to get the correct field signature
-          Fields.printImplementedField(implementedField, overrideElement,
-              implementedType, implementationInstanceName));
+    // Fields and Methods
+    
+    // Add fields
+    for (var field
+        in element.fields) {
+      code.writeln(Fields.printField(field));
     }
-  }
+  
+    // Add methods
+    for (var method in element.methods) {
+      code.writeln(Methods.printMethod(method,
+          Methods.overridesParentBaseMethod(method, element)));
+    }    
 
-  static void addImplementedMethods(
-      StringBuffer code,
-      String implementationInstanceName,
-      InterfaceType implementedType,
-      ClassElement implementingType,
-      List<ClassMemberElement> addedByMxins,
-      List<ClassMemberElement> addByInterfaces) {
-    for (var implementedMethod in implementedType.methods.where((method) =>
-        method.isPublic &&
-        !addByInterfaces.any((existingMethod) =>
-            existingMethod.displayName == method.displayName) &&
-        !addedByMxins.any((existingMethod) =>
-            existingMethod.displayName == method.displayName))) {
-      // Store which methods are already implemented to avoid multiple declarations of the same method
-      addedByMxins.add(implementedMethod);
+    // Implement interface based fields and methods (e.g. Dart using an `implements`)
+    for (var interface in element.interfaces
+                            .where((x) { return x.displayName != 'Object' && x is InterfaceType; }))
+    {
+      for (var field in interface.element.fields.where((x) => element.fields.where((y) => y.displayName == x.displayName).length == 0))
+        code.writeln(Fields.printField(field));
 
-      // Check if a method in this class overrides the implemented method
-      // Use the method body of the overriding method in this case
-      var overridingMethod = implementingType.methods.firstWhere(
-          (method) => method.name == implementedMethod.name,
-          orElse: () => null);
-      // Store the overriding method to avoid adding it again when adding the other methods
-      if (overridingMethod != null) addByInterfaces.add(overridingMethod);
-
-      code.writeln(Methods.printImplementedMethod(
-          // Pass the overriden element to get the correct method modifiers
-          overridingMethod != null ? overridingMethod : implementedMethod,
-          implementationInstanceName,
-          implementedType,
-          overridingMethod,
-          implementingType));
+      for (var method in interface.element.methods.where((x) => element.methods.where((y) => y.displayName == x.displayName).length == 0))
+        code.writeln(Methods.printMethod(method, false));
     }
+   
+    code.writeln('}'); // End Instance Class
+
+    // Mixin static extensions class 
+    code.writeln('public static class ${rawName}Mixin {');
+
+    // Instance holding for mixins
+    if (generics.isEmpty) // No Generics
+      code.writeln('static System.Runtime.CompilerServices.ConditionalWeakTable<$name, $rawName> _table = new System.Runtime.CompilerServices.ConditionalWeakTable<$name, $rawName>();');
+    else // With generics we can't have an unbounded generic as type definition, so we revert to object's and cast later.
+      code.writeln('static System.Runtime.CompilerServices.ConditionalWeakTable<object, object> _table = new System.Runtime.CompilerServices.ConditionalWeakTable<object, object>();');
+
+    // Get Or Create Value
+    code.writeln('static $rawName$generics GetOrCreate$generics($name instance)');
+    code.writeln('{');
+    code.writeln('if (!_table.TryGetValue(instance, out var value))');
+    code.writeln('{');
+    code.writeln('value = new $rawName$generics();');
+    code.writeln('_table.Add(instance, value);');
+    code.writeln('}');
+    code.writeln('return ($rawName$generics)value;');
+    code.writeln('}');
+
+    // Extension Methods
+
+    // Add Fields
+    for (var field
+        in element.fields.where((x) { return x.isPublic; })) {
+          var typeAndName = Fields.printTypeAndName(field);
+          var fieldName = Fields.getFieldName(field);
+
+      code.writeln('public static ${typeAndName}Property$generics(this $name instance) => GetOrCreate(instance).$fieldName;');
+    }
+
+     // Add Methods
+    for (var method
+        in element.methods.where((x) { return x.isPublic; })) {
+          var methodName = Methods.getMethodName(method);
+          var signature = Methods.methodSignature(method, null, false, '', null, 'this $name instance', generics);
+          var parameterCalls = Methods.printParameterNames(method);
+
+          code.writeln('public static ${signature} => GetOrCreate(instance).$methodName($parameterCalls);');     
+    }
+
+    code.writeln('}'); // End Mixin Class
+
+    return code.toString();
   }
 
   static String printInterface(ClassElement element) {
@@ -336,11 +271,13 @@ class Classes {
     for (var method in element.methods
         .where((method) => method.isPublic || method.hasProtected)) {
       var baseMethod = Methods.getBaseMethodInClass(method);
-      code.writeln(Methods.methodSignature(baseMethod, method, null) + ";");
+      code.writeln(
+          Methods.methodSignature(baseMethod, method, false) + ";");
     }
 
     for (var field in element.fields
         .where((field) => field.isPublic || field.hasProtected)) {
+      
       var baseField = Fields.getBaseFieldInClass(field);
       code.writeln(Fields.getFieldSignature(baseField));
     }

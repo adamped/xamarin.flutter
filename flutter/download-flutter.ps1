@@ -19,12 +19,11 @@ echo "cleaning up"
 rm -r -fo "flutter"
 rm $zip
 echo "finished downloading flutter" 
-
 echo "attempt to run flutter package get"
 if (Get-Command flutter -errorAction SilentlyContinue)
 {  
     flutter packages get
 }
 else{
-    echo "cmdlet flutter is not available"
-}
+    echo "cmdlet flutter is not available" 
+} 

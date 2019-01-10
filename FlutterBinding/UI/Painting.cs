@@ -3089,7 +3089,7 @@ namespace FlutterBinding.UI
     ///
     /// The current transform and clip can be saved and restored using the stack
     /// managed by the [save], [saveLayer], and [restore] methods.
-    public class Canvas : NativeCanvas
+    public class Canvas : NativeCanvas, ICanvas
     {
         /// Creates a canvas for recording graphical operations into the
         /// given picture recorder.
@@ -3129,7 +3129,7 @@ namespace FlutterBinding.UI
         ///
         ///  * [saveLayer], which does the same thing but additionally also groups the
         ///    commands done until the matching [restore].
-        public void save() => this.Save();
+        public void Save() => this.Save();
 
         /// Saves a copy of the current transform and clip on the save stack, and then
         /// creates a new group which subsequent calls will become a part of. When the
@@ -3261,7 +3261,7 @@ namespace FlutterBinding.UI
         ///
         /// If the state was pushed with with [saveLayer], then this call will also
         /// cause the new layer to be composited into the previous layer.
-        public void restore()
+        public void Restore()
         {
             // [DONE] native 'Canvas_restore';
             this.Restore();
@@ -3273,11 +3273,11 @@ namespace FlutterBinding.UI
         /// each matching call to [restore] decrements it.
         ///
         /// This number cannot go below 1.
-        public int getSaveCount() => this.SaveCount;
+        public int GetSaveCount() => this.SaveCount;
 
         /// Add a translation to the current transform, shifting the coordinate space
         /// horizontally by the first argument and vertically by the second argument.
-        public void translate(double dx, double dy) => this.Translate((float)dx, (float)dy);
+        public void Translate(double dx, double dy) => this.Translate((float)dx, (float)dy);
 
         /// Add an axis-aligned scale to the current transform, scaling by the first
         /// argument in the horizontal direction and the second in the vertical
@@ -3285,7 +3285,7 @@ namespace FlutterBinding.UI
         ///
         /// If [sy] is unspecified, [sx] will be used for the scale in both
         /// directions.
-        public void scale(double sx, double? sy) => _scale(sx, sy ?? sx);
+        public void Scale(double sx, double sy = default(double)) => _scale(sx, sy);
 
         void _scale(double sx, double sy)
         {
@@ -3294,7 +3294,7 @@ namespace FlutterBinding.UI
         }
 
         /// Add a rotation to the current transform. The argument is in radians clockwise.
-        public void rotate(double radians)
+        public void Rotate(double radians)
         {
             this.RotateRadians((float)radians);
         }
@@ -3303,14 +3303,14 @@ namespace FlutterBinding.UI
         /// being the horizontal skew in radians clockwise around the origin, and the
         /// second argument being the vertical skew in radians clockwise around the
         /// origin.
-        public void skew(double sx, double sy)
+        public void Skew(double sx, double sy)
         {
             this.Skew((float)sx, (float)sy);
         }
 
         /// Multiply the current transform by the specified 4⨉4 transformation matrix
         /// specified as a list of values in column-major order.
-        public void transform(List<float> matrix4)
+        public void Transform(List<float> matrix4)
         {
             ////assert(matrix4 != null);
             if (matrix4.Count != 16)
@@ -3334,7 +3334,7 @@ namespace FlutterBinding.UI
         ///
         /// Use [ClipOp.difference] to subtract the provided rectangle from the
         /// current clip.
-        public void clipRect(Rect rect, ClipOp clipOp = ClipOp.intersect, bool doAntiAlias = true)
+        public void ClipRect(Rect rect, ClipOp clipOp = default(ClipOp), bool doAntiAlias = true)
         {
             ////assert(_rectIsValid(rect));
             ////assert(clipOp != null);
@@ -3351,7 +3351,7 @@ namespace FlutterBinding.UI
         /// If multiple draw commands intersect with the clip boundary, this can result
         /// in incorrect blending at the clip boundary. See [saveLayer] for a
         /// discussion of how to address that and some examples of using [clipRRect].
-        public void clipRRect(RRect rrect, bool doAntiAlias = true)
+        public void ClipRRect(RRect rrect, bool doAntiAlias = true)
         {
             ////assert(_rrectIsValid(rrect));
             ////assert(doAntiAlias != null);
@@ -3367,7 +3367,7 @@ namespace FlutterBinding.UI
         /// multiple draw commands intersect with the clip boundary, this can result
         /// in incorrect blending at the clip boundary. See [saveLayer] for a
         /// discussion of how to address that.
-        public void clipPath(Path path, bool doAntiAlias = true)
+        public void ClipPath(Path path, bool doAntiAlias = true)
         {
             ////assert(path != null); // path is checked on the engine side
             ////assert(doAntiAlias != null);
@@ -3377,7 +3377,7 @@ namespace FlutterBinding.UI
         /// Paints the given [Color] onto the canvas, applying the given
         /// [BlendMode], with the given color being the source and the background
         /// being the destination.
-        public void drawColor(Color color, BlendMode blendMode)
+        public void DrawColor(Color color, BlendMode blendMode)
         {
             ////assert(color != null);
             ////assert(blendMode != null);
@@ -3388,7 +3388,7 @@ namespace FlutterBinding.UI
         /// stroked, the value of the [Paint.style] is ignored for this call.
         ///
         /// The `p1` and `p2` arguments are interpreted as offsets from the origin.
-        public void drawLine(Offset p1, Offset p2, SKPaint paint)
+        public void DrawLine(Offset p1, Offset p2, SKPaint paint)
         {
             ////assert(_offsetIsValid(p1));
             ////assert(_offsetIsValid(p2));
@@ -3402,7 +3402,7 @@ namespace FlutterBinding.UI
         ///
         /// To fill the canvas with a solid color and blend mode, consider
         /// [drawColor] instead.
-        public void drawPaint(SKPaint paint)
+        public void DrawPaint(SKPaint paint)
         {
             //assert(paint != null);
             this.DrawPaint(paint);
@@ -3533,7 +3533,7 @@ namespace FlutterBinding.UI
         /// five regions are drawn by stretching them to fit such that they exactly
         /// cover the destination rectangle while maintaining their relative
         /// positions.
-        public void drawImageNine(SKImage image, Rect center, Rect dst, SKPaint paint)
+        public void DrawImageNine(SKImage image, Rect center, Rect dst, SKPaint paint)
         {
             //assert(image != null); // image is checked on the engine side
             //assert(_rectIsValid(center));
@@ -3546,7 +3546,7 @@ namespace FlutterBinding.UI
 
         /// Draw the given picture onto the canvas. To create a picture, see
         /// [PictureRecorder].
-        public void drawPicture(SKPicture picture)
+        public void DrawPicture(SKPicture picture)
         {
             //assert(picture != null); // picture is checked on the engine side        
             this.DrawPicture(picture);
@@ -3572,7 +3572,7 @@ namespace FlutterBinding.UI
         /// If the text is centered, the centering axis will be at the position
         /// described by adding half of the [ParagraphConstraints.width] given to
         /// [Paragraph.layout], to the `offset` argument's [Offset.dx] coordinate.
-        public void drawParagraph(Paragraph paragraph, Offset offset)
+        public void DrawParagraph(Paragraph paragraph, Offset offset)
         {
             //assert(paragraph != null);
             //assert(_offsetIsValid(offset));
@@ -3587,7 +3587,7 @@ namespace FlutterBinding.UI
         ///
         ///  * [drawRawPoints], which takes `points` as a [List<float> ] rather than a
         ///    [List<Offset>].
-        public void drawPoints(PointMode pointMode, List<Offset> points, SKPaint paint)
+        public void DrawPoints(PointMode pointMode, List<Offset> points, SKPaint paint)
         {
             //assert(pointMode != null);
             //assert(points != null);
@@ -3604,7 +3604,7 @@ namespace FlutterBinding.UI
         ///
         ///  * [drawPoints], which takes `points` as a [List<Offset>] rather than a
         ///    [List<List<float> >].
-        public void drawRawPoints(PointMode pointMode, List<double> points, SKPaint paint)
+        public void DrawRawPoints(PointMode pointMode, List<double> points, SKPaint paint)
         {
             //assert(pointMode != null);
             //assert(points != null);
@@ -3618,12 +3618,12 @@ namespace FlutterBinding.UI
                 list.Add(new Offset(points[i], points[i + 1]));
             }
 
-            drawPoints(pointMode, list, paint);
+            DrawPoints(pointMode, list, paint);
         }
 
 
 
-        public void drawVertices(SKVertices vertices, BlendMode blendMode, SKPaint paint)
+        public void DrawVertices(SKVertices vertices, BlendMode blendMode, SKPaint paint)
         {
             //assert(vertices != null); // vertices is checked on the engine side
             //assert(paint != null);
@@ -3681,13 +3681,11 @@ namespace FlutterBinding.UI
 
             List<uint> colorBuffer = colors.Count == 0 ? null : _encodeColorList(colors);
             List<double> cullRectBuffer = cullRect?._value;
-
-            _drawAtlas(
+            
+            _drawAtlas( 
               paint._objects, paint._data, atlas, rstTransformBuffer, rectBuffer,
               colorBuffer, (int)blendMode, cullRectBuffer
             );
-
-            
         }
 
         //
@@ -3705,13 +3703,13 @@ namespace FlutterBinding.UI
         //
         //  * [drawAtlas], which takes its arguments as objects rather than typed
         //    data lists.
-        public void drawRawAtlas(SKImage atlas,
+        public void DrawRawAtlas(SKImage atlas,
                           List<double> rstTransforms,
                           List<double> rects,
                           List<uint> colors,
                           BlendMode blendMode,
                           Rect cullRect,
-                          Paint paint)
+                          SKPaint paint)
         {
             ////assert(atlas != null); // atlas is checked on the engine side
             ////assert(rstTransforms != null);
@@ -3728,10 +3726,11 @@ namespace FlutterBinding.UI
             if (colors != null && colors.Count * 4 != rectCount)
                 throw new ArgumentException("If non-null, 'colors' length must be one fourth the length of 'rstTransforms' and 'rects'.");
 
-            _drawAtlas(
+            //TODO SKPaint and Paint is mixed up here
+            /* _drawAtlas(
               paint._objects, paint._data, atlas, rstTransforms, rects,
               colors, (int)blendMode, cullRect?._value
-            );
+            ); */
         }
 
         void _drawAtlas(List<Object> paintObjects,
@@ -3752,7 +3751,7 @@ namespace FlutterBinding.UI
         /// is not opaque.
         ///
         /// The arguments must not be null.
-        public void drawShadow(Path path, Color color, double elevation, bool transparentOccluder)
+        public void DrawShadow(Path path, Color color, double elevation, bool transparentOccluder)
         {
             //assert(path != null); // path is checked on the engine side
             //assert(color != null);
