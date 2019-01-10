@@ -79,7 +79,7 @@ class Constructors {
 
 
   static String getBaseParameters(ConstructorElement constructor) {
-    // Get parameters
+    // Get parameters 
     var parameters = "";
     // TODO: I don't think we auto initialize anything when there are other constantIntializers other than a SuperConstructorInvocation
     // Need to add the other code into the method body.

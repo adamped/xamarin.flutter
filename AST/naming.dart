@@ -331,6 +331,12 @@ class Naming {
         "DefaultClass";
     return getFormattedName(name, NameStyle.UpperCamelCase);
   }
+
+  static String getTopLevelVariableName(TopLevelVariableElement element){
+    var name = element.name;
+    name = name.replaceAll("\$", "");
+    return name;
+  }
 }
 
 enum NameStyle {

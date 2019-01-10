@@ -523,7 +523,7 @@ csharp += Naming.escapeFixedWords(processEntity(entity));
     }
     // TODO: No such thing as named constructors in C#
     // Will need to look at Static Method calls without the new.
-    if (!csharp.startsWith('new ')) csharp = 'new ' + csharp;
+    //if (!csharp.startsWith('new ')) csharp = 'new ' + csharp;
     return csharp;
   }
 
@@ -599,6 +599,13 @@ csharp += Naming.escapeFixedWords(processEntity(entity));
 
   static String processSimpleIdentifier(SimpleIdentifier identifier) {
     var csharp = '';
+
+    // Check if this is directly inside the namespace and was mapped inside the namespace default class
+    if(identifier.staticElement != null && identifier.staticElement.enclosingElement is CompilationUnitElement && !(identifier.staticElement is EnumElementImpl)) {
+      // add the default class to the call
+      var defaultClass = Naming.DefaultClassName(identifier.staticElement.enclosingElement);
+      csharp += defaultClass + ".";
+    }
 
     // If the identifier is actually a type.
     if (identifier.parent is TypeName)

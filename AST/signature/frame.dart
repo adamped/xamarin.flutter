@@ -2,6 +2,7 @@ import 'package:analyzer/dart/element/element.dart';
 
 import '../comments.dart';
 import '../config.dart';
+import '../types.dart';
 import 'classes.dart';
 import '../naming.dart';
 import 'delegates.dart';
@@ -11,7 +12,7 @@ class Frame {
   static String printNamespace(
       CompilationUnitElement element, String namespace) {
     var code = new StringBuffer();
-    code.writeln(printImports(element)); 
+    code.writeln(printImports(element));
 
     code.writeln("namespace ${namespace}{");
 
@@ -23,16 +24,26 @@ class Frame {
     // Add methods that are not inside a class in dart to a default class in c#
     var defaultClassName = Naming.DefaultClassName(element);
     code.writeln("internal static class ${defaultClassName}{");
+    for (var topLevelVariable in element.topLevelVariables) {
+      var type = Types.getDartTypeName(topLevelVariable.type);
+      var name = Naming.getTopLevelVariableName(topLevelVariable);
+      name = Naming.upperCamelCase(name);
+      code.writeln("public static $type $name = default(${type});");
+    }
+
     for (var function in element.functions) {
       code.writeln(Functions.printFunction(function));
     }
     code.writeln("}");
 
     // Interfaces for abstract classes
-    for (var type in element.types.where((t) => t.isAbstract == true && t.isValidMixin == false 
-	  // Workaround for classes that are not correctly picked up as interfaces
-	  || ["PageMetrics","FixedExtentMetrics","GestureArenaEntry"].contains(t.name))) {
-        code.writeln(Classes.printInterface(type));
+    for (var type in element.types.where((t) =>
+        t.isAbstract == true && t.isValidMixin == false
+        // Workaround for classes that are not correctly picked up as interfaces
+        ||
+        ["PageMetrics", "FixedExtentMetrics", "GestureArenaEntry"]
+            .contains(t.name))) {
+      code.writeln(Classes.printInterface(type));
     }
 
     // Add mixins and their interfaces
@@ -45,8 +56,8 @@ class Frame {
     }
 
     // Classes
-    // Where not a valid Mixin, because I already created a class in the Mixin section     
-    for (var type in element.types.where((t) => t.isValidMixin == false)) { 
+    // Where not a valid Mixin, because I already created a class in the Mixin section
+    for (var type in element.types.where((t) => t.isValidMixin == false)) {
       code.writeln(Classes.printClass(type));
     }
     // Enums
@@ -69,16 +80,22 @@ class Frame {
     // "part of" acts like all files are in the same library and imports are not used here
     // Since we actually need the usings in c# and cant just put the files in one namespace (that would break other references)
     // we add the missing usings manually
-    if(element.enclosingElement.identifier.contains("material/animated_icons")){
+    if (element.enclosingElement.identifier
+        .contains("material/animated_icons")) {
       imports.add("FlutterSDK.Material.Animatedicons.Animatedicons");
       imports.add("FlutterSDK.Material.Animatedicons.Animatediconsdata");
     }
-    
+
     // HACK: Remove Cupertino, while in Alpha
-    return imports.where((x) { return !x.contains('Cupertino');}).map((import) => "using ${import};").join("\n");
+    return imports
+        .where((x) {
+          return !x.contains('Cupertino');
+        })
+        .map((import) => "using ${import};")
+        .join("\n");
   }
 
-  static void AddImport(LibraryElement import, List<String> allImports) { 
+  static void AddImport(LibraryElement import, List<String> allImports) {
     var name = import.identifier;
 
     // Skip imports that should get ignored
@@ -109,9 +126,7 @@ class Frame {
 
     // Check if import is within the FlutterSDK library and modify the import to use the correct namespace
     if (import != null &&
-        import.identifier
-            .replaceAll("/", "\\")
-            .contains(Config.sourcePath)) {
+        import.identifier.replaceAll("/", "\\").contains(Config.sourcePath)) {
       name = Naming.namespaceFromIdentifier(import.identifier);
     }
 
@@ -127,7 +142,7 @@ class Frame {
 
     // if (element.hasProtected == true || element.isPrivate == true)
     //   code.write("internal ");
-    // if (element.isPublic == true) 
+    // if (element.isPublic == true)
     // HACK: Making all public for the moment
     code.write("public ");
 
