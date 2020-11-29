@@ -1,4 +1,4 @@
-**ABANDONED: While this project is technically feasible, it's not feasible for a couple of developers in their spare time to finish. It was only meant as a proof of concept and has taken several months to reach its current status and it may even take several more to complete. As stated, this project was never expected to be commercially viable. Due to the effort remaining and no future for this project, it was decided it was not worth our time to complete. (Adam Pedley) - Personally I will now be focussing on the Flutter eco-system.**
+**ABANDONED: While this project is technically feasible, it's not feasible for a couple of developers in their spare time to finish. It was only meant as a proof of concept and has taken several months to reach its current status and it may even take several more to complete. As stated, this project was never expected to be commercially viable. Due to the effort remaining and no future for this project, it was decided it was not worth our time to complete.**
 
 # Flutter for Xamarin
 
